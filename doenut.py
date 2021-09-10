@@ -447,7 +447,28 @@ def four_D_contour_plot(
     cmap='jet',
     num_of_z_levels=9,
     z_limits=[]):
-    """This could be improved to take any number of data"""
+    """This could be improved to take any number of data
+    1. unscaled_model: the model you just trained
+    2. x_key: name in the dataframe for the input to go on the x axis
+    3. y_key: name in the dataframe for the input to go on the y axis
+    4. c_key: name in the dataframe for the input to be the constant for each plot (i.e. equivalents of pyrollidine)
+    5. x_limits: limits of the x axis: min and max time values
+    6. y_limits: limits of the y axis: min and max temperatures
+    7. constants: values of pyrollidine to keep constant for the 3 plots
+    8. n_points: how many points in the x and y direction to use to build the map
+    9. my_function: a little function to add higher order terms if the model requires it
+    10. fig_label: label for the overall figure
+    11. x_label: label for x axes
+    12. y_label: label for y axis
+    13. constant_label: label for top of subplots
+    14: z_label: label for the heatbar
+    15: cmap: colourmap for the plot (yes you can change it, do not spend hours playing around with the colourscheme!)
+    16: num_of_z_levels: number of levels for the contours. You will want one more than you think you do
+    17: z_limits: limits for the yield, i.e. minimum and maximum. """
+
+
+
+
     X_1,Y_1,Z_1 = map_chemical_space(
         unscaled_model=unscaled_model,
         x_key = x_key,
