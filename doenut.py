@@ -77,7 +77,20 @@ def train_model(inputs,
                 verbose=True):
     """ Simple function to train models
     inputs: input matrix to the model
-    responses: """
+    responses:
+    train_model returns:
+    a model fitted to your data: original_model
+    the inputs given to it: inputs_used
+    the  𝑅2  of that model: original_model_R2
+    a set of predictions that the model gives for your original data: predictions.
+    The inputs to the function doenut.train_model() are:
+
+    the inputs: inputs
+    the outputs: responses['ortho']. By typing either 'ortho', 'para' or 'di' in the square brackets you can select the output you want to model.
+    test_responses: if you have a separate set of test data you can input it here to try your model out on that
+    do_scaling_here: whether to scale the data. You do not need to do this in this work.
+    fit_intercept: whether or not to fit the intercept. In this work you always want to fit the intercept.
+    verbose: this is a common setting in coding, if true it means run in verbose mode and many bits of information are printed to the screen."""
     if do_scaling_here:
         inputs, _, _ =orthogonal_scaling(inputs)
     if test_responses == None:
@@ -93,18 +106,23 @@ def train_model(inputs,
 def plot_observed_vs_predicted(responses, 
                                predictions,
                                range_x=[],
-                               label=''):
+                               label='',
+                               do_axes_equal = True):
     """plots a graph duh
     range should be in the form [min_x, max_x]
     else it will take from responses"""
     plt.plot(responses, predictions,'o')
+    min_xy = np.min([np.min(responses),np.min(predictions)])
+    max_xy = np.max([np.max(responses),np.max(predictions)])
     if range_x == []:
-        range_x = [(np.min(responses)//10)*10, (np.max(responses)//10)*10+10]
+        range_x = [(min_xy//10)*10, (max_xy//10)*10+10]
     plt.plot(range_x,range_x)
     x_label = 'Measured ' + label
     y_label = 'Predicted ' + label
     plt.xlabel(x_label)
     plt.ylabel(y_label)
+    if do_axes_equal:
+        plt.gca().set_aspect('equal')
     return
 
 def Calculate_R2(ground_truth, 
@@ -181,6 +199,13 @@ def plot_summary_of_fit_small(R2, Q2):
     plt.grid(axis = 'x')
     return
 
+def dunk(setting=None):
+    if setting == 'coffee':
+        print('Splash!')
+    else:
+        print('Requires coffee')
+    return
+
 def calc_averaged_model(inputs, 
                         responses, 
                         key='',
@@ -193,7 +218,25 @@ def calc_averaged_model(inputs,
     inputs: full set of terms for the model (x_n)
     responses: responses to model (ground truth, y)
     drop-duplicates: True, we drop the duplicates on the leave one out model
-    to avoid inflating the results"""
+    to avoid inflating the results
+    doenut.calc_averaged_model usage details:
+
+    Takes in:
+
+    inputs: the input dataframe
+    responses[['ortho']]: the response data for the ortho-product
+    key='ortho': used to calculate Q2
+    drop_duplicates: removes the replicate experiments
+    others as above
+    Outputs:
+
+    the averaged model (called ortho_model below as it models the ortho-product data)
+    predictions from the model from the inputs
+    the inputs measured (called ground_truth below)
+    coeffs: the coefficients of the models
+    R2S: a list of the  𝑅2  values for each model
+    R2: the  𝑅2  correlation coefficient on the training data for the averaged model (the fitting coefficient)
+    Q2: the  𝑄2  correlation coefficient on the testing data for the averaged model (the predicting coefficient)"""
     # first we copy the data sideways
     if use_scaled_inputs:
         inputs, _, _ = orthogonal_scaling(inputs)
@@ -423,10 +466,7 @@ def map_chemical_space(
 
 def my_function(df_1):
     
-    df_1['Time*2'] = df_1['Time']*df_1['Time']
-    df_1['Temp*2'] = df_1['Temp']*df_1['Temp']
-    df_1['Eq*2'] = df_1['Eq']*df_1['Eq']
-    df_1['Time*Temp'] = df_1['Time']*df_1['Temp']
+    pass
     return df_1
 
 def four_D_contour_plot(
@@ -529,18 +569,27 @@ def four_D_contour_plot(
 
     egg1=ax1.contour(X_1, Y_1, Z_1,  
                      num_of_levels, levels=levels, colors = 'black')
-    plt.clabel(egg1, fontsize=10, inline=1,fmt = '%1.0f')
+    if np.max(levels) >10:
+        plt.clabel(egg1, fontsize=10, inline=1,fmt = '%1.0f')
+    else:
+        plt.clabel(egg1, fontsize=10, inline=1, fmt='%1.2f')
     #egg.xlabel('egg')
     ax2.contourf(X_2, Y_2, Z_2, 
                  num_of_levels, levels=levels,cmap=cmap)
     egg2=ax2.contour(X_2, Y_2, Z_2,  num_of_levels, levels=levels,
                      colors = 'black')
-    plt.clabel(egg2, fontsize=10, inline=1,fmt = '%1.0f')
+    if np.max(levels) >10:
+        plt.clabel(egg2, fontsize=10, inline=1,fmt = '%1.0f')
+    else:
+        plt.clabel(egg2, fontsize=10, inline=1, fmt='%1.2f')
     ax3.contourf(X_3, Y_3, Z_3, 
                  num_of_levels, levels=levels,cmap=cmap)
     egg3=ax3.contour(X_3, Y_3, Z_3,  
                      num_of_levels, levels=levels, colors = 'black')
-    plt.clabel(egg3, fontsize=10, inline=1,fmt = '%1.0f')
+    if np.max(levels) >10:
+        plt.clabel(egg3, fontsize=10, inline=1,fmt = '%1.0f')
+    else:
+        plt.clabel(egg3, fontsize=10, inline=1, fmt='%1.2f')
     # make constant label for subplot title
     ax1.set_title(constant_label + ' = ' + str(constants[0]))
     ax2.set_title(constant_label + ' = ' + str(constants[1]))
