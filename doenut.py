@@ -206,6 +206,14 @@ def dunk(setting=None):
         print('Requires coffee')
     return
 
+def error_plot(error_list):
+    plt.stem([x for x in range(len(error_list))],
+             error_list,
+             use_line_collection=True)
+    plt.xlabel("Missing data point")
+    plt.ylabel("Test set error")
+    return
+
 def calc_averaged_model(inputs, 
                         responses, 
                         key='',
