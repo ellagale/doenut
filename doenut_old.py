@@ -55,7 +55,7 @@ def replicate_plot(inputs, responses, key):
     non_replicate_row_list = [x for x in range(len(responses)) if x not in replicate_row_list]
     col = responses[key]
     x_data = [x for x in range(len(non_replicate_row_list))]
-    y_data = [col.loc[x] for x in non_replicate_row_list]
+    y_data = [col.iloc[x] for x in non_replicate_row_list]
     plt.plot(x_data,
              y_data,'o')
     ax = plt.gca()
@@ -65,7 +65,7 @@ def replicate_plot(inputs, responses, key):
     plt.ylabel('Response')
 
     x_data = [len(non_replicate_row_list) for x in range(len(replicate_row_list))]
-    y_data = [col.loc[x] for x in replicate_row_list]
+    y_data = [col.iloc[x] for x in replicate_row_list]
     plt.plot(x_data, y_data,'or')
     return
 
@@ -206,56 +206,18 @@ def dunk(setting=None):
         print('Requires coffee')
     return
 
-def average_replicates(
-    inputs,
-    responses,
-    verbose=False):
-    """averages inputs that are the same
-    TO-DO - you can make it pick nearly teh same inputs if
-    if you add the actual values which are not always the expected values
-    inputs = inputs
-    responses = responses"""
-
-
-    whole_inputs =inputs
-    duplicates = [x for x in whole_inputs[whole_inputs.duplicated()].index ]
-    duplicates_for_averaging = {}
-    non_duplicate_list = [x for x in whole_inputs.index if x not in duplicates]
-    for non_duplicate in non_duplicate_list:
-        this_duplicate_list=[]
-        non_duplicate_row = np.array(whole_inputs.loc[[non_duplicate]])
-        for duplicate in duplicates:
-            duplicate_row = np.array(whole_inputs.loc[[duplicate]])
-            if (non_duplicate_row==duplicate_row).all():
-                this_duplicate_list.append(duplicate)
-                if verbose:
-                    print(f"found duplicate pairs: {non_duplicate}, {duplicate}")
-        duplicates_for_averaging[non_duplicate]=this_duplicate_list
-
-    averaged_responses = []
-    averaged_inputs = []
-
-    for non_duplicate, duplicates in duplicates_for_averaging.items():
-        #print(f"nd: {non_duplicate}")
-        to_average=whole_inputs.loc[[non_duplicate]]
-        to_average_responses=responses.loc[[non_duplicate]]
-        for duplicate in duplicates:
-            to_average = to_average.append(whole_inputs.loc[[duplicate]])
-            to_average_responses = to_average_responses.append(responses.loc[[duplicate]])
-        meaned = to_average.mean(axis=0)
-        meaned_responses = to_average_responses.mean(axis=0)
-        try:
-            averaged_inputs=averaged_inputs.append(pd.DataFrame(meaned).transpose(), ignore_index=True)
-            averaged_responses=averaged_responses.append(pd.DataFrame(meaned_responses).transpose(), ignore_index=True)
-        except TypeError:
-            averaged_inputs=pd.DataFrame(meaned).transpose()
-            averaged_responses=pd.DataFrame(meaned_responses).transpose()
-    return averaged_inputs, averaged_responses   
+def error_plot(error_list):
+    plt.stem([x for x in range(len(error_list))],
+             error_list,
+             use_line_collection=True)
+    plt.xlabel("Missing data point")
+    plt.ylabel("Test set error")
+    return
 
 def calc_averaged_model(inputs, 
                         responses, 
                         key='',
-                        drop_duplicates='Yes',
+                        drop_duplicates=True,
                         fit_intercept=False,
                         do_scaling_here=False,
                         use_scaled_inputs=False):
@@ -263,7 +225,7 @@ def calc_averaged_model(inputs,
     of models
     inputs: full set of terms for the model (x_n)
     responses: responses to model (ground truth, y)
-    drop-duplicates: True, we drop the duplicates on the leave one out model, 'average', we average them
+    drop-duplicates: True, we drop the duplicates on the leave one out model
     to avoid inflating the results
     doenut.calc_averaged_model usage details:
 
@@ -288,18 +250,9 @@ def calc_averaged_model(inputs,
         inputs, _, _ = orthogonal_scaling(inputs)
     whole_inputs = inputs
     whole_responses = responses
-    if (drop_duplicates=='Yes') or (type(drop_duplicates)==bool and drop_duplicates):
-        print('Dropping replicates')
+    if drop_duplicates:
         duplicates = [x for x in whole_inputs[whole_inputs.duplicated()].index ]
-    elif drop_duplicates == 'average':
-        # averages the replicates
-        print('Averaging replicates')
-        whole_inputs, whole_responses = average_replicates(
-            inputs,
-            responses)
-        duplicates = []
     else:
-        print('Have found no replicates')
         duplicates = []
     # we drop the duplicates
     inputs = whole_inputs.drop(duplicates)
@@ -368,26 +321,6 @@ def calc_averaged_model(inputs,
 
     return model, df_pred, df_GT, coeffs, R2s, R2, Q2
 
-def calc_ave_coeffs_and_errors(coeffs, labels, errors='std',normalise=False):
-    """Coefficient plot
-    set error to 'std' for standard deviation
-    set error to 'p95' for 95th percentile (
-    approximated by 2*std)"""
-        
-    ave_coeffs = np.mean(coeffs,axis=0)[0]
-    stds = np.std(coeffs, axis=0)[0]
-    if normalise:
-        ave_coeffs = ave_coeffs/stds
-        #stds = np.std(coeffs, axis=0)[0]
-    if errors == 'std':
-        error_bars = stds
-    elif errors == 'p95':
-        # this is an approximation assuming a gaussian distribution in your coeffs
-        error_bars = 2*stds
-    else:
-        printf(f'Error: errors setting {errors} not known, chose std or p95')
-    
-    return ave_coeffs, error_bars
 
 
 def coeff_plot(coeffs, labels, errors='std',normalise=False):
@@ -395,13 +328,18 @@ def coeff_plot(coeffs, labels, errors='std',normalise=False):
     set error to 'std' for standard deviation
     set error to 'p95' for 95th percentile (
     approximated by 2*std)"""
-    # get values
-    ave_coeffs, error_bars = calc_ave_coeffs_and_errors(
-        coeffs, 
-        labels, 
-        errors=errors,
-        normalise=normalise)
-    # plot values
+    ave_coeffs = np.mean(coeffs,axis=0)[0]
+    stds = np.std(coeffs, axis=0)[0]
+    if normalise:
+        ave_coeffs = ave_coeffs/stds
+        stds = np.std(coeffs, axis=0)[0]
+    if errors == 'std':
+        error_bars = stds
+    elif errors == 'p95':
+        # this is an appromation assuming a gaussian distribution in your coeffs
+        error_bars = 2*stds
+    else:
+        printf(f'Error: errors setting {errors} not known, chose std or p95')
     x_points = [x for x in range(len(ave_coeffs))]
     f = plt.figure()
     f.set_figwidth(16)
@@ -414,7 +352,7 @@ def coeff_plot(coeffs, labels, errors='std',normalise=False):
             ave_coeffs,
             yerr=error_bars, capsize=20)
     plt.xticks(x_points,labels)
-    return 
+    return
 
 def calulate_R2_and_Q2_for_models(inputs, 
                            responses, 
@@ -422,11 +360,7 @@ def calulate_R2_and_Q2_for_models(inputs,
                            response_selector=None,
                            fit_intercept=True,
                            use_scaled_inputs=False,
-                           do_scaling_here=False,
-                           drop_duplicates='average',
-                           do_plot=True,
-                           do_r2=True,
-                           verbose = True):    
+                           do_scaling_here=False):    
     """Calculates R2 for model, sub-models
     and allows removal of terms
     Can be called to loop over all responses
@@ -444,9 +378,8 @@ def calulate_R2_and_Q2_for_models(inputs,
     # finds out which columns we're going to use
     input_column_list = [x for x in inputs.columns]
     response_column_list = [x for x in responses.columns]
-    if verbose:
-        print(f"Input terms are {input_column_list}")
-        print(f"Input Responses are {response_column_list}\n")
+    print(f"Input terms are {input_column_list}")
+    print(f"Input Responses are {response_column_list}\n")
     # make a linear regression model
     if response_selector == None:
         # do all columns
@@ -461,8 +394,7 @@ def calulate_R2_and_Q2_for_models(inputs,
         # don't use this function
         # finds key
         response_key = response_column_list[res_col_num]
-        if verbose:
-            print(f"Selected Response is {response_key}")
+        print(f"Selected Response is {response_key}")
         # creates a new response dataframe of just the response requested
         this_model_responses = responses[[response_key]]
         # creates a new input dataframe of just the inputs desired
@@ -474,7 +406,7 @@ def calulate_R2_and_Q2_for_models(inputs,
         edited_input_data, 
         this_model_responses, 
         key=response_key,
-        drop_duplicates=drop_duplicates,
+        drop_duplicates=True,
         fit_intercept=fit_intercept,
         use_scaled_inputs=use_scaled_inputs,
         do_scaling_here=do_scaling_here)        
@@ -491,172 +423,16 @@ def calulate_R2_and_Q2_for_models(inputs,
         new_model.coef_ = coefficient_list
         # now get the R2 value
         R2 = new_model.score(edited_input_data, this_model_responses)
-        if verbose:
-            print("Response {} R2 is {:.3}".format(response_key, R2))
-        if not do_r2:
-            plt.clf()
-        if do_plot:
-            coeff_plot(coeffs, 
-                       labels=selected_input_terms, 
-                       errors='p95',
-                       normalise=True)
+        print("Response {} R2 is {:.3}".format(response_key, R2))
+        coeff_plot(coeffs, 
+                   labels=selected_input_terms, 
+                   errors='p95',
+                   normalise=True)
         #print(averaged_coeffs)
         #scaled_coeffs = orthogonal_scaling(averaged_coeffs)
         #plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
 
-    return new_model, R2, temp_tuple, selected_input_terms
-
-def autotune_model(
-        inputs,
-        responses,
-        source_list,
-        response_selector=[0],
-        use_scaled_inputs=True,
-        do_scaling_here=True,
-        drop_duplicates='average',
-        errors='p95',
-        normalise=True,
-        do_hierarchical=True,
-        remove_significant = False,
-        verbose=False):
-    """
-    inputs: the input matrix
-    responses: the results
-    response_selector=[0]: which column of results to use, or all of it
-    use_scaled_inputs=True: scale model to remove columns baseed on stds
-    do_scaling_here=True: if you want scaled inputs and haven't input them
-    errors='p95': 95th percentile or 'std' for standard deviation
-    normalise=True: setting for coefficient calculation - wants to match scaled inputs
-    remove_significant: model will continue removing terms until only one is left
-        verbose=False
-    """
-    sat_inputs = inputs
-    
-    if verbose:
-        print(f'Source list is {source_list}')
-    input_selector=[i for i in range(len(sat_inputs.columns))]
-    output_indices = input_selector
-    # global list of all column names.
-    input_terms=list(sat_inputs.columns)
-    if verbose:
-        print('numbers\tnames')
-        for i,v in enumerate(input_terms):
-            print(f"{i}\t{v}")
-    have_removed = True
-    R2_over_opt = []
-    Q2_over_opt = []
-    n_terms_over_opt = []
-    terms = []
-    
-    while have_removed:
-        selected_input_indices = output_indices
-    
-        #print(selected_input_indices)
-        #print(sat_inputs)
-        if len(selected_input_indices) == 0:
-            break
-        this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
-                        sat_inputs, 
-                        responses, 
-                        input_selector=selected_input_indices, 
-                        response_selector=[0],
-                        use_scaled_inputs=True,
-                        do_scaling_here=True,
-                        drop_duplicates=drop_duplicates,
-                        do_r2=False,
-                        verbose=False)
-        new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-    
-        R2_over_opt.append(R2)
-        Q2_over_opt.append(Q2)
-
-        
-        # cell 2
-        #print("Cell 2:")
-        print(f"Selected terms {selected_input_terms}")
-        print(f"Source List: {source_list}")
-        # build a dictionary mapping from input term to the set of derived term's indices.
-        # Note that we are only caring about indices still in selected_input_indices (I.e. ones we have not thrown out!)
-        dependency_dict={}
-        for i in selected_input_indices:
-            dependency_dict[i]=set()
-            # ignore 1st order terms. They have no antecedents
-            if isinstance(source_list[i], str):
-                continue
-            # single term - a direct power of a 1st order term.
-            if isinstance(source_list[i], int):
-                if i in selected_input_indices:
-                    dependency_dict[source_list[i]].add(i)
-            # some other 2nd+ term.
-            if isinstance(source_list[i], list):
-                for x in source_list[i]:
-                    if i in selected_input_indices:
-                        try:
-                            dependency_dict[x].add(i)
-                        except:
-                            if do_hierarchical:
-                                print(f"Error: Heirarchical model missing lower level terms!!!!")
-        print(dependency_dict)
-        # Handy shortcut - since the empty set is considered false,
-        # we can just test dependency_dict[some_term] to see if there are still dependents.
-        
-        #cell 3
-        enforce_hierarchical_model = do_hierarchical
-        # whether to enforce hierarchy over terms (i.e. a lower order term must be present for a higher order one)
-
-        ave_coeffs, error_bars=calc_ave_coeffs_and_errors(
-            coeffs=coeffs, 
-            labels=selected_input_terms, 
-            errors='p95',
-            normalise=True)
-        n_terms_over_opt.append(len(ave_coeffs))
-
-        # create a copy of source_list that we will modify for the next iteration
-        output_indices = list(selected_input_indices)
-
-
-        # build a list of all terms whose error bar crosses 0. 
-        # Values are tuples of the form (source_list index, |error_bar_size|)
-        insignificant_terms = []
-        for i in range(len(ave_coeffs)):
-            if abs(ave_coeffs[i]) < abs(error_bars[i]):
-               # print("{:.2}- {:.2}", ave_coeffs[i], error_bars[i])
-                if verbose:
-                    print(f'{i}:\t{input_terms[i]}\t{source_list[i]}')
-                insignificant_terms.append((selected_input_indices[i], abs(ave_coeffs[i])))
-                #diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
-                
-        # for removing smallest significant terms
-        if insignificant_terms == [] and remove_significant:
-            for i in range(len(ave_coeffs)):
-               # print("{:.2}- {:.2}", ave_coeffs[i], error_bars[i])
-                print(f'{i}:\t{input_terms[i]}\t{source_list[i]}')
-                insignificant_terms.append((selected_input_indices[i], abs(ave_coeffs[i])))
-                #diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
-
-        # Now sort in order of ave_coeff
-        insignificant_terms = sorted(insignificant_terms, key=lambda x: x[1])
-        print(insignificant_terms)
-
-        # Now find the first term we can remove (if any)
-        have_removed = False
-
-        for idx, error_value in insignificant_terms:
-            # If it has dependents, and you're doing an heirarchical model skip it
-            if do_hierarchical==True:
-                if dependency_dict[idx]:
-                    continue
-            print(f"removing term {input_terms[idx]} ({idx}) with error {error_value}")
-            output_indices.remove(idx)
-            have_removed = True
-            break
-
-        print(f"output_indices are {output_indices}")
-        terms.append(output_indices)
-    return output_indices, new_model, predictions, ground_truth, coeffs, R2s, R2, Q2, R2_over_opt, Q2_over_opt, n_terms_over_opt, terms
-
-
-
+    return new_model, R2, temp_tuple
 
 def map_chemical_space(
     unscaled_model,
@@ -844,90 +620,4 @@ def four_D_contour_plot(
  
     return
 
-def add_higher_order_terms(inputs,
-                          add_squares=True,
-                          add_interactions=True,
-                          column_list=[],
-                          verbose= True):
-    """Adds in squares and interactions terms
-    inputs: the input/feature/variable array with data
-    add_squares=True : whether to add square terms, e.g. x_1^2, x_2^2
-    add_interactions=True: whether to add interaction terms, x_1*x_2, etc
-    column_list=[]: to select only a subset of columns, input a column list here 
-    Currently does not go above power of 2
-    
-    returns saturated array and a list of which inputs created which column"""
-    
-    sat_inputs = inputs
-    if column_list == []:
-        # do all columns
-        column_list = [x for x in inputs.columns]
-    if verbose:
-        print(f"Input array has columns {column_list}")
-        
-    source_list = [x for x in column_list]
-          
-    if add_squares == True:
-        if verbose:
-            print('Adding square terms:')
-        for i in range(len(column_list)):
-            source_list.append(i)
-            input_name = column_list[i]
-            new_name = input_name + '*2'
-            if verbose:
-                print(new_name)
-            sat_inputs[new_name] = inputs[input_name]*inputs[input_name]
 
-            
-    if add_interactions == True:
-        if verbose:
-            print('Adding interaction terms:')
-        for i in range(len(column_list)):
-            for j in range(i+1,len(column_list)):
-                source_list.append([i,j])
-                input_name_1 = column_list[i]
-                input_name_2 = column_list[j]
-                new_name = input_name_1 + '*' + input_name_2
-                if verbose:
-                    print(new_name)
-                sat_inputs[new_name] = inputs[input_name_1]*inputs[input_name_2]
-
-    return sat_inputs, source_list
-
-def plot_training(R2_over_opt,
-                  Q2_over_opt,
-                  n_terms_over_opt):
-    """Plots optimisation correlation coefficient outcomes
-    n_terms_over_opt
-    R2_over_opt: list of R2 over optimisation
-    Q2_over_opt: list of Q2 over optimisation
-    n_terms_over_opt: running number of terms 
-                  
-                  """
-    ax = plt.axes()
-    x_data = range(len(R2_over_opt))
-    plt.plot(x_data, R2_over_opt)
-    plt.plot(x_data, Q2_over_opt)
-    #plt.set_xlabels(n_terms_over_opt)
-    ax.set_xticks(x_data)
-    if not n_terms_over_opt == []:
-        ax.set_xticklabels(n_terms_over_opt)
-    plt.legend(["R$^2$","Q$^2$"])
-    plt.ylim([0,1])
-    plt.plot([x_data[0],x_data[-1]],[0.5,0.5], '-.')
-    plt.xlabel('Number of terms')
-    plt.ylabel("Correlation coefficient");
-    return ax
-
-def predict_from_model(model,
-                        inputs,
-                        input_selector):
-    """Reorgs the inputs and does a prediction
-    model = the model to use
-    inputs = the saturated inputs 
-    input_selector = the subset of inputs the model is using
-    """
-    list_of_terms=[inputs.columns[x] for x in input_selector]
-    model_inputs = inputs[list_of_terms]
-    predictions = model.predict(model_inputs)
-    return predictions, list_of_terms
