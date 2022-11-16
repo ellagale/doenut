@@ -16,3 +16,17 @@ must also be present (regardless of whether it is considered
 statistically significant). The parsimonious model is defined as a model
 in containing as few terms of any type that describe that describe the
 data well.
+
+## Checking the response plot
+
+The first thing to do is check for experimental error.
+
+types of error. bias error etc.
+
+        doenut.replicate_plot(inputs, # the input dataframe
+            responses, # the response dataframe
+            key="ortho")
+
+<img src="response_plot.png" style="width:40.0%" alt="image" />
+<img src="head_foot/bias_response_plot.png" style="width:40.0%"
+alt="image" />
