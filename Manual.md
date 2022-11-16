@@ -249,3 +249,267 @@ datapoint.</figcaption>
         use_scaled_inputs=False,
         fit_intercept=True,
         do_scaling_here=False)
+        
+        # Analysing model
+
+look at R2 and Q2 (and model validity and replicability) to find out if
+it is a good model.
+
+Is anything missing?
+
+## predicted-measured plot
+
+Analyse by plotting the observed-predicted plot. Might seem an odd way
+round but we want to see how good the model is compared to the data, not
+sue the model to predict data and see how good our model is. Data is
+king so out model must fit the data. The line is y=x so a perfect model
+would sit on this line. You want a libear scattering over this line. If
+the data looks curved that shows that higher order terms are needed to
+describe the data (vide infra).
+
+Figure <a href="#fig:observed_vs_predicted" data-reference-type="ref"
+data-reference="fig:observed_vs_predicted">[fig:observed_vs_predicted]</a>(top)
+shows the observed-predicted plot for the dataset analysed in
+section\[\[above!\]\]. There is a curve, suggesting that higher order
+terms are needed.
+Fig. <a href="#fig:observed_vs_predicted" data-reference-type="ref"
+data-reference="fig:observed_vs_predicted">[fig:observed_vs_predicted]</a>(bottom)
+shows the results for a model with higher order terms, the curved trend
+has been removed.
+
+The first order model does not seem to model the lowest and highest
+point well. Expected as there is not much data in these regions. We
+don’t care if it models the low yields not too well as we want to
+optimise the data.
+
+<img src="first_order_measured_predicted.png" alt="image" />  
+<img src="final_model_predicted_measured.png" alt="image" />  
+
+        model_1_graph= doenut.plot_observed_vs_predicted(responses['ortho'], 
+            ortho_model.predict(inputs),
+            range_x=[],
+            label='ortho')
+
+# Fitting a saturated model
+
+what is the sat model. Dont need very many high order terms.
+
+The inputs to the model are called \*features\*, these include the input
+factors you’ve already used, but they can also include features that you
+can create from your inputs.
+
+For example, for a system with 2 input factors, *x*<sub>1</sub> and
+*x*<sub>2</sub>, we could create a model like this:
+
+*y* = *β*<sub>0</sub> + *β*<sub>1</sub>*x*<sub>1</sub> + *β*<sub>2</sub>*x*<sub>2</sub> + *β*<sub>3</sub>*x*<sub>1</sub>*x*<sub>2</sub> + *β*<sub>4</sub>*x*<sub>1</sub><sup>2</sup> + *β*<sub>5</sub>*x*<sub>2</sub><sup>2</sup>
+
+The features in this model are: *x*<sub>1</sub>, *x*<sub>2</sub>,
+*x*<sub>1</sub>*x*<sub>2</sub>, *x*<sub>1</sub><sup>2</sup> and
+*x*<sub>2</sub><sup>2</sup>.
+
+Terms of the format *x*<sub>*j*</sub><sup>2</sup> are called \*square
+terms\* and show second order effects in the main term.
+
+Terms of the format *x*<sub>*i*</sub>*x*<sub>*j*</sub> are called
+\*interaction terms\*, and these show the interaction between the inputs
+*x*<sub>*i*</sub> and *x*<sub>*j*</sub>.
+
+Both are very importent for understanding the complexity of the system
+and we are using MVAT experimentation to discover these.
+
+You may noticed that we could keep going, we could have highers powers
+(e.g. *β*<sub>*i*</sub>*x*<sub>1</sub><sup>3</sup> or
+*β*<sub>*j*</sub>*x*<sub>1</sub><sup>3</sup>*x*<sub>2</sub><sup>2</sup>
+etc). We make the \*assumption\* that this system is not that
+complicated, so we will not consider any terms with a power higher than
+2, i.e. we are setting all other possible *β* values to 0. In this
+feild, the terms we add are called \*polynomial features\* and thus you
+can describe this process and only considering polynomial features up to
+power 2.
+
+A \*saturated model\* is one with all the polynomial features (up to our
+desired power) included. The model written above is a saturated model
+for two inputs and one output.
+
+A saturated model would have the following equation:
+
+*y*<sub>*o**r**t**h**o*</sub> = *β*<sub>0</sub> + *β*<sub>1</sub>*x*<sub>1</sub> + *β*<sub>2</sub>*x*<sub>2</sub> + *β*<sub>3</sub>*x*<sub>3</sub> + *β*<sub>4</sub>*x*<sub>1</sub><sup>2</sup> + *β*<sub>5</sub>*x*<sub>2</sub><sup>2</sup> + *β*<sub>6</sub>*x*<sub>3</sub><sup>2</sup> + *β*<sub>7</sub>*x*<sub>1</sub>*x*<sub>2</sub> + *β*<sub>8</sub>*x*<sub>1</sub>*x*<sub>3</sub> + *β*<sub>9</sub>*x*<sub>2</sub>*x*<sub>3</sub>
+
+The first line is the intercept, the second is the inputs, the third is
+the square terms and the fourth is the interaction terms.
+
+A \*parsimonious model\* is a model that is the simplest model we can
+build that captures the behaviour of the reaction.
+
+## DoENUT implementation
+
+DoENUT offers the functionality to add in the higher order terms
+automatically, with the option to add in only squares, only interactions
+or both. The original input array in input into the function below.
+Optionally, column_list will create extra terms for the subset of
+columnn names input.
+
+    sat_inputs, source_list = doenut.add_higher_order_terms(
+        inputs,
+        add_squares=True,
+        add_interactions=True,
+        column_list=[],
+        verbose= True)
+
+R2 overall is 0.956 Mean of test set: 68.9 Mean being used:
+70.19411764705882 Sum of squares of the residuals (explained variance)
+is 798.6438029955726 Sum of squares total (total variance) is
+5836.321107266435 Q2 is 0.863
+
+Fitting a saturation model can then be done exactly as it was done with
+the simple first order model, except that now we use the saturated
+inputs.
+
+# Scaling!
+
+Coefficients! Need to scale the system to get relative importance of
+coefficients. There are two ways to build a model in DoENUT, you can
+scale the coefficients or not. To build a parsimonious model you want to
+scale the coefficients, so you can directly compare the relative effeect
+of each input, regardless of that inputs general range. The coefficients
+are scaled by teh standard deviation to take into account the range.
+Once you have decided which features to include in your model, it is
+best to refit the model without scaling to get the actual values,
+allowing you to use the model without altering the input ranges.
+Alternatively, you can use the scaled model and simply scale the inputs
+by the standard deviations used to make the model.
+
+## Removing features to get best model
+
+The coefficients plots are given by the averaged model code, or
+alternatively can be plotted using the code below, using the averaged
+coefficients returned
+
+        doenut.coeff_plot(saturated_coeffs, 
+               labels=[x for x in sat_inputs.columns], 
+               errors='std',
+               normalise=True)
+
+\[\[to-do plot of R2 and Q2 over removal process\]\]
+
+To remove the coefficients by hand, use the code below. For example, to
+remove the 7th term, you would replace the input_selector with
+\[0,1,2,3,4,5,7\]. To have a hierarchical model, you must not remove
+linear terms (e.g. *x*<sub>1</sub>) if you have higher order terms that
+depend on it, (e.g. *x*<sub>1</sub>*x*<sub>2</sub> or
+*x*<sub>1</sub><sup>2</sup>). It is best to tune your model by hand, as
+there are chemical considerations to take into account when choosing the
+model. For example, ref Cham-Lan, there are several models with
+different terms that were able to predict better reaction conditions.
+Sometimes, there is a chemical reason to prefer one version over
+another.
+
+# Building a parsimonious model
+
+<img src="Sat_model.png" alt="image" />
+<img src="mid_model.png" alt="image" />
+<img src="final_model.png" alt="image" />
+
+<figure>
+<img src="example_training.png" id="fig:training"
+alt="The coefficient correlation values for hte trianing and test sets as terms are removed in reverse order of their significance.[[change this get a better example data!]]" />
+<figcaption aria-hidden="true">The coefficient correlation values for
+hte trianing and test sets as terms are removed in reverse order of
+their significance.[[change this get a better example
+data!]]</figcaption>
+</figure>
+
+## How to choose the model
+
+Aoicke information coefficient AOC and other things. Heuristics. etc.
+
+Introduce the idea of test sets (and say Q2 is the verification in some
+way?)
+
+## How implemented in DoENUT
+
+trains new model with different numbers of coefficients
+
+    this_model, R2, temp_tuple = doenut.calulate_R2_and_Q2_for_models(
+        inputs, 
+        responses, 
+        input_selector=[0,1,2,3,4,5,6,7], 
+        response_selector=[0],
+        use_scaled_inputs=True,
+        do_scaling_here=True)
+    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+
+It is possible to autotune a model, where DoENUT will sucessively remove
+the smallest terms and retrain the model. It can respect hierarchical
+models.
+
+        autotune_model(
+        sat_inputs,
+        responses)
+
+and this gives out the trained model, preedictions and the ground truth,
+the averaged coefficients, R2 and Q2 values of the final model and also
+how the R2, Q2 and number of terms changed oover the optimisation, which
+can tehn be plotted using plot_training.
+
+output_indices, new_model, predictions, ground_truth, coeffs, R2s, R2,
+Q2, R2_over_opt, Q2_over_opt, n_terms_over_opt = temp_tuple
+
+Example of building an expanded input dataframe and writing the function
+for the 4D contour plot
+
+        inputs['Time**2']=inputs['Time']*inputs['Time'] 
+        inputs['Temp**2']=inputs['Temp']*inputs['Temp'] 
+        inputs['Eq**2']=inputs['Eq']*inputs['Eq'] 
+        def my_function_second_order(df_1):
+            df_1['Time**2'] = df_1['Time']*df_1['Time']
+            df_1['Temp**2'] = df_1['Temp']*df_1['Temp']
+            df_1['Eq**2'] = df_1['Eq']*df_1['Eq']
+            return df_1
+
+If you have more than 3 dimensions you need ot input the other data:
+
+example
+
+        PC4_constant = 2
+    n_points = 60
+    def my_function(df_1):
+        df_1['PC4']=c = np.linspace(PC4_constant, PC4_constant, 3600)
+        df_1['PC1*2']= df_1['PC1']*df_1['PC1']
+        df_1['PC3*2']= df_1['PC3']*df_1['PC3']
+        df_1['PC4*2']= df_1['PC4']*df_1['PC4']    
+        df_1['PC1*PC2']= df_1['PC1']*df_1['PC2']
+        df_1['PC1*PC3']= df_1['PC1']*df_1['PC3']
+        return df_1
+
+
+Suggested workflow for DoE factor idenfitication and optimisation
+
+1.  Preliminary experiments to determine the reaction works on the bench
+
+2.  choose factors
+
+3.  Setting up of an experimental design
+
+4.  Preparation for automated synthesis (creating stock solution etc)
+
+5.  check replicate plot for bias effects and check replication of
+    centre points is good
+
+6.  Fit a linear model on main effects. Examine observed-predicted plot,
+    R2 and Q2 values to idenitify if higher order terms are needed
+
+7.  add all higher order terms for the type of model to be optimised
+    (i.e. saturated, square or interaction
+
+8.  remove terms starting with the higher order least significant terms,
+    and using chemical intuition
+
+9.  choose best model based on observed-predicted plot, R2, Q2 and MV or
+    AIC
+
+10. use model to predict optimum reaction conditions
+
+11. verify model predictions and (hopefully) optimise reaction
+
+12. if needed: go back to step 2 to further optimise
