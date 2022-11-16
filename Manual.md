@@ -1,4 +1,9 @@
-# DoENUT Manual  ![Drag Racing](images/doenut_small.jpg)
+# DoENUT (Design of Experiments Numerical Utility Toolkit) Manual  
+![Drag Racing](images/doenut_small.jpg)
+
+This is the (incomplete) manual for DoENUT
+
+## Types of models 
 
 A linear model for 3 factors which is capable of distinguishing main
 effects:
@@ -54,7 +59,7 @@ MODDE manual\]\]
 We can use degrees of freedom (DoF) as another metric for choosing a
 good model, higher DoF models are better (equivalently, lower numbers of
 terms). DoF is given by:
-*D**o**F* = *N* − *N*<sub>*β*<sub>*x*</sub></sub> + 1
+*DoF* = *N* − *N*<sub>*β*<sub>*x*</sub></sub> + 1
 where *N* is the number of experiments, *N*<sub>*β*<sub>*x*</sub></sub>
 is the number of model terms (the +1 is due to the intercept,
 *β*<sub>0</sub>).
@@ -67,7 +72,7 @@ factor is the best.
 The AIC can be used be used as a metric for the model’s efficiency and
 choosing the model with the lower AIC is the best.
 
-Parsimonious models are created by successively removing the
+**Parsimonious models** are created by successively removing the
 statistically insignificantly higher order terms from a saturated model
 and taking the model with the best *Q*<sup>2</sup> (N.B. *R*<sup>2</sup>
 is always higher than the *Q*<sup>2</sup>). With lower resolution models
@@ -88,12 +93,12 @@ variables. For example, in a system with 3 input variables,
 factors are the main effects on the system.
 
 A model relates input factors to output responses.
-*i**n**p**u**t**s* → *m**o**d**e**l* → *o**u**t**p**u**t**s*
+*inputs* → *model* → *outputs*
 
 A very simple model would be something like this:
-*o**u**t**p**u**t**s* = *β*<sub>0</sub> + *β*<sub>1</sub>*i**n**p**u**t*
+*outputs* = *β*<sub>0</sub> + *β*<sub>1</sub>*input*
 which is simply the equation for a straight line:
-*y* = *m**x* + *c*
+*y* = *m* *x* + *c*
 where *c* and *β*<sub>0</sub> are the intercept and *m* and
 *β*<sub>1</sub> are the gradient.
 
@@ -115,10 +120,8 @@ below. (N.B. the first term is
 
 ## Implementation in DoENUT
 
-Based on scikit-learn so could add in any model here. Simpler linear
+Based on `scikit-learn` so could add in any model here. Simpler linear
 regression is the best etc.
-
-\[\[To-DoENUT! perhaps add in an option to put in any model?\]\]
 
         original_model, inputs_used, original_model_R2, predictions = doenut.train_model(
         inputs, 
@@ -137,19 +140,19 @@ alt="4D contour plot for the linear model in section [[]]" />
 section [[]]</figcaption>
 </figure>
 
-## Leave one out methodology
+## Leave one out methodology (LOOM)
 
 R2 is : . Relation to ML training set. what corerlation coeffi is and
 isnt
 
 Chemistry data hard to come by so need to make the most of the data we
-have. LOOM!
+have. 
 
 We make a training set of 1 point, and build N models of N-1 points.
 Should get similar R2 for each model and the errors should be evenly
 distributed around zero.
 
-The final model is averaged. Q2 calculated from each model separaetly.
+The final model is averaged. *Q^2* calculated from each model separaetly.
 
 Over-fitting. undertraining. R2 always more than Q2. etc. what r2 of 0
 means (or less than 0).
@@ -161,9 +164,6 @@ What makes a good model *Q*<sup>2</sup> \> 0.5, *R*<sup>2</sup> \> 0.5,
 *R*<sup>2</sup> − *Q*<sup>2</sup> \< 0.2.
 
 ### Example of analysing the averaged model
-
-\[\[To-do read DoNUT to find out what all this is! is averaged error the
-error for all points on that model?\]\]
 
 Means should be similar for train and test set. Q2 calcualted etc.
 
@@ -257,8 +257,6 @@ datapoint.</figcaption>
 look at R2 and Q2 (and model validity and replicability) to find out if
 it is a good model.
 
-Is anything missing?
-
 ## predicted-measured plot
 
 Analyse by plotting the observed-predicted plot. Might seem an odd way
@@ -293,8 +291,6 @@ optimise the data.
             label='ortho')
 
 # Fitting a saturated model
-
-what is the sat model. Dont need very many high order terms.
 
 The inputs to the model are called \*features\*, these include the input
 factors you’ve already used, but they can also include features that you
@@ -392,8 +388,6 @@ coefficients returned
                errors='std',
                normalise=True)
 
-\[\[to-do plot of R2 and Q2 over removal process\]\]
-
 To remove the coefficients by hand, use the code below. For example, to
 remove the 7th term, you would replace the input_selector with
 \[0,1,2,3,4,5,7\]. To have a hierarchical model, you must not remove
@@ -421,13 +415,6 @@ their significance.[[change this get a better example
 data!]]</figcaption>
 </figure>
 
-## How to choose the model
-
-Aoicke information coefficient AOC and other things. Heuristics. etc.
-
-Introduce the idea of test sets (and say Q2 is the verification in some
-way?)
-
 ## How implemented in DoENUT
 
 trains new model with different numbers of coefficients
@@ -449,7 +436,7 @@ models.
         sat_inputs,
         responses)
 
-and this gives out the trained model, preedictions and the ground truth,
+and this gives out the trained model, predictions and the ground truth,
 the averaged coefficients, R2 and Q2 values of the final model and also
 how the R2, Q2 and number of terms changed oover the optimisation, which
 can tehn be plotted using plot_training.
