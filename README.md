@@ -3,6 +3,9 @@
 
 Package to conveniently combine all necessary functions required to do Design of Experiments. 
 
+Code for a forthcoming paper:
+"DoENUT: Design of Experiments Numerical Utility Toolbox, for use in research and teaching," Ella M. Gale
+
 Also has tutorials and examples
 
 This paper will present a novel python module to do DoE from start to
@@ -67,5 +70,4 @@ allowing for easy gathering of data.
 [1] Also called ‘experimental design’ and ‘statistical experimental
 design’
 
-Code for a forthcoming paper:
-"DoENUT: Design of Experiments Numerical Utility Toolbox, for use in research and teaching," Ella M. Gale
+
