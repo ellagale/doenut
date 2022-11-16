@@ -1,4 +1,4 @@
-<img src="images/doenut.jpg" style="width:40.0%" alt="image" />
+# DoENUT Manual  <img src="images/doenut.jpg" style="width:10.0%" alt="image" />
 
 A linear model for 3 factors which is capable of distinguishing main
 effects:
