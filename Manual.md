@@ -134,3 +134,85 @@ alt="4D contour plot for the linear model in section [[]]" />
 <figcaption aria-hidden="true">4D contour plot for the linear model in
 section [[]]</figcaption>
 </figure>
+
+## Leave one out methodology
+
+R2 is : . Relation to ML training set. what corerlation coeffi is and
+isnt
+
+Chemistry data hard to come by so need to make the most of the data we
+have. LOOM!
+
+We make a training set of 1 point, and build N models of N-1 points.
+Should get similar R2 for each model and the errors should be evenly
+distributed around zero.
+
+The final model is averaged. Q2 calculated from each model separaetly.
+
+Over-fitting. undertraining. R2 always more than Q2. etc. what r2 of 0
+means (or less than 0).
+
+Is your model valid? is Q2 above 0.5? if not - could be not enough data
+etc.
+
+What makes a good model *Q*<sup>2</sup> \> 0.5, *R*<sup>2</sup> \> 0.5,
+*R*<sup>2</sup> − *Q*<sup>2</sup> \< 0.2.
+
+### Example of analysing the averaged model
+
+\[\[To-do read DoNUT to find out what all this is! is averaged error the
+error for all points on that model?\]\]
+
+Means should be similar for train and test set. Q2 calcualted etc.
+
+Table  <a href="#tab:averaged_model" data-reference-type="ref"
+data-reference="tab:averaged_model">1</a> and figure
+ <a href="#fig:error_plot" data-reference-type="ref"
+data-reference="fig:error_plot">[fig:error_plot]</a> show data from a
+first order lienar model.
+Figure <a href="#fig:error_plot" data-reference-type="ref"
+data-reference="fig:error_plot">[fig:error_plot]</a> shows that the
+first 16 experiments are well distributed, but the last one is an
+outlier.
+
+hhiger r2 (see table). Higher error (see figure) We do not remove this
+outlier!
+
+why? Is the highest yield point, ie what we are searching for. But this
+high error suggests that the model is not very predictive at this point.
+See figure <a href="#fig:linear_model_pre" data-reference-type="ref"
+data-reference="fig:linear_model_pre">[fig:linear_model_pre]</a>, which
+shows a yield above 100% in this area.
+
+models are only predictive in the range they have been trianed over Do
+not know chemical or phsycial facts, such that a yield above 100% is
+impossible. We know that 91% is the true yeild here.
+
+relate back to OVAT which would get the correct answer.
+
+But our answers is close enough to proceed and test that area for better
+yeilds.
+
+Figure <a href="#fig:observed_vs_predicted" data-reference-type="ref"
+data-reference="fig:observed_vs_predicted">[fig:observed_vs_predicted]</a>A
+shows the model response for this data.
+
+| Missing data point | model *R*<sup>2</sup> | Average error |
+|:-------------------|:----------------------|:--------------|
+| 0                  | 0.801                 | -16.5         |
+| 1                  | 0.857                 | -3.63         |
+| 2                  | 0.873                 | 10.5          |
+| 3                  | 0.862                 | -13.2         |
+| 4                  | 0.852                 | -0.916        |
+| 5                  | 0.86                  | 5.03          |
+| 6                  | 0.854                 | 2.59          |
+| 7                  | 0.881                 | 12.9          |
+| 10                 | 0.85                  | 3.17          |
+| 11                 | 0.856                 | 5.89          |
+| 12                 | 0.854                 | -8.72         |
+| 13                 | 0.855                 | -4.17         |
+| 14                 | 0.861                 | 9.52          |
+| 15                 | 0.858                 | 5.21          |
+| 16                 | 0.92                  | -25.3         |
+
+ Output from 17 models trained for LOOM
