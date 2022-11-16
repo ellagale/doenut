@@ -1,7 +1,8 @@
-# DoENUT (Design of Experiments Numerical Utility Toolkit) Manual  
-![Drag Racing](images/doenut_small.jpg)
+<img align="right" src="images/doenut_small.jpg">
 
-This is the (incomplete) manual for DoENUT
+# DoENUT (Design of Experiments Numerical Utility Toolkit) Manual  
+
+This is the (incomplete) manual for DoENUT (sadly also incomplete)
 
 ## Types of models 
 
