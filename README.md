@@ -1,7 +1,7 @@
 # doenut
 # Design of Experiments Numerical Utility Toolkit
 
-![doenut on a 4d contour plot as rendered by ai](images/doenut_small.jpg)
+
 <img align="right" src="images/doenut_small.jpg">
 
 Package to conveniently combine all necessary functions required to do Design of Experiments.
