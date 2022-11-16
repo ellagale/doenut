@@ -1,4 +1,5 @@
 <img align="right" src="images/doenut_small.jpg">
+
 # Design of Experiments Numerical Utility Toolkit DoENUT 
 
 
