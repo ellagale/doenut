@@ -402,10 +402,18 @@ another.
 
 # Building a parsimonious model
 
+First we build a saturated model, as in the image below
 <img src="images/Sat_model.png" alt="image" />
+
+Then we removed the higher order terms which are not significant. Insignificant terms are those where the `p95` (default) error bars cross zero as we could replace this coefficient with 0 (i.e. remove that factor) and not make a statistically significant change to the model. Do this is order (from least significant upwards) and recalculate the model each time. If you want a heirarchical model then don't remove lower order terms that higher order terms depend on even if it is not significant.
+
+The image below shows one of the intermediate models
 <img src="images/mid_model.png" alt="image" />
+
+This is the final parsimonious model.
 <img src="images/final_model.png" alt="image" />
 
+As we remove terms, teh R2 drops but hte Q2 goes up,
 <figure>
 <img src="images/example_training.png" id="fig:training"
 alt="The coefficient correlation values for hte trianing and test sets as terms are removed in reverse order of their significance.[[change this get a better example data!]]" />
@@ -417,7 +425,7 @@ data!]]</figcaption>
 
 ## How implemented in DoENUT
 
-trains new model with different numbers of coefficients
+trains new model with different numbers of coefficients. Change input selector to remove different factors, for example, `input_selector = [0,1,2,3,5,6]` has removed t he 4th and 7th factors.
 
     this_model, R2, temp_tuple = doenut.calulate_R2_and_Q2_for_models(
         inputs, 
@@ -472,7 +480,7 @@ example
         return df_1
 
 
-Suggested workflow for DoE factor idenfitication and optimisation
+## Suggested workflow for DoE factor idenfitication and optimisation
 
 1.  Preliminary experiments to determine the reaction works on the bench
 
