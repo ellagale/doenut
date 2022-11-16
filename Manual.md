@@ -27,8 +27,8 @@ types of error. bias error etc.
             responses, # the response dataframe
             key="ortho")
 
-<img src="response_plot.png" style="width:40.0%" alt="image" />
-<img src="head_foot/bias_response_plot.png" style="width:40.0%"
+<img src="images/response_plot.png" style="width:40.0%" alt="image" />
+<img src="images/bias_response_plot.png" style="width:40.0%"
 alt="image" />
 
 # Modelling
@@ -129,7 +129,7 @@ regression is the best etc.
 # Prediction
 
 <figure>
-<img src="linear_model.png" id="fig:linear_model_prediction"
+<img src="images/linear_model.png" id="fig:linear_model_prediction"
 alt="4D contour plot for the linear model in section [[]]" />
 <figcaption aria-hidden="true">4D contour plot for the linear model in
 section [[]]</figcaption>
@@ -230,7 +230,7 @@ shows the model response for this data.
     Q2 is 0.715
 
 <figure>
-<img src="head_foot/error_plot.png" id="fig:error_plot"
+<img src="images/error_plot.png" id="fig:error_plot"
 alt="Error plot. The errors should be evenly distributed around 0. This plot shows good errors except for the last datapoint." />
 <figcaption aria-hidden="true">Error plot. The errors should be evenly
 distributed around 0. This plot shows good errors except for the last
@@ -406,12 +406,12 @@ another.
 
 # Building a parsimonious model
 
-<img src="Sat_model.png" alt="image" />
-<img src="mid_model.png" alt="image" />
-<img src="final_model.png" alt="image" />
+<img src="images/Sat_model.png" alt="image" />
+<img src="images/mid_model.png" alt="image" />
+<img src="images/final_model.png" alt="image" />
 
 <figure>
-<img src="example_training.png" id="fig:training"
+<img src="images/example_training.png" id="fig:training"
 alt="The coefficient correlation values for hte trianing and test sets as terms are removed in reverse order of their significance.[[change this get a better example data!]]" />
 <figcaption aria-hidden="true">The coefficient correlation values for
 hte trianing and test sets as terms are removed in reverse order of
