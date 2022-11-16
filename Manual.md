@@ -216,3 +216,36 @@ shows the model response for this data.
 | 16                 | 0.92                  | -25.3         |
 
  Output from 17 models trained for LOOM
+ 
+ A standard output is: \[\[prolly turn to a table\]\]
+
+    Input data is 17 points long
+    We are using 16 data points
+
+    R2 overall is 0.823
+    Mean of test set: 68.9
+    Mean being used: 70.19411764705882
+    Sum of squares of the residuals (explained variance) is 1665.7625447426085
+    Sum of squares total (total variance) is 5836.321107266435
+    Q2 is 0.715
+
+<figure>
+<img src="head_foot/error_plot.png" id="fig:error_plot"
+alt="Error plot. The errors should be evenly distributed around 0. This plot shows good errors except for the last datapoint." />
+<figcaption aria-hidden="true">Error plot. The errors should be evenly
+distributed around 0. This plot shows good errors except for the last
+datapoint.</figcaption>
+</figure>
+
+### DoENUT implementation
+
+        (ortho_model, predictions, ground_truth, 
+        coeffs, R2s, R2, 
+        Q2) = doenut.calc_averaged_model(
+        inputs, 
+        responses[['ortho']], 
+        key='ortho',
+        drop_duplicates=True,
+        use_scaled_inputs=False,
+        fit_intercept=True,
+        do_scaling_here=False)
