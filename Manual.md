@@ -1,4 +1,4 @@
-# DoENUT Manual  <img src="images/doenut.jpg" style="width:10.0%" alt="image" />
+# DoENUT Manual  <![Drag Racing](images/doenut.jpg)
 
 A linear model for 3 factors which is capable of distinguishing main
 effects:
