@@ -282,8 +282,8 @@ point well. Expected as there is not much data in these regions. We
 don’t care if it models the low yields not too well as we want to
 optimise the data.
 
-<img src="first_order_measured_predicted.png" alt="image" />  
-<img src="final_model_predicted_measured.png" alt="image" />  
+<img src="images/first_order_measured_predicted.png" alt="image" />  
+<img src="images/final_model_predicted_measured.png" alt="image" />  
 
         model_1_graph= doenut.plot_observed_vs_predicted(responses['ortho'], 
             ortho_model.predict(inputs),
