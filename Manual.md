@@ -110,3 +110,27 @@ This is a model of order 1 as all the variables are *x*<sup>1</sup> or
 below. (N.B. the first term is
 *β*<sub>0</sub>*x*<sup>0</sup> = *β*<sub>0</sub>, and is called the
 \*intercept\*).
+
+## Implementation in DoENUT
+
+Based on scikit-learn so could add in any model here. Simpler linear
+regression is the best etc.
+
+\[\[To-DoENUT! perhaps add in an option to put in any model?\]\]
+
+        original_model, inputs_used, original_model_R2, predictions = doenut.train_model(
+        inputs, 
+        responses['ortho'], 
+        test_responses=None,
+        do_scaling_here=False,
+        fit_intercept=True,
+        verbose=True)
+
+# Prediction
+
+<figure>
+<img src="linear_model.png" id="fig:linear_model_prediction"
+alt="4D contour plot for the linear model in section [[]]" />
+<figcaption aria-hidden="true">4D contour plot for the linear model in
+section [[]]</figcaption>
+</figure>
