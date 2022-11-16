@@ -1,3 +1,5 @@
+# DoENUT Manual  <![Drag Racing](images/doenut.jpg)
+
 A linear model for 3 factors which is capable of distinguishing main
 effects:
 *y* = *β*<sub>0</sub> + *β*<sub>1</sub>*x*<sub>1</sub> + *β*<sub>2</sub>*x*<sub>2</sub> + *β*<sub>3</sub>*x*<sub>3</sub> .
