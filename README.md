@@ -1,19 +1,21 @@
 # doenut
 # Design of Experiments Numerical Utility Toolkit
 
-Package to conveniently combine all necessary functions required to do Design of Experiments. 
+![doenut on a 4d contour plot as rendered by ai](images/doenut_small.jpg)
+
+Package to conveniently combine all necessary functions required to do Design of Experiments.
 
 Code for a forthcoming paper:
 "DoENUT: Design of Experiments Numerical Utility Toolbox, for use in research and teaching," Ella M. Gale
 
 Also has tutorials and examples
 
-This paper will present a novel python module to do DoE from start to
-finish for the \[\[x\]\] main methodologies used by chemists and thus
+A python module to do DoE from start to
+finish for the main methodologies used by chemists and thus
 explain the methods of DoE to the interested chemist.
 
 Design of experiments[1] (DoE) is a technique widely used in industry
-\[\[cite!\]\] to optimise processes, formulations and materials or to
+to optimise processes, formulations and materials or to
 quickly explore chemical space. The standard approach to scientific
 research is the *one variable at a time* (OVAT), where a single variable
 is changed and the effect measured, or the related ‘trail and error’
@@ -46,16 +48,7 @@ process. The DoE method is:
 8.  using the model to predict which area of variable space to explore
     next to continue to optimise.
 
-There are several software programs to make this easy \[\[cite Modde,SAS
-etc\]\]. As an example \[\[cite MArcus\]\] wanted to determine the best
-a model to predict the best formulation of a novel material to enable
-cell attachment for use as a cell scaffold. The inputs chosen were
-surface zeta potential, capacitive coupling, shear modulus and surface
-roughness (the things that could be measured in the lab) and the output
-the cell attachement %. With cross terms this gave 22 models to
-investigate. The differences between DoE and linear regression are: that
-you are generally optimising a known system and that constraints are
-usually applied. For example, in optimsing a new recipie for Pringles (a
+There are several software programs to make this easy (e.g. Modde,SAS etc). For example, in optimsing a new recipie for Pringles (a
 type of potatoe based chip) that reduced the amount of potato flour by
 including rice, corn and wheat flour, Kelloggs performed a DoE with the
 constraints that the potato flour content must be at least 40% and that
