@@ -1,8 +1,8 @@
-# doenut
+# doenut <img align="right" src="images/doenut_small.jpg">
 # Design of Experiments Numerical Utility Toolkit
 
 
-<img align="right" src="images/doenut_small.jpg">
+
 
 Package to conveniently combine all necessary functions required to do Design of Experiments.
 
