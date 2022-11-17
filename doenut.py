@@ -378,6 +378,7 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors='std',normalise=False):
     stds = np.std(coeffs, axis=0)[0]
     if normalise:
         ave_coeffs = ave_coeffs/stds
+        stds = stds/stds
         #stds = np.std(coeffs, axis=0)[0]
     if errors == 'std':
         error_bars = stds
