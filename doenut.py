@@ -8,6 +8,7 @@
 # first we import some useful libraries
 import numpy as np
 import pandas as pd
+import copy
 import random
 from matplotlib import pyplot as plt
 from sklearn.linear_model import LinearRegression
@@ -664,12 +665,12 @@ def map_chemical_space(
     x_key,
     y_key,
     c_key,
-    x_limits, 
-    y_limits, 
-    constant, 
+    x_limits,
+    y_limits,
+    constant,
     n_points,
     my_function):
-    
+
     min_x = x_limits[0]
     max_x = x_limits[1]
     min_y = y_limits[0]
@@ -695,6 +696,54 @@ def map_chemical_space(
     #print(Z.shape)
     #print(Z)
     Z=Z.reshape(n_points,n_points)
+    return X, Y, Z
+
+
+def map_chemical_space_new(
+        unscaled_model,
+        x_key,
+        y_key,
+        c_key,
+        x_limits,
+        y_limits,
+        constant,
+        n_points,
+        my_function,
+        source_list=[]):
+    min_x = x_limits[0]
+    max_x = x_limits[1]
+    min_y = y_limits[0]
+    max_y = y_limits[1]
+
+    x = np.linspace(min_x, max_x, n_points)
+    y = np.linspace(min_y, max_y, n_points)
+    c = np.linspace(constant, constant, n_points)
+
+    def fn(x, y, c, unscaled_model, my_function):
+        df_1 = pd.DataFrame()
+        df_1[x_key] = x.reshape(-1)
+        df_1[y_key] = y.reshape(-1)
+        df_1[c_key] = c
+        # here we add the extra terms
+        df_1 = my_function(df_1)
+        sat_inputs=add_higher_order_terms(df_1,
+                               add_squares=True,
+                               add_interactions=True,
+                               column_list=source_list,
+                               verbose=True)
+
+        predict_from_model(model,
+                           inputs,
+                           input_selector)
+        # print(df_1)
+        z = unscaled_model.predict(df_1)
+        return z
+
+    X, Y = np.meshgrid(x, y)
+    Z = fn(X, Y, constant, unscaled_model, my_function)
+    # print(Z.shape)
+    # print(Z)
+    Z = Z.reshape(n_points, n_points)
     return X, Y, Z
 
 def my_function(df_1):
@@ -859,7 +908,7 @@ def add_higher_order_terms(inputs,
     
     returns saturated array and a list of which inputs created which column"""
     
-    sat_inputs = inputs
+    sat_inputs = copy.deepcopy(inputs)
     if column_list == []:
         # do all columns
         column_list = [x for x in inputs.columns]
@@ -874,7 +923,7 @@ def add_higher_order_terms(inputs,
         for i in range(len(column_list)):
             source_list.append(i)
             input_name = column_list[i]
-            new_name = input_name + '*2'
+            new_name = input_name + '**2'
             if verbose:
                 print(new_name)
             sat_inputs[new_name] = inputs[input_name]*inputs[input_name]

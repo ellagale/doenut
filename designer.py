@@ -55,7 +55,7 @@ def experiment_designer(levels,
 
 
 
-def frac_fact_res_designer(levels, 
+def frac_fact_res_designer(levels,
                          res,
                         do_midpoints=True,
                         shuffle=True,
@@ -75,8 +75,33 @@ def frac_fact_res_designer(levels,
         #midpoints = pd.DataFrame(midpoints, index=str(len(design)+1))
         for i in range(num_midpoints):
             design = design.append(midpoints, ignore_index=True)
-        
+
         if shuffle == True:
             design = design.sample(frac=1)
-                
+
+    return design
+
+
+def fact_designer(levels,
+                           do_midpoints=True,
+                           shuffle=True,
+                           repeats=1,
+                           num_midpoints=3):
+    levels_in = copy.deepcopy(levels)
+    design = full_fact(levels_in)
+    factor_names = [x for x in levels.keys()]
+    if do_midpoints:
+        midpoints = {}
+        for factor in levels.keys():
+            if len(levels[factor]) > 2:
+                midpoints[factor] = np.median(levels[factor])
+            else:
+                midpoints[factor] = np.mean(levels[factor])
+        # midpoints = pd.DataFrame(midpoints, index=str(len(design)+1))
+        for i in range(num_midpoints):
+            design = design.append(midpoints, ignore_index=True)
+
+        if shuffle == True:
+            design = design.sample(frac=1)
+
     return design
