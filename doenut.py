@@ -495,6 +495,7 @@ def calulate_R2_and_Q2_for_models(inputs,
         R2 = new_model.score(edited_input_data, this_model_responses)
         if verbose:
             print("Response {} R2 is {:.3}".format(response_key, R2))
+            print("Input selector was {}".format(input_selector))
         if not do_r2:
             plt.clf()
         if do_plot:
@@ -503,10 +504,55 @@ def calulate_R2_and_Q2_for_models(inputs,
                        errors='p95',
                        normalise=True)
         #print(averaged_coeffs)
-        #scaled_coeffs = orthogonal_scaling(averaged_coeffs)
+        #scaled_coeffs = orthogonal_scaling(coefficient_list)
         #plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
+        
 
     return new_model, R2, temp_tuple, selected_input_terms
+
+def tune_model(inputs, 
+               responses, 
+               input_selector=None, 
+               response_selector=None,
+               fit_intercept=True,
+               use_scaled_inputs=False,
+               do_scaling_here=False,
+               drop_duplicates='average',
+               do_plot=True,
+               do_r2=True,
+               verbose = True
+              ):
+    """Wrapper to calulate_R2_and_Q2_for_models to make life easy
+       It does both scaled and unscaled models
+       assumes you want an unscaled model for ease of plotting
+       and a scaled model coefficients for ease of choosing"""#
+    
+    ## scaled model, use this for picking your coefficients
+    this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
+                        inputs, 
+                        responses[['Profit']], 
+                        input_selector=input_selector, 
+                        response_selector=response_selector,
+                        use_scaled_inputs=True,
+                        drop_duplicates='No',
+                        do_scaling_here=True)
+    scaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2= temp_tuple
+    
+    ## unscaled model, use this for picking your coefficients
+    #this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
+    #                    inputs, 
+    #                    responses[['Profit']], 
+    #                    input_selector=input_selector, 
+    #                    response_selector=response_selector,
+    #                    use_scaled_inputs=False,
+    #                    drop_duplicates='No',
+    #                    do_scaling_here=False,
+    #                    do_plot=False,
+    #                    verbose=False)
+    #unscaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2= temp_tuple
+    unscaled_model = []
+
+    return scaled_model, R2, temp_tuple, selected_input_terms
 
 def autotune_model(
         inputs,
@@ -762,6 +808,7 @@ def four_D_contour_plot(
     n_points,
     my_function,
     fig_label='',
+    input_selector=[],
     x_label='',
     y_label='',
     constant_label='',
