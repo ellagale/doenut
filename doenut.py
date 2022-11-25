@@ -530,7 +530,7 @@ def tune_model(inputs,
     ## scaled model, use this for picking your coefficients
     this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
                         inputs, 
-                        responses[['Profit']], 
+                        responses, 
                         input_selector=input_selector, 
                         response_selector=response_selector,
                         use_scaled_inputs=True,
