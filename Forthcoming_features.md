@@ -8,3 +8,4 @@ Basically a To-DoENUT list (geddit?)
   4. AIC measurement
   5. \[\[To-DoENUT! perhaps add in an option to put in any model from skleanr to do the fitting ?\]\]
   6. Convert designer.py to be a class
+  7. Fix links so doenut can be called from the tutorial folder
