@@ -815,7 +815,8 @@ def four_D_contour_plot(
     z_label = '',
     cmap='jet',
     num_of_z_levels=9,
-    z_limits=[]):
+    z_limits=[],
+    tidy_subfig_axes=False):
     """This could be improved to take any number of data
     1. unscaled_model: the model you just trained
     2. x_key: name in the dataframe for the input to go on the x axis
@@ -899,26 +900,26 @@ def four_D_contour_plot(
     egg1=ax1.contour(X_1, Y_1, Z_1,  
                      num_of_levels, levels=levels, colors = 'black')
     if np.max(levels) >10:
-        plt.clabel(egg1, fontsize=10, inline=1,fmt = '%1.0f')
+        plt.clabel(egg1, fontsize=16, inline=1,fmt = '%1.0f')
     else:
-        plt.clabel(egg1, fontsize=10, inline=1, fmt='%1.2f')
+        plt.clabel(egg1, fontsize=16, inline=1, fmt='%1.2f')
     #egg.xlabel('egg')
     ax2.contourf(X_2, Y_2, Z_2, 
                  num_of_levels, levels=levels,cmap=cmap)
     egg2=ax2.contour(X_2, Y_2, Z_2,  num_of_levels, levels=levels,
                      colors = 'black')
     if np.max(levels) >10:
-        plt.clabel(egg2, fontsize=10, inline=1,fmt = '%1.0f')
+        plt.clabel(egg2, fontsize=16, inline=1,fmt = '%1.0f')
     else:
-        plt.clabel(egg2, fontsize=10, inline=1, fmt='%1.2f')
+        plt.clabel(egg2, fontsize=16, inline=1, fmt='%1.2f')
     ax3.contourf(X_3, Y_3, Z_3, 
                  num_of_levels, levels=levels,cmap=cmap)
     egg3=ax3.contour(X_3, Y_3, Z_3,  
                      num_of_levels, levels=levels, colors = 'black')
     if np.max(levels) >10:
-        plt.clabel(egg3, fontsize=10, inline=1,fmt = '%1.0f')
+        plt.clabel(egg3, fontsize=16, inline=1,fmt = '%1.0f')
     else:
-        plt.clabel(egg3, fontsize=10, inline=1, fmt='%1.2f')
+        plt.clabel(egg3, fontsize=16, inline=1, fmt='%1.2f')
     # make constant label for subplot title
     ax1.set_title(constant_label + ' = ' + str(constants[0]))
     ax2.set_title(constant_label + ' = ' + str(constants[1]))
@@ -929,6 +930,10 @@ def four_D_contour_plot(
     ax3.set_xlabel(x_label)
     
     ax1.set_ylabel(y_label)
+
+    if tidy_subfig_axes:
+        ax2.yaxis.set_visible(False) 
+        ax3.yaxis.set_visible(False)
     
         #fig.colorbar()
         #ax1.clabel(contours, inline=True, fontsize=12)
