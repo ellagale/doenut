@@ -9,7 +9,8 @@ setup(
     author_email='ella.gale@bristol.ac.uk',
     license='GPL3',
     packages=['doenut'],
-    install_requires=['numpy',
+    install_requires=[
+        'numpy',
         'pandas',
         'matplotlib',
         'scikit-learn',
