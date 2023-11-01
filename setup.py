@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='doenut',
     version='0.1.0',
-    description='Design Of Experiments Nice User Toolkit',
+    description='Design Of Experiments Numerical Utility Toolkit',
     url='https://github.com/ellagale/doenut',
     author='Ella Gale',
     author_email='ella.gale@bristol.ac.uk',

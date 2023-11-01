@@ -1,7 +1,7 @@
 """
 Doenut
 
-Design of Experiments Nice(?) Utility(?) Toolkit
+Design of Experiments Numerical Utility Toolkit
 """
 
 __version__ = "0.1.0"

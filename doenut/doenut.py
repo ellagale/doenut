@@ -1,6 +1,6 @@
 """
 DOENUT
-Design of Experiments ...
+Design of Experiments Numerical Utility Toolkit
 """
 
 # first we import some useful libraries
