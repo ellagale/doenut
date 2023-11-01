@@ -1,24 +1,18 @@
-#############################################################
-#															#
-#							DOENUT							#
-#	Design Of Experiments ...
-#															#
-#############################################################
+"""
+DOENUT
+Design of Experiments ...
+"""
 
 # first we import some useful libraries
 import numpy as np
 import pandas as pd
 import copy
-import random
 from matplotlib import pyplot as plt
 from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn import preprocessing
 
 
 def orthogonal_scaling(inputs):
-    ## the scaling thingy that Modde uses
+    # the scaling thingy that Modde uses
     inputs_max = np.max(inputs)
     inputs_min = np.min(inputs)
     Mj = (inputs_min + inputs_max) / 2
@@ -36,7 +30,7 @@ def scale_1D_data(scaler, data, do_fit=True):
 
 
 def applying_orthogonal_scaling_to_new_data(new_data):
-    ## the scaling thingy that Modde uses
+    # the scaling thingy that Modde uses
     new_data = (new_data - Mj) / Rj
     return new_data
 
@@ -53,7 +47,7 @@ def find_replicates(inputs):
 def replicate_plot(inputs, responses, key):
     """Plots a replicate plot which shows all experiments
     and identifies the replicates
-    inputs: 
+    inputs:
     responses:
     key: column in responses that you wish to plot"""
     plt.title(key)
@@ -103,7 +97,7 @@ def train_model(inputs,
     verbose: this is a common setting in coding, if true it means run in verbose mode and many bits of information are printed to the screen."""
     if do_scaling_here:
         inputs, _, _ = orthogonal_scaling(inputs)
-    if test_responses == None:
+    if test_responses is None:
         test_responses = responses
     model = LinearRegression(fit_intercept=fit_intercept)
     model.fit(inputs, responses)
@@ -139,7 +133,7 @@ def plot_observed_vs_predicted(responses,
 
 def Calculate_R2(ground_truth, predictions, key, word='test', verbose=True):
     """Calculates R2 from input data
-    You can use this to calculate q2 if you're 
+    You can use this to calculate q2 if you're
     using the test ground truth as the mean
     else use calculate Q2
     I think this is what Modde uses for PLS fitting"""
@@ -171,7 +165,7 @@ def Calculate_Q2(ground_truth,
                  word='test',
                  verbose=True):
     """A different way of calculating Q2
-    this uses the mean from the training data, not the 
+    this uses the mean from the training data, not the
     test ground truth"""
     errors = ground_truth[[key]] - predictions[[key]]
     train_mean = np.mean(train_responses[[key]], axis=0)
@@ -186,7 +180,7 @@ def Calculate_Q2(ground_truth,
             f'Sum of squares of the residuals (explained variance) is {sum_squares_residuals}'
         )
     sum_squares_total = sum((ground_truth[key] - train_mean[0])**2)
-    ##### stuff from Modde
+    ### stuff from Modde
     #errors/1
 
     if verbose:
@@ -277,7 +271,7 @@ def calc_averaged_model(inputs,
                         fit_intercept=False,
                         do_scaling_here=False,
                         use_scaled_inputs=False):
-    """Uses 'leave one out' method to train and test a series 
+    """Uses 'leave one out' method to train and test a series
     of models
     inputs: full set of terms for the model (x_n)
     responses: responses to model (ground truth, y)
@@ -306,8 +300,7 @@ def calc_averaged_model(inputs,
         inputs, _, _ = orthogonal_scaling(inputs)
     whole_inputs = inputs
     whole_responses = responses
-    if (drop_duplicates == 'Yes') or (type(drop_duplicates) == bool
-                                      and drop_duplicates):
+    if (drop_duplicates == 'Yes') or (type(drop_duplicates) == bool and drop_duplicates):
         print('Dropping replicates')
         duplicates = [x for x in whole_inputs[whole_inputs.duplicated()].index]
     elif drop_duplicates == 'average':
@@ -379,7 +372,7 @@ def calc_averaged_model(inputs,
     Q2 = Calculate_Q2(
         ground_truth=df_GT,
         predictions=df_pred,
-        train_responses=whole_responses,  ### is it this one?
+        train_responses=whole_responses,  # is it this one?
         word='test',
         key=key,
         verbose=True)
@@ -406,7 +399,7 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors='std', normalise=False):
         # this is an approximation assuming a gaussian distribution in your coeffs
         error_bars = 2 * stds
     else:
-        printf(f'Error: errors setting {errors} not known, chose std or p95')
+        print(f'Error: errors setting {errors} not known, chose std or p95')
 
     return ave_coeffs, error_bars
 
@@ -467,12 +460,12 @@ def calulate_R2_and_Q2_for_models(inputs,
         print(f"Input terms are {input_column_list}")
         print(f"Input Responses are {response_column_list}\n")
     # make a linear regression model
-    if response_selector == None:
+    if response_selector is None:
         # do all columns
         res_col_num_list = [x for x in range(len(responses.columns))]
     else:
         res_col_num_list = range(len(response_selector))
-    if input_selector == None:
+    if input_selector is None:
         #saturated model - do all columns
         input_selector = [x for x in inp_col_num_list]
     for res_col_num in response_selector:
@@ -540,9 +533,9 @@ def tune_model(inputs,
     """Wrapper to calulate_R2_and_Q2_for_models to make life easy
        It does both scaled and unscaled models
        assumes you want an unscaled model for ease of plotting
-       and a scaled model coefficients for ease of choosing"""#
+       and a scaled model coefficients for ease of choosing"""
 
-    ## scaled model, use this for picking your coefficients
+    # scaled model, use this for picking your coefficients
     this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
         inputs,
         responses,
@@ -553,7 +546,7 @@ def tune_model(inputs,
         do_scaling_here=True)
     scaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
 
-    ## unscaled model, use this for picking your coefficients
+    # unscaled model, use this for picking your coefficients
     #this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
     #                    inputs,
     #                    responses[['Profit']],
@@ -658,7 +651,7 @@ def autotune_model(inputs,
                         except:
                             if do_hierarchical:
                                 print(
-                                    f"Error: Heirarchical model missing lower level terms!!!!"
+                                    "Error: Heirarchical model missing lower level terms!!!!"
                                 )
         print(dependency_dict)
         # Handy shortcut - since the empty set is considered false,
@@ -708,7 +701,7 @@ def autotune_model(inputs,
 
         for idx, error_value in insignificant_terms:
             # If it has dependents, and you're doing an heirarchical model skip it
-            if do_hierarchical == True:
+            if do_hierarchical:
                 if dependency_dict[idx]:
                     continue
             print(
@@ -964,9 +957,9 @@ def add_higher_order_terms(inputs,
     inputs: the input/feature/variable array with data
     add_squares=True : whether to add square terms, e.g. x_1^2, x_2^2
     add_interactions=True: whether to add interaction terms, x_1*x_2, etc
-    column_list=[]: to select only a subset of columns, input a column list here 
+    column_list=[]: to select only a subset of columns, input a column list here
     Currently does not go above power of 2
-    
+
     returns saturated array and a list of which inputs created which column"""
 
     sat_inputs = copy.deepcopy(inputs)
@@ -978,7 +971,7 @@ def add_higher_order_terms(inputs,
 
     source_list = [x for x in column_list]
 
-    if add_squares == True:
+    if add_squares:
         if verbose:
             print('Adding square terms:')
         for i in range(len(column_list)):
@@ -989,7 +982,7 @@ def add_higher_order_terms(inputs,
                 print(new_name)
             sat_inputs[new_name] = inputs[input_name] * inputs[input_name]
 
-    if add_interactions == True:
+    if add_interactions:
         if verbose:
             print('Adding interaction terms:')
         for i in range(len(column_list)):
@@ -1011,8 +1004,8 @@ def plot_training(R2_over_opt, Q2_over_opt, n_terms_over_opt):
     n_terms_over_opt
     R2_over_opt: list of R2 over optimisation
     Q2_over_opt: list of Q2 over optimisation
-    n_terms_over_opt: running number of terms 
-                  
+    n_terms_over_opt: running number of terms
+
                   """
     ax = plt.axes()
     x_data = range(len(R2_over_opt))
@@ -1033,7 +1026,7 @@ def plot_training(R2_over_opt, Q2_over_opt, n_terms_over_opt):
 def predict_from_model(model, inputs, input_selector):
     """Reorgs the inputs and does a prediction
     model = the model to use
-    inputs = the saturated inputs 
+    inputs = the saturated inputs
     input_selector = the subset of inputs the model is using
     """
     list_of_terms = [inputs.columns[x] for x in input_selector]
