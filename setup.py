@@ -7,7 +7,7 @@ setup(
     url='https://github.com/ellagale/doenut',
     author='Ella Gale',
     author_email='ella.gale@bristol.ac.uk',
-    license='GPL3',
+    license='MIT',
     packages=['doenut'],
     install_requires=[
         'numpy',
@@ -20,7 +20,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Programming Language :: Python :: 3',
         'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'License :: OSI Approved :: MIT License',
         'Topic :: Scientific/Engineering'
     ],
 )
