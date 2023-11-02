@@ -8,4 +8,5 @@ __version__ = "0.1.0"
 __author__ = "Ella Gale"
 
 from . import doenut
+from . import designer
 from .doenut import *

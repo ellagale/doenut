@@ -14,6 +14,7 @@ setup(
         'pandas',
         'matplotlib',
         'scikit-learn',
+        'doepy',
     ],
     classifiers=[
         'Intended Audience :: Science/Research',
