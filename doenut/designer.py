@@ -6,9 +6,8 @@
 
 # !!! TO-DO !!!
 #
-# make this into a nice proper class  
+# make this into a nice proper class
 
-import pandas as pd
 import numpy as np
 import copy
 
@@ -16,15 +15,11 @@ import copy
 from doepy.build import full_fact
 from doepy.build import frac_fact_res
 
-import copy
 
-####### this should be a base class with hte actual experiment overwritten in the sub-class
-def experiment_designer(levels, 
-                        res,
-                        do_midpoints=True,
-                        shuffle=True,
-                        repeats=1,
-                        num_midpoints=3):
+# TODO:: this should be a base class with hte actual experiment overwritten in the sub-class
+def experiment_designer(
+    levels, res, do_midpoints=True, shuffle=True, repeats=1, num_midpoints=3
+):
     """
     levels is a dictionary of factor name and levels
     res is the resolution (for frac fact) - shouldn't be in class
@@ -48,24 +43,19 @@ def experiment_designer(levels,
                 midpoints[factor] = np.median(levels[factor])
             else:
                 midpoints[factor] = np.mean(levels[factor])
-        #midpoints = pd.DataFrame(midpoints, index=str(len(design)+1))
+        # midpoints = pd.DataFrame(midpoints, index=str(len(design)+1))
         for i in range(num_midpoints):
             design = design.append(midpoints, ignore_index=True)
-        
-        if shuffle == True:
+
+        if shuffle:
             design = design.sample(frac=1)
-                
+
     return design
 
 
-
-def frac_fact_res_designer(levels,
-                         res,
-                        do_midpoints=True,
-                        shuffle=True,
-                        repeats=1,
-                        num_midpoints=3):
-
+def frac_fact_res_designer(
+    levels, res, do_midpoints=True, shuffle=True, repeats=1, num_midpoints=3
+):
     levels_in = copy.deepcopy(levels)
     design = frac_fact_res(levels_in, res=res)
     factor_names = [x for x in levels.keys()]
@@ -76,21 +66,17 @@ def frac_fact_res_designer(levels,
                 midpoints[factor] = np.median(levels[factor])
             else:
                 midpoints[factor] = np.mean(levels[factor])
-        #midpoints = pd.DataFrame(midpoints, index=str(len(design)+1))
+        # midpoints = pd.DataFrame(midpoints, index=str(len(design)+1))
         for i in range(num_midpoints):
             design = design.append(midpoints, ignore_index=True)
 
-        if shuffle == True:
+        if shuffle:
             design = design.sample(frac=1)
 
     return design
 
 
-def fact_designer(levels,
-                           do_midpoints=True,
-                           shuffle=True,
-                           repeats=1,
-                           num_midpoints=3):
+def fact_designer(levels, do_midpoints=True, shuffle=True, repeats=1, num_midpoints=3):
     levels_in = copy.deepcopy(levels)
     design = full_fact(levels_in)
     factor_names = [x for x in levels.keys()]
@@ -105,7 +91,7 @@ def fact_designer(levels,
         for i in range(num_midpoints):
             design = design.append(midpoints, ignore_index=True)
 
-        if shuffle == True:
+        if shuffle:
             design = design.sample(frac=1)
 
     return design
