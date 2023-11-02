@@ -1,5 +1,8 @@
 <img align="right" src="images/doenut_small.jpg">
 
+_warning: this repository is currently in a state of flux as it is prepared for use as a proper module.
+Expect things to move around without warning for the immediate future!_
+
 # Design of Experiments Numerical Utility Toolkit DoENUT 
 
 
