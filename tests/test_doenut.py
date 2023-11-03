@@ -47,7 +47,7 @@ def test_add_higher_order_terms():
     pytest.sat_inputs_orig = sat_inputs_orig
 
 
-def test_tune_model():
+def test_tune_model_fully_quad():
     input_selector = [0, 1, 2, 3,
                       4, 5, 6, 7]
     scaled_model, R2, temp_tuple, _ = doenut.tune_model(
@@ -59,3 +59,17 @@ def test_tune_model():
     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
     assert round(R2, 3) == 0.815
     assert round(Q2, 3) == -0.176
+
+
+def test_tune_model_parsimonious():
+    input_selector = [0, 1, 2,
+                      4, 5, 6]
+    scaled_model, R2, temp_tuple, _ = doenut.tune_model(
+        pytest.sat_inputs_orig,
+        responses,
+        input_selector=input_selector,
+        response_selector=[0]
+    )
+    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+    assert round(R2, 3) == 0.813
+    assert round(Q2, 3) == 0.332
