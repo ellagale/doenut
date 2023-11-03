@@ -1,7 +1,6 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 import doenut
+import pytest
 
 df = pd.read_csv('solar_cells_1.csv')
 inputs = pd.DataFrame({
@@ -12,9 +11,17 @@ inputs = pd.DataFrame({
 
 responses = pd.DataFrame({'PCE': [float(x) for x in df['PCE'][1:-1]]})
 
-input_selector = range(len(inputs.columns))
+
+def pytest_namespace():
+    """
+    Helper function to store calculated values that are passed from one test
+    to another for consecutive steps.
+    """
+    return {'sat_inputs_orig': None}
+
 
 def test_calulate_r2_and_q2_for_models():
+    input_selector = range(len(inputs.columns))
     this_model, R2, temp_tuple, _ = doenut.calulate_R2_and_Q2_for_models(
         inputs,
         responses,
@@ -22,8 +29,33 @@ def test_calulate_r2_and_q2_for_models():
         response_selector=[0],
         use_scaled_inputs=True,
         do_scaling_here=True
-        )
+    )
 
-    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2= temp_tuple
+    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
     assert round(R2, 3) == 0.604
     assert round(Q2, 3) == 0.170
+
+
+def test_add_higher_order_terms():
+    sat_inputs_orig, sat_source_list = doenut.add_higher_order_terms(
+        inputs,
+        add_squares=True,
+        add_interactions=True,
+        column_list=[])
+    assert sat_inputs_orig.size == 210
+    assert len(sat_source_list) == 14
+    pytest.sat_inputs_orig = sat_inputs_orig
+
+
+def test_tune_model():
+    input_selector = [0, 1, 2, 3,
+                      4, 5, 6, 7]
+    scaled_model, R2, temp_tuple, _ = doenut.tune_model(
+        pytest.sat_inputs_orig,
+        responses,
+        input_selector=input_selector,
+        response_selector=[0]
+    )
+    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+    assert round(R2, 3) == 0.815
+    assert round(Q2, 3) == -0.176
