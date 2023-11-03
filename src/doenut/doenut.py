@@ -167,15 +167,15 @@ def Calculate_Q2(
     train_mean = np.mean(train_responses[[key]], axis=0)
     test_mean = np.mean(ground_truth[[key]], axis=0)
     if verbose:
-        print(f"Mean of {word} set: {test_mean[0]}")
-        print(f"Mean being used: {train_mean[0]}")
+        print(f"Mean of {word} set: {test_mean.iloc[0]}")
+        print(f"Mean being used: {train_mean.iloc[0]}")
     errors["squared"] = errors[key] * errors[key]
     sum_squares_residuals = sum(errors["squared"])
     if verbose:
         print(
             f"Sum of squares of the residuals (explained variance) is {sum_squares_residuals}"
         )
-    sum_squares_total = sum((ground_truth[key] - train_mean[0]) ** 2)
+    sum_squares_total = sum((ground_truth[key] - train_mean.iloc[0]) ** 2)
     # stuff from Modde
     # errors/1
 
@@ -234,9 +234,9 @@ def average_replicates(inputs, responses, verbose=False):
     non_duplicate_list = [x for x in whole_inputs.index if x not in duplicates]
     for non_duplicate in non_duplicate_list:
         this_duplicate_list = []
-        non_duplicate_row = np.array(whole_inputs.loc[[non_duplicate]])
+        non_duplicate_row = whole_inputs.loc[[non_duplicate]].to_numpy()
         for duplicate in duplicates:
-            duplicate_row = np.array(whole_inputs.loc[[duplicate]])
+            duplicate_row = whole_inputs.loc[[duplicate]].to_numpy()
             if (non_duplicate_row == duplicate_row).all():
                 this_duplicate_list.append(duplicate)
                 if verbose:
@@ -258,9 +258,12 @@ def average_replicates(inputs, responses, verbose=False):
         meaned = to_average.mean(axis=0)
         meaned_responses = to_average_responses.mean(axis=0)
         try:
-            averaged_inputs = pd.concat([averaged_inputs, pd.DataFrame(meaned).transpose()])
-            averaged_responses = pd.concat([averaged_responses,
-                pd.DataFrame(meaned_responses).transpose()])
+            averaged_inputs = pd.concat(
+                [averaged_inputs, pd.DataFrame(meaned).transpose()]
+            )
+            averaged_responses = pd.concat(
+                [averaged_responses, pd.DataFrame(meaned_responses).transpose()]
+            )
         except TypeError:
             averaged_inputs = pd.DataFrame(meaned).transpose()
             averaged_responses = pd.DataFrame(meaned_responses).transpose()
@@ -336,10 +339,11 @@ def calc_averaged_model(
     for idx, i in enumerate([x for x in inputs.index]):
         # print(i)
         # pick a row of the dataset and make that the test set
-        test_input = np.array(inputs.iloc[idx]).reshape(1, -1)
+        test_input = inputs.iloc[idx].to_numpy().reshape(1, -1)
+        # test_input = pd.DataFrame(inputs.iloc[idx])
         test_response = responses.iloc[idx]
         # drop that row from the training data
-        train_inputs = inputs.drop(i)
+        train_inputs = inputs.drop(i).to_numpy()
         train_responses = responses.drop(i)
         # here we instantiate the model
         model, _, _, _ = train_model(
@@ -368,8 +372,8 @@ def calc_averaged_model(
         predictions.append(prediction)
         ground_truth.append(test_response)
         errors.append(error)
-        predictions_out = np.array(predictions)
-        test_responses = np.array(ground_truth)
+        # predictions_out = np.array(predictions)
+        # test_responses = np.array(ground_truth)
         egg = np.array(coeffs)
         R2s.append(R2)
     # these coefficients is what defines the final model
@@ -380,7 +384,7 @@ def calc_averaged_model(
     average_intercept = np.mean(intercepts, axis=0)
     model.intercept_ = average_intercept
     # and score the model, this is for all responses together
-    R2 = model.score(whole_inputs, whole_responses)
+    R2 = model.score(whole_inputs.to_numpy(), whole_responses.to_numpy())
     print("R2 overall is {:.3}".format(R2))
     df_pred = pd.DataFrame.from_records(predictions, columns=responses.columns)
     df_GT = pd.DataFrame.from_records(ground_truth, columns=responses.columns)
@@ -407,8 +411,7 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     stds = np.std(coeffs, axis=0)[0]
     if normalise:
         ave_coeffs = ave_coeffs / stds
-        stds = stds / stds
-        # stds = np.std(coeffs, axis=0)[0]
+        stds = stds / stds  # stds = np.std(coeffs, axis=0)[0]
     if errors == "std":
         error_bars = stds
     elif errors == "p95":
@@ -529,10 +532,7 @@ def calulate_R2_and_Q2_for_models(
         if do_plot:
             coeff_plot(
                 coeffs, labels=selected_input_terms, errors="p95", normalise=True
-            )
-        # print(averaged_coeffs)
-        # scaled_coeffs = orthogonal_scaling(coefficient_list)
-        # plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
+            )  # print(averaged_coeffs)  # scaled_coeffs = orthogonal_scaling(coefficient_list)  # plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
 
     return new_model, R2, temp_tuple, selected_input_terms
 
@@ -579,7 +579,7 @@ def tune_model(
     #                    do_plot=False,
     #                    verbose=False)
     # unscaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2= temp_tuple
-    unscaled_model = []
+    # unscaled_model = []
 
     return scaled_model, R2, temp_tuple, selected_input_terms
 
@@ -687,7 +687,7 @@ def autotune_model(
         # we can just test dependency_dict[some_term] to see if there are still dependents.
 
         # cell 3
-        enforce_hierarchical_model = do_hierarchical
+        # enforce_hierarchical_model = do_hierarchical
         # whether to enforce hierarchy over terms (i.e. a lower order term must be present for a higher order one)
 
         ave_coeffs, error_bars = calc_ave_coeffs_and_errors(
@@ -708,8 +708,7 @@ def autotune_model(
                     print(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
                 insignificant_terms.append(
                     (selected_input_indices[i], abs(ave_coeffs[i]))
-                )
-                # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
+                )  # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
 
         # for removing smallest significant terms
         if insignificant_terms == [] and remove_significant:
@@ -718,8 +717,7 @@ def autotune_model(
                 print(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
                 insignificant_terms.append(
                     (selected_input_indices[i], abs(ave_coeffs[i]))
-                )
-                # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
+                )  # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
 
         # Now sort in order of ave_coeff
         insignificant_terms = sorted(insignificant_terms, key=lambda x: x[1])
@@ -765,7 +763,7 @@ def map_chemical_space(
     y_limits,
     constant,
     n_points,
-    my_function,
+    hook_function,
 ):
     min_x = x_limits[0]
     max_x = x_limits[1]
@@ -774,25 +772,20 @@ def map_chemical_space(
 
     x = np.linspace(min_x, max_x, n_points)
     y = np.linspace(min_y, max_y, n_points)
-    c = np.linspace(constant, constant, n_points)
+    # c = np.linspace(constant, constant, n_points)
 
-    def fn(x, y, c, unscaled_model, my_function):
-        df_1 = pd.DataFrame()
-        df_1[x_key] = x.reshape(-1)
-        df_1[y_key] = y.reshape(-1)
-        df_1[c_key] = c
-        # here we add the extra terms
-        df_1 = my_function(df_1)
-        # print(df_1)
-        z = unscaled_model.predict(df_1)
-        return z
+    mesh_x, mesh_y = np.meshgrid(x, y)
 
-    X, Y = np.meshgrid(x, y)
-    Z = fn(X, Y, constant, unscaled_model, my_function)
-    # print(Z.shape)
-    # print(Z)
-    Z = Z.reshape(n_points, n_points)
-    return X, Y, Z
+    z_df = pd.DataFrame()
+    z_df[x_key] = mesh_x.reshape(-1)
+    z_df[y_key] = mesh_y.reshape(-1)
+    z_df[c_key] = constant
+    # add any extra terms
+    z_df = hook_function(z_df)
+
+    mesh_z = unscaled_model.predict(z_df).reshape(n_points, n_points)
+
+    return mesh_x, mesh_y, mesh_z
 
 
 def map_chemical_space_new(
@@ -808,7 +801,7 @@ def map_chemical_space_new(
     model,
     inputs,
     input_selector,
-    source_list=None
+    source_list=None,
 ):
     if source_list is None:
         source_list = []
@@ -819,34 +812,27 @@ def map_chemical_space_new(
 
     x = np.linspace(min_x, max_x, n_points)
     y = np.linspace(min_y, max_y, n_points)
-    c = np.linspace(constant, constant, n_points)
+    # c = np.linspace(constant, constant, n_points)
 
-    def fn(x, y, c, unscaled_model, hook_function):
-        df_1 = pd.DataFrame()
-        df_1[x_key] = x.reshape(-1)
-        df_1[y_key] = y.reshape(-1)
-        df_1[c_key] = c
-        # here we add the extra terms
-        df_1 = my_function(df_1)
-        sat_inputs = add_higher_order_terms(
-            df_1,
-            add_squares=True,
-            add_interactions=True,
-            column_list=source_list,
-            verbose=True,
-        )
+    mesh_x, mesh_y = np.meshgrid(x, y)
+    z_df = pd.DataFrame()
+    z_df[x_key] = mesh_x.reshape(-1)
+    z_df[y_key] = mesh_y.reshape(-1)
+    z_df[c_key] = constant
+    z_df = hook_function(z_df)
 
-        predict_from_model(model, inputs, input_selector)
-        # print(df_1)
-        z = unscaled_model.predict(df_1)
-        return z
+    # sat_inputs = add_higher_order_terms(
+    #         z_df,
+    #         add_squares=True,
+    #         add_interactions=True,
+    #         column_list=source_list,
+    #         verbose=True,
+    #     )
+    # predict_from_model(model, inputs, input_selector)
 
-    X, Y = np.meshgrid(x, y)
-    Z = fn(X, Y, constant, unscaled_model, hook_function)
-    # print(Z.shape)
-    # print(Z)
-    Z = Z.reshape(n_points, n_points)
-    return X, Y, Z
+    mesh_z = unscaled_model.predict(z_df).reshape(n_points, n_points)
+
+    return mesh_x, mesh_y, mesh_z
 
 
 def my_function(df_1):
@@ -985,8 +971,7 @@ def four_D_contour_plot(
         ax2.yaxis.set_visible(False)
         ax3.yaxis.set_visible(False)
 
-        # fig.colorbar()
-        # ax1.clabel(contours, inline=True, fontsize=12)
+        # fig.colorbar()  # ax1.clabel(contours, inline=True, fontsize=12)
 
     fig.subplots_adjust(right=0.9)
     cbar_ax = fig.add_axes([0.95, 0.15, 0.05, 0.7])
