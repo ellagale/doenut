@@ -340,7 +340,6 @@ def calc_averaged_model(
         # print(i)
         # pick a row of the dataset and make that the test set
         test_input = inputs.iloc[idx].to_numpy().reshape(1, -1)
-        # test_input = pd.DataFrame(inputs.iloc[idx])
         test_response = responses.iloc[idx]
         # drop that row from the training data
         train_inputs = inputs.drop(i).to_numpy()
