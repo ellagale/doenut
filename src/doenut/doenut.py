@@ -29,7 +29,7 @@ def scale_1D_data(scaler, data, do_fit=True):
     return data_scaled, scaler
 
 
-def applying_orthogonal_scaling_to_new_data(new_data):
+def applying_orthogonal_scaling_to_new_data(new_data, Mj, Rj):
     # the scaling thingy that Modde uses
     new_data = (new_data - Mj) / Rj
     return new_data
@@ -471,8 +471,8 @@ def calulate_R2_and_Q2_for_models(
     # if use_scaled_inputs:
     #    inputs = orthogonal_scaling(inputs)
     # finds out which columns we're going to use
-    input_column_list = [x for x in inputs.columns]
-    response_column_list = [x for x in responses.columns]
+    input_column_list = list(inputs.columns)
+    response_column_list = list(responses.columns)
     if verbose:
         print(f"Input terms are {input_column_list}")
         print(f"Input Responses are {response_column_list}\n")
@@ -484,7 +484,7 @@ def calulate_R2_and_Q2_for_models(
         res_col_num_list = range(len(response_selector))
     if input_selector is None:
         # saturated model - do all columns
-        input_selector = [x for x in inp_col_num_list]
+        input_selector = range(len(input_column_list))
     for res_col_num in response_selector:
         # loops over responses, to get R2 for all responses at once
         # don't use this function
@@ -804,9 +804,14 @@ def map_chemical_space_new(
     y_limits,
     constant,
     n_points,
-    my_function,
-    source_list=[],
+    hook_function,
+    model,
+    inputs,
+    input_selector,
+    source_list=None
 ):
+    if source_list is None:
+        source_list = []
     min_x = x_limits[0]
     max_x = x_limits[1]
     min_y = y_limits[0]
@@ -816,7 +821,7 @@ def map_chemical_space_new(
     y = np.linspace(min_y, max_y, n_points)
     c = np.linspace(constant, constant, n_points)
 
-    def fn(x, y, c, unscaled_model, my_function):
+    def fn(x, y, c, unscaled_model, hook_function):
         df_1 = pd.DataFrame()
         df_1[x_key] = x.reshape(-1)
         df_1[y_key] = y.reshape(-1)
@@ -837,7 +842,7 @@ def map_chemical_space_new(
         return z
 
     X, Y = np.meshgrid(x, y)
-    Z = fn(X, Y, constant, unscaled_model, my_function)
+    Z = fn(X, Y, constant, unscaled_model, hook_function)
     # print(Z.shape)
     # print(Z)
     Z = Z.reshape(n_points, n_points)
