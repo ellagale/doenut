@@ -16,7 +16,6 @@ def test_full_fact():
 
 
 def test_fract_fact():
-    input_ranges = doenut.designer.get_ranges(inputs)
-    actual = doenut.designer.frac_fact_res(input_ranges, 2)
+    actual = doenut.designer.frac_fact(inputs, 2)
     assert actual is not None
     assert actual.size == 24

@@ -3,6 +3,7 @@
 #              DoENUT Designer
 #
 ############################################################################################################
+import doepy.build
 
 # !!! TO-DO !!!
 #
@@ -11,16 +12,12 @@ import pandas as pd
 import numpy as np
 import copy
 
-# this is where the experiments come from
-from doepy.build import frac_fact_res
 
-
-def get_ranges(data):
+def _check_is_input_dict(data):
     """
-    Go through a dictionary of value lists, and return the same, but with
-    only the min / max value from each in each.
+    Most of these functions require a dictionary of lists as their input data
+    This is a helper function that will throw an appropriate assert if needed.
     """
-    # first check we are being passed something sane
     if not isinstance(data, dict):
         raise TypeError("Input data must be a dictionary")
     for key, value in data.items():
@@ -29,6 +26,16 @@ def get_ranges(data):
         except TypeError as e:
             print(f"Parameter {key} is not iterable")
             raise e
+
+
+def get_ranges(data):
+    """
+    Go through a dictionary of value lists, and return the same, but with
+    only the min / max value from each in each.
+    """
+    # first check we are being passed something sane
+    _check_is_input_dict(data)
+
     result = {}
     for key, value in data.items():
         result[key] = [min(value), max(value)]
@@ -79,6 +86,29 @@ def full_fact(data):
 
     result = pd.DataFrame(columns=list(data.keys()), dtype=object, data=result)
     return result
+
+
+def frac_fact(data, resolution=None):
+    """
+    build a 2-level fractional factorial design
+    :param data dictionary to design from
+    :param resolution what resolution model to build. Default is param_count/2
+    """
+    _check_is_input_dict(data)
+    if resolution is None:
+        resolution = int(len(data.keys()) / 2) + 1
+    if resolution >= len(data.keys()):
+        raise ValueError(
+            "Resolution has to be less than the number of parameters"
+        )
+    if resolution == 1:
+        raise ValueError("Resolution of 1 is meaningless")
+
+    # only want the limits
+    data_ranges = get_ranges(data)
+
+    # TODO:: Now implement the hard bit!
+    return doepy.build.frac_fact_res(data_ranges, resolution)
 
 
 # TODO:: this should be a base class with hte actual experiment overwritten in the sub-class
