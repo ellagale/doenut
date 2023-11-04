@@ -1,7 +1,10 @@
 import pandas as pd
 import doenut
 import pytest
+import os
 
+# since pytest runs from an arbitrary location, fix that.
+os.chdir(os.path.dirname(__file__))
 df = pd.read_csv("solar_cells_1.csv")
 inputs = pd.DataFrame(
     {
