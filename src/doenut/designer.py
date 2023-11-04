@@ -15,6 +15,26 @@ import copy
 from doepy.build import frac_fact_res
 
 
+def get_ranges(data):
+    """
+    Go through a dictionary of value lists, and return the same, but with
+    only the min / max value from each in each.
+    """
+    # first check we are being passed something sane
+    if not isinstance(data, dict):
+        raise TypeError("Input data must be a dictionary")
+    for key, value in data.items():
+        try:
+            _ = iter(value)
+        except TypeError as e:
+            print(f"Parameter {key} is not iterable")
+            raise e
+    result = {}
+    for key, value in data.items():
+        result[key] = [min(value), max(value)]
+    return result
+
+
 def full_fact(data):
     """
     Generate a full factorial model from the supplied parameters
@@ -57,9 +77,7 @@ def full_fact(data):
         left_data = int(left_data * value_count)
         right_data = right_data / value_count
 
-    result = pd.DataFrame(
-        columns=list(data.keys()), dtype=object, data=result
-    )
+    result = pd.DataFrame(columns=list(data.keys()), dtype=object, data=result)
     return result
 
 
