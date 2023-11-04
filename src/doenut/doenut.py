@@ -259,16 +259,16 @@ def average_replicates(inputs, responses, verbose=False):
         meaned_responses = to_average_responses.mean(axis=0)
         try:
             averaged_inputs = pd.concat(
-                [averaged_inputs, pd.DataFrame(meaned).transpose()]
+                [averaged_inputs, pd.DataFrame(meaned).transpose()],
+                ignore_index=True
             )
             averaged_responses = pd.concat(
-                [averaged_responses, pd.DataFrame(meaned_responses).transpose()]
+                [averaged_responses, pd.DataFrame(meaned_responses).transpose()],
+                ignore_index=True
             )
         except TypeError:
             averaged_inputs = pd.DataFrame(meaned).transpose()
             averaged_responses = pd.DataFrame(meaned_responses).transpose()
-    averaged_inputs = averaged_inputs.reset_index(drop=True)
-    averaged_responses = averaged_responses.reset_index(drop=True)
     return averaged_inputs, averaged_responses
 
 
