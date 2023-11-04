@@ -1,11 +1,8 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 import warnings
 
 warnings.filterwarnings("ignore")
 import doenut
-import doenut.designer as designer
 import pytest
 
 df = pd.read_csv("solar_cells_1.csv")
@@ -44,7 +41,7 @@ def pytest_namespace():
     Helper function to store calculated values that are passed from one test
     to another for consecutive steps.
     """
-    return {"sat_inputs_orig": None, "sat_inputs_2": None}
+    return {"sat_inputs_orig": None, "sat_inputs_2": None, "scaled_model": None}
 
 
 def test_calulate_r2_and_q2_for_models():
@@ -131,3 +128,27 @@ def test_saturated_parsnip_terms():
     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
     assert round(R2, 3) == 0.871
     assert round(Q2, 3) == 0.716
+    pytest.scaled_model = scaled_model
+
+
+def test_run_model():
+    runs = pd.DataFrame({'A':{'Donor %': 20, 'Conc.': 12, 'Spin':  500},
+                         'B':{'Donor %': 40, 'Conc.': 16, 'Spin':  1500},
+                         'C':{'Donor %': 35, 'Conc.': 22, 'Spin':  1500},
+                         'D':{'Donor %': 45, 'Conc.': 18, 'Spin':  2500},
+                         'E':{'Donor %': 20, 'Conc.': 17, 'Spin':  2500}}).T
+    sat_inputs, sat_sources = doenut.add_higher_order_terms(
+        runs,
+        add_squares=True,
+        add_interactions=True,
+        column_list=[],
+        verbose=False)
+    input_selector = [0, 1, 2, 3, 4, 5]
+    results, _ = doenut.predict_from_model(
+        pytest.scaled_model,
+        sat_inputs,
+        input_selector)
+    expected_results = [2.11, 6.11, 7.61, 4.65, 3.97]
+    actual_results = [round(x,2) for x in results]
+    assert expected_results == actual_results
+
