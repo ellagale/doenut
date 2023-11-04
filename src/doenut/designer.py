@@ -15,23 +15,23 @@ import copy
 from doepy.build import frac_fact_res
 
 
-def full_fact(**kwargs):
+def full_fact(data):
     """
     Generate a full factorial model from the supplied parameters
-    :param kwargs: keyworded lists of allowed values for each parameter
-    :return: a panda datafram of the all the experiments
+    :param data: dict of lists of allowed values for each parameter
+    :return: a panda dataframe of the all the experiments
     """
     # first validate the inputs are all lists or list like
     # while we are here, work out how bit this is.
     row_count = 1
-    for key, value in kwargs.items():
+    for key, value in data.items():
         try:
             _ = iter(value)
         except TypeError as e:
             print(f"Parameter {key} is not iterable")
             raise e
         row_count = row_count * len(value)
-    result = np.zeros((row_count, len(kwargs.keys())), dtype="O")
+    result = np.zeros((row_count, len(data.keys())), dtype="O")
 
     # Now build up the data column by column
     # how many row 'blocks' there are to the left of the current column
@@ -42,7 +42,7 @@ def full_fact(**kwargs):
     # Note, there are a lot of int() calls below,
     # but these should always be valid as we are dividing ints by other ints
     # that are divisors of it.
-    for column_idx, (column, values) in enumerate(kwargs.items()):
+    for column_idx, (column, values) in enumerate(data.items()):
         value_count = len(values)
         # how many times do we need to write this value in a row?
         rows_per_value = int(right_data / value_count)
@@ -58,7 +58,7 @@ def full_fact(**kwargs):
         right_data = right_data / value_count
 
     result = pd.DataFrame(
-        columns=list(kwargs.keys()), dtype=object, data=result
+        columns=list(data.keys()), dtype=object, data=result
     )
     return result
 
