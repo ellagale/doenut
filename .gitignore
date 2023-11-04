@@ -4,3 +4,5 @@ build/
 *.swp
 dist/
 .ipynb_checkpoints/
+.idea
+.coverage

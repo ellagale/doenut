@@ -29,7 +29,7 @@ def scale_1D_data(scaler, data, do_fit=True):
     return data_scaled, scaler
 
 
-def applying_orthogonal_scaling_to_new_data(new_data):
+def applying_orthogonal_scaling_to_new_data(new_data, Mj, Rj):
     # the scaling thingy that Modde uses
     new_data = (new_data - Mj) / Rj
     return new_data
@@ -65,7 +65,9 @@ def replicate_plot(inputs, responses, key):
     plt.xlabel("Experiment No.")
     plt.ylabel("Response")
 
-    x_data = [len(non_replicate_row_list) for x in range(len(replicate_row_list))]
+    x_data = [
+        len(non_replicate_row_list) for x in range(len(replicate_row_list))
+    ]
     y_data = [col.loc[x] for x in replicate_row_list]
     plt.plot(x_data, y_data, "or")
     return
@@ -79,22 +81,18 @@ def train_model(
     fit_intercept=False,
     verbose=True,
 ):
-    """Simple function to train models
-    inputs: input matrix to the model
-    responses:
-    train_model returns:
-    a model fitted to your data: original_model
-    the inputs given to it: inputs_used
-    the  𝑅2  of that model: original_model_R2
-    a set of predictions that the model gives for your original data: predictions.
-    The inputs to the function doenut.train_model() are:
-
-    the inputs: inputs
-    the outputs: responses['ortho']. By typing either 'ortho', 'para' or 'di' in the square brackets you can select the output you want to model.
-    test_responses: if you have a separate set of test data you can input it here to try your model out on that
-    do_scaling_here: whether to scale the data. You do not need to do this in this work.
-    fit_intercept: whether or not to fit the intercept. In this work you always want to fit the intercept.
-    verbose: this is a common setting in coding, if true it means run in verbose mode and many bits of information are printed to the screen.
+    """A simple function to train a model
+    :param inputs: full set of terms for the model (x_n)
+    :param responses: expected responses for the inputs (ground truth, y)
+    :param test_responses: expected responses for seperate test data (if used)
+    :param do_scaling_here: whether to scale the data
+    :param fit_intercept: whether to fit the intercept
+    :param verbose: whether to perform additional logging.
+    :return: A tuple of:
+        A model fitted to the data,
+        the inputs used
+        the R2 of that model
+        the predictions that model makes for the original inputs
     """
     if do_scaling_here:
         inputs, _, _ = orthogonal_scaling(inputs)
@@ -144,7 +142,8 @@ def Calculate_R2(ground_truth, predictions, key, word="test", verbose=True):
     sum_squares_residuals = sum(errors["squared"])
     if verbose:
         print(
-            f"Sum of squares of the residuals (explained variance) is {sum_squares_residuals}"
+            "Sum of squares of the residuals (explained variance) is"
+            f"{sum_squares_residuals}"
         )
     sum_squares_total = sum((ground_truth[key] - test_mean[0]) ** 2)
     if verbose:
@@ -167,15 +166,16 @@ def Calculate_Q2(
     train_mean = np.mean(train_responses[[key]], axis=0)
     test_mean = np.mean(ground_truth[[key]], axis=0)
     if verbose:
-        print(f"Mean of {word} set: {test_mean[0]}")
-        print(f"Mean being used: {train_mean[0]}")
+        print(f"Mean of {word} set: {test_mean.iloc[0]}")
+        print(f"Mean being used: {train_mean.iloc[0]}")
     errors["squared"] = errors[key] * errors[key]
     sum_squares_residuals = sum(errors["squared"])
     if verbose:
         print(
-            f"Sum of squares of the residuals (explained variance) is {sum_squares_residuals}"
+            "Sum of squares of the residuals (explained variance) is"
+            f"{sum_squares_residuals}"
         )
-    sum_squares_total = sum((ground_truth[key] - train_mean[0]) ** 2)
+    sum_squares_total = sum((ground_truth[key] - train_mean.iloc[0]) ** 2)
     # stuff from Modde
     # errors/1
 
@@ -234,13 +234,15 @@ def average_replicates(inputs, responses, verbose=False):
     non_duplicate_list = [x for x in whole_inputs.index if x not in duplicates]
     for non_duplicate in non_duplicate_list:
         this_duplicate_list = []
-        non_duplicate_row = np.array(whole_inputs.loc[[non_duplicate]])
+        non_duplicate_row = whole_inputs.loc[[non_duplicate]].to_numpy()
         for duplicate in duplicates:
-            duplicate_row = np.array(whole_inputs.loc[[duplicate]])
+            duplicate_row = whole_inputs.loc[[duplicate]].to_numpy()
             if (non_duplicate_row == duplicate_row).all():
                 this_duplicate_list.append(duplicate)
                 if verbose:
-                    print(f"found duplicate pairs: {non_duplicate}, {duplicate}")
+                    print(
+                        f"found duplicate pairs: {non_duplicate}, {duplicate}"
+                    )
         duplicates_for_averaging[non_duplicate] = this_duplicate_list
 
     averaged_responses = []
@@ -258,11 +260,16 @@ def average_replicates(inputs, responses, verbose=False):
         meaned = to_average.mean(axis=0)
         meaned_responses = to_average_responses.mean(axis=0)
         try:
-            averaged_inputs = averaged_inputs.append(
-                pd.DataFrame(meaned).transpose(), ignore_index=True
+            averaged_inputs = pd.concat(
+                [averaged_inputs, pd.DataFrame(meaned).transpose()],
+                ignore_index=True,
             )
-            averaged_responses = averaged_responses.append(
-                pd.DataFrame(meaned_responses).transpose(), ignore_index=True
+            averaged_responses = pd.concat(
+                [
+                    averaged_responses,
+                    pd.DataFrame(meaned_responses).transpose(),
+                ],
+                ignore_index=True,
             )
         except TypeError:
             averaged_inputs = pd.DataFrame(meaned).transpose()
@@ -279,31 +286,28 @@ def calc_averaged_model(
     do_scaling_here=False,
     use_scaled_inputs=False,
 ):
-    """Uses 'leave one out' method to train and test a series
-    of models
-    inputs: full set of terms for the model (x_n)
-    responses: responses to model (ground truth, y)
-    drop-duplicates: True, we drop the duplicates on the leave one out model, 'average', we average them
-    to avoid inflating the results
-    doenut.calc_averaged_model usage details:
+    """Use 'leave one out' method to train and test a series of models.
 
-    Takes in:
-
-    inputs: the input dataframe
-    responses[['ortho']]: the response data for the ortho-product
-    key='ortho': used to calculate Q2
-    drop_duplicates: removes the replicate experiments
-    others as above
-    Outputs:
-
-    the averaged model (called ortho_model below as it models the ortho-product data)
-    predictions from the model from the inputs
-    the inputs measured (called ground_truth below)
-    coeffs: the coefficients of the models
-    R2S: a list of the  𝑅2  values for each model
-    R2: the  𝑅2  correlation coefficient on the training data for the averaged model (the fitting coefficient)
-    Q2: the  𝑄2  correlation coefficient on the testing data for the averaged model (the predicting coefficient)
+    :param inputs: full set of terms for the model (x_n)
+    :param responses: responses to model (ground truth, y)
+    :param key: Method used to calculate Q2, e.g. 'ortho'
+    :param drop_duplicates: what to do with duplicates:
+        'Yes' or True: drop them
+        'average': average their values
+        otherwise: leave them in
+    :param fit_intercept: whether to fit the intercept
+    :param do_scaling_here: whether to scale the data
+    :param use_scaled_inputs:
+    :return: A tuple of the following:
+        The ortho (averaged) model.
+        Predictions from the model for the inputs.
+        The inputs measured (the ground truth).
+        The coefficients of the models.
+        A list of the R2 values for the models.
+        The R2 correlation coefficient for the ortho model.
+        The Q2 correlation coefficient for the ortho model.
     """
+
     # first we copy the data sideways
     if use_scaled_inputs:
         inputs, _, _ = orthogonal_scaling(inputs)
@@ -337,10 +341,10 @@ def calc_averaged_model(
     for idx, i in enumerate([x for x in inputs.index]):
         # print(i)
         # pick a row of the dataset and make that the test set
-        test_input = np.array(inputs.iloc[idx]).reshape(1, -1)
+        test_input = inputs.iloc[idx].to_numpy().reshape(1, -1)
         test_response = responses.iloc[idx]
         # drop that row from the training data
-        train_inputs = inputs.drop(i)
+        train_inputs = inputs.drop(i).to_numpy()
         train_responses = responses.drop(i)
         # here we instantiate the model
         model, _, _, _ = train_model(
@@ -369,8 +373,8 @@ def calc_averaged_model(
         predictions.append(prediction)
         ground_truth.append(test_response)
         errors.append(error)
-        predictions_out = np.array(predictions)
-        test_responses = np.array(ground_truth)
+        # predictions_out = np.array(predictions)
+        # test_responses = np.array(ground_truth)
         egg = np.array(coeffs)
         R2s.append(R2)
     # these coefficients is what defines the final model
@@ -381,7 +385,7 @@ def calc_averaged_model(
     average_intercept = np.mean(intercepts, axis=0)
     model.intercept_ = average_intercept
     # and score the model, this is for all responses together
-    R2 = model.score(whole_inputs, whole_responses)
+    R2 = model.score(whole_inputs.to_numpy(), whole_responses.to_numpy())
     print("R2 overall is {:.3}".format(R2))
     df_pred = pd.DataFrame.from_records(predictions, columns=responses.columns)
     df_GT = pd.DataFrame.from_records(ground_truth, columns=responses.columns)
@@ -408,8 +412,7 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     stds = np.std(coeffs, axis=0)[0]
     if normalise:
         ave_coeffs = ave_coeffs / stds
-        stds = stds / stds
-        # stds = np.std(coeffs, axis=0)[0]
+        stds = stds / stds  # stds = np.std(coeffs, axis=0)[0]
     if errors == "std":
         error_bars = stds
     elif errors == "p95":
@@ -472,8 +475,8 @@ def calulate_R2_and_Q2_for_models(
     # if use_scaled_inputs:
     #    inputs = orthogonal_scaling(inputs)
     # finds out which columns we're going to use
-    input_column_list = [x for x in inputs.columns]
-    response_column_list = [x for x in responses.columns]
+    input_column_list = list(inputs.columns)
+    response_column_list = list(responses.columns)
     if verbose:
         print(f"Input terms are {input_column_list}")
         print(f"Input Responses are {response_column_list}\n")
@@ -485,7 +488,7 @@ def calulate_R2_and_Q2_for_models(
         res_col_num_list = range(len(response_selector))
     if input_selector is None:
         # saturated model - do all columns
-        input_selector = [x for x in inp_col_num_list]
+        input_selector = range(len(input_column_list))
     for res_col_num in response_selector:
         # loops over responses, to get R2 for all responses at once
         # don't use this function
@@ -529,11 +532,14 @@ def calulate_R2_and_Q2_for_models(
             plt.clf()
         if do_plot:
             coeff_plot(
-                coeffs, labels=selected_input_terms, errors="p95", normalise=True
+                coeffs,
+                labels=selected_input_terms,
+                errors="p95",
+                normalise=True,
             )
-        # print(averaged_coeffs)
-        # scaled_coeffs = orthogonal_scaling(coefficient_list)
-        # plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
+            # print(averaged_coeffs)
+            # scaled_coeffs = orthogonal_scaling(coefficient_list)
+            # plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
 
     return new_model, R2, temp_tuple, selected_input_terms
 
@@ -557,7 +563,12 @@ def tune_model(
     and a scaled model coefficients for ease of choosing"""
 
     # scaled model, use this for picking your coefficients
-    this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
+    (
+        this_model,
+        R2,
+        temp_tuple,
+        selected_input_terms,
+    ) = calulate_R2_and_Q2_for_models(
         inputs,
         responses,
         input_selector=input_selector,
@@ -580,7 +591,7 @@ def tune_model(
     #                    do_plot=False,
     #                    verbose=False)
     # unscaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2= temp_tuple
-    unscaled_model = []
+    # unscaled_model = []
 
     return scaled_model, R2, temp_tuple, selected_input_terms
 
@@ -660,8 +671,10 @@ def autotune_model(
         # print("Cell 2:")
         print(f"Selected terms {selected_input_terms}")
         print(f"Source List: {source_list}")
-        # build a dictionary mapping from input term to the set of derived term's indices.
-        # Note that we are only caring about indices still in selected_input_indices (I.e. ones we have not thrown out!)
+        # build a dictionary mapping from input term to the
+        # set of derived term's indices.
+        # Note that we are only caring about indices still in
+        # selected_input_indices (I.e. ones we have not thrown out!)
         dependency_dict = {}
         for i in selected_input_indices:
             dependency_dict[i] = set()
@@ -678,21 +691,26 @@ def autotune_model(
                     if i in selected_input_indices:
                         try:
                             dependency_dict[x].add(i)
-                        except:
+                        except: #TODO:: fix blank except. I _think_ KeyError
                             if do_hierarchical:
                                 print(
                                     "Error: Heirarchical model missing lower level terms!!!!"
                                 )
         print(dependency_dict)
         # Handy shortcut - since the empty set is considered false,
-        # we can just test dependency_dict[some_term] to see if there are still dependents.
+        # we can just test dependency_dict[some_term] to see if there
+        # are still dependents.
 
         # cell 3
-        enforce_hierarchical_model = do_hierarchical
-        # whether to enforce hierarchy over terms (i.e. a lower order term must be present for a higher order one)
+        # enforce_hierarchical_model = do_hierarchical
+        # whether to enforce hierarchy over terms (i.e. a lower order term
+        # must be present for a higher order one)
 
         ave_coeffs, error_bars = calc_ave_coeffs_and_errors(
-            coeffs=coeffs, labels=selected_input_terms, errors="p95", normalise=True
+            coeffs=coeffs,
+            labels=selected_input_terms,
+            errors="p95",
+            normalise=True,
         )
         n_terms_over_opt.append(len(ave_coeffs))
 
@@ -709,8 +727,7 @@ def autotune_model(
                     print(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
                 insignificant_terms.append(
                     (selected_input_indices[i], abs(ave_coeffs[i]))
-                )
-                # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
+                )  # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
 
         # for removing smallest significant terms
         if insignificant_terms == [] and remove_significant:
@@ -719,8 +736,7 @@ def autotune_model(
                 print(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
                 insignificant_terms.append(
                     (selected_input_indices[i], abs(ave_coeffs[i]))
-                )
-                # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
+                )  # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
 
         # Now sort in order of ave_coeff
         insignificant_terms = sorted(insignificant_terms, key=lambda x: x[1])
@@ -734,7 +750,9 @@ def autotune_model(
             if do_hierarchical:
                 if dependency_dict[idx]:
                     continue
-            print(f"removing term {input_terms[idx]} ({idx}) with error {error_value}")
+            print(
+                f"removing term {input_terms[idx]} ({idx}) with error {error_value}"
+            )
             output_indices.remove(idx)
             have_removed = True
             break
@@ -766,7 +784,7 @@ def map_chemical_space(
     y_limits,
     constant,
     n_points,
-    my_function,
+    hook_function,
 ):
     min_x = x_limits[0]
     max_x = x_limits[1]
@@ -775,25 +793,20 @@ def map_chemical_space(
 
     x = np.linspace(min_x, max_x, n_points)
     y = np.linspace(min_y, max_y, n_points)
-    c = np.linspace(constant, constant, n_points)
+    # c = np.linspace(constant, constant, n_points)
 
-    def fn(x, y, c, unscaled_model, my_function):
-        df_1 = pd.DataFrame()
-        df_1[x_key] = x.reshape(-1)
-        df_1[y_key] = y.reshape(-1)
-        df_1[c_key] = c
-        # here we add the extra terms
-        df_1 = my_function(df_1)
-        # print(df_1)
-        z = unscaled_model.predict(df_1)
-        return z
+    mesh_x, mesh_y = np.meshgrid(x, y)
 
-    X, Y = np.meshgrid(x, y)
-    Z = fn(X, Y, constant, unscaled_model, my_function)
-    # print(Z.shape)
-    # print(Z)
-    Z = Z.reshape(n_points, n_points)
-    return X, Y, Z
+    z_df = pd.DataFrame()
+    z_df[x_key] = mesh_x.reshape(-1)
+    z_df[y_key] = mesh_y.reshape(-1)
+    z_df[c_key] = constant
+    # add any extra terms
+    z_df = hook_function(z_df)
+
+    mesh_z = unscaled_model.predict(z_df).reshape(n_points, n_points)
+
+    return mesh_x, mesh_y, mesh_z
 
 
 def map_chemical_space_new(
@@ -805,9 +818,14 @@ def map_chemical_space_new(
     y_limits,
     constant,
     n_points,
-    my_function,
-    source_list=[],
+    hook_function,
+    model,
+    inputs,
+    input_selector,
+    source_list=None,
 ):
+    if source_list is None:
+        source_list = []
     min_x = x_limits[0]
     max_x = x_limits[1]
     min_y = y_limits[0]
@@ -815,34 +833,27 @@ def map_chemical_space_new(
 
     x = np.linspace(min_x, max_x, n_points)
     y = np.linspace(min_y, max_y, n_points)
-    c = np.linspace(constant, constant, n_points)
+    # c = np.linspace(constant, constant, n_points)
 
-    def fn(x, y, c, unscaled_model, my_function):
-        df_1 = pd.DataFrame()
-        df_1[x_key] = x.reshape(-1)
-        df_1[y_key] = y.reshape(-1)
-        df_1[c_key] = c
-        # here we add the extra terms
-        df_1 = my_function(df_1)
-        sat_inputs = add_higher_order_terms(
-            df_1,
-            add_squares=True,
-            add_interactions=True,
-            column_list=source_list,
-            verbose=True,
-        )
+    mesh_x, mesh_y = np.meshgrid(x, y)
+    z_df = pd.DataFrame()
+    z_df[x_key] = mesh_x.reshape(-1)
+    z_df[y_key] = mesh_y.reshape(-1)
+    z_df[c_key] = constant
+    z_df = hook_function(z_df)
 
-        predict_from_model(model, inputs, input_selector)
-        # print(df_1)
-        z = unscaled_model.predict(df_1)
-        return z
+    # sat_inputs = add_higher_order_terms(
+    #         z_df,
+    #         add_squares=True,
+    #         add_interactions=True,
+    #         column_list=source_list,
+    #         verbose=True,
+    #     )
+    # predict_from_model(model, inputs, input_selector)
 
-    X, Y = np.meshgrid(x, y)
-    Z = fn(X, Y, constant, unscaled_model, my_function)
-    # print(Z.shape)
-    # print(Z)
-    Z = Z.reshape(n_points, n_points)
-    return X, Y, Z
+    mesh_z = unscaled_model.predict(z_df).reshape(n_points, n_points)
+
+    return mesh_x, mesh_y, mesh_z
 
 
 def my_function(df_1):
@@ -948,20 +959,26 @@ def four_D_contour_plot(
     fig.suptitle(fig_label)
     egg = ax1.contourf(X_1, Y_1, Z_1, num_of_levels, levels=levels, cmap=cmap)
 
-    egg1 = ax1.contour(X_1, Y_1, Z_1, num_of_levels, levels=levels, colors="black")
+    egg1 = ax1.contour(
+        X_1, Y_1, Z_1, num_of_levels, levels=levels, colors="black"
+    )
     if np.max(levels) > 10:
         plt.clabel(egg1, fontsize=16, inline=1, fmt="%1.0f")
     else:
         plt.clabel(egg1, fontsize=16, inline=1, fmt="%1.2f")
     # egg.xlabel('egg')
     ax2.contourf(X_2, Y_2, Z_2, num_of_levels, levels=levels, cmap=cmap)
-    egg2 = ax2.contour(X_2, Y_2, Z_2, num_of_levels, levels=levels, colors="black")
+    egg2 = ax2.contour(
+        X_2, Y_2, Z_2, num_of_levels, levels=levels, colors="black"
+    )
     if np.max(levels) > 10:
         plt.clabel(egg2, fontsize=16, inline=1, fmt="%1.0f")
     else:
         plt.clabel(egg2, fontsize=16, inline=1, fmt="%1.2f")
     ax3.contourf(X_3, Y_3, Z_3, num_of_levels, levels=levels, cmap=cmap)
-    egg3 = ax3.contour(X_3, Y_3, Z_3, num_of_levels, levels=levels, colors="black")
+    egg3 = ax3.contour(
+        X_3, Y_3, Z_3, num_of_levels, levels=levels, colors="black"
+    )
     if np.max(levels) > 10:
         plt.clabel(egg3, fontsize=16, inline=1, fmt="%1.0f")
     else:
@@ -981,8 +998,7 @@ def four_D_contour_plot(
         ax2.yaxis.set_visible(False)
         ax3.yaxis.set_visible(False)
 
-        # fig.colorbar()
-        # ax1.clabel(contours, inline=True, fontsize=12)
+        # fig.colorbar()  # ax1.clabel(contours, inline=True, fontsize=12)
 
     fig.subplots_adjust(right=0.9)
     cbar_ax = fig.add_axes([0.95, 0.15, 0.05, 0.7])
@@ -994,7 +1010,11 @@ def four_D_contour_plot(
 
 
 def add_higher_order_terms(
-    inputs, add_squares=True, add_interactions=True, column_list=[], verbose=True
+    inputs,
+    add_squares=True,
+    add_interactions=True,
+    column_list=[],
+    verbose=True,
 ):
     """Adds in squares and interactions terms
     inputs: the input/feature/variable array with data
@@ -1036,7 +1056,9 @@ def add_higher_order_terms(
                 new_name = input_name_1 + "*" + input_name_2
                 if verbose:
                     print(new_name)
-                sat_inputs[new_name] = inputs[input_name_1] * inputs[input_name_2]
+                sat_inputs[new_name] = (
+                    inputs[input_name_1] * inputs[input_name_2]
+                )
 
     return sat_inputs, source_list
 
