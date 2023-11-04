@@ -65,7 +65,9 @@ def replicate_plot(inputs, responses, key):
     plt.xlabel("Experiment No.")
     plt.ylabel("Response")
 
-    x_data = [len(non_replicate_row_list) for x in range(len(replicate_row_list))]
+    x_data = [
+        len(non_replicate_row_list) for x in range(len(replicate_row_list))
+    ]
     y_data = [col.loc[x] for x in replicate_row_list]
     plt.plot(x_data, y_data, "or")
     return
@@ -79,22 +81,18 @@ def train_model(
     fit_intercept=False,
     verbose=True,
 ):
-    """Simple function to train models
-    inputs: input matrix to the model
-    responses:
-    train_model returns:
-    a model fitted to your data: original_model
-    the inputs given to it: inputs_used
-    the  𝑅2  of that model: original_model_R2
-    a set of predictions that the model gives for your original data: predictions.
-    The inputs to the function doenut.train_model() are:
-
-    the inputs: inputs
-    the outputs: responses['ortho']. By typing either 'ortho', 'para' or 'di' in the square brackets you can select the output you want to model.
-    test_responses: if you have a separate set of test data you can input it here to try your model out on that
-    do_scaling_here: whether to scale the data. You do not need to do this in this work.
-    fit_intercept: whether or not to fit the intercept. In this work you always want to fit the intercept.
-    verbose: this is a common setting in coding, if true it means run in verbose mode and many bits of information are printed to the screen.
+    """A simple function to train a model
+    :param inputs: full set of terms for the model (x_n)
+    :param responses: expected responses for the inputs (ground truth, y)
+    :param test_responses: expected responses for seperate test data (if used)
+    :param do_scaling_here: whether to scale the data
+    :param fit_intercept: whether to fit the intercept
+    :param verbose: whether to perform additional logging.
+    :return: A tuple of:
+        A model fitted to the data,
+        the inputs used
+        the R2 of that model
+        the predictions that model makes for the original inputs
     """
     if do_scaling_here:
         inputs, _, _ = orthogonal_scaling(inputs)
@@ -144,7 +142,8 @@ def Calculate_R2(ground_truth, predictions, key, word="test", verbose=True):
     sum_squares_residuals = sum(errors["squared"])
     if verbose:
         print(
-            f"Sum of squares of the residuals (explained variance) is {sum_squares_residuals}"
+            "Sum of squares of the residuals (explained variance) is"
+            f"{sum_squares_residuals}"
         )
     sum_squares_total = sum((ground_truth[key] - test_mean[0]) ** 2)
     if verbose:
@@ -173,7 +172,8 @@ def Calculate_Q2(
     sum_squares_residuals = sum(errors["squared"])
     if verbose:
         print(
-            f"Sum of squares of the residuals (explained variance) is {sum_squares_residuals}"
+            "Sum of squares of the residuals (explained variance) is"
+            f"{sum_squares_residuals}"
         )
     sum_squares_total = sum((ground_truth[key] - train_mean.iloc[0]) ** 2)
     # stuff from Modde
@@ -240,7 +240,9 @@ def average_replicates(inputs, responses, verbose=False):
             if (non_duplicate_row == duplicate_row).all():
                 this_duplicate_list.append(duplicate)
                 if verbose:
-                    print(f"found duplicate pairs: {non_duplicate}, {duplicate}")
+                    print(
+                        f"found duplicate pairs: {non_duplicate}, {duplicate}"
+                    )
         duplicates_for_averaging[non_duplicate] = this_duplicate_list
 
     averaged_responses = []
@@ -260,11 +262,14 @@ def average_replicates(inputs, responses, verbose=False):
         try:
             averaged_inputs = pd.concat(
                 [averaged_inputs, pd.DataFrame(meaned).transpose()],
-                ignore_index=True
+                ignore_index=True,
             )
             averaged_responses = pd.concat(
-                [averaged_responses, pd.DataFrame(meaned_responses).transpose()],
-                ignore_index=True
+                [
+                    averaged_responses,
+                    pd.DataFrame(meaned_responses).transpose(),
+                ],
+                ignore_index=True,
             )
         except TypeError:
             averaged_inputs = pd.DataFrame(meaned).transpose()
@@ -281,31 +286,28 @@ def calc_averaged_model(
     do_scaling_here=False,
     use_scaled_inputs=False,
 ):
-    """Uses 'leave one out' method to train and test a series
-    of models
-    inputs: full set of terms for the model (x_n)
-    responses: responses to model (ground truth, y)
-    drop-duplicates: True, we drop the duplicates on the leave one out model, 'average', we average them
-    to avoid inflating the results
-    doenut.calc_averaged_model usage details:
+    """Use 'leave one out' method to train and test a series of models.
 
-    Takes in:
-
-    inputs: the input dataframe
-    responses[['ortho']]: the response data for the ortho-product
-    key='ortho': used to calculate Q2
-    drop_duplicates: removes the replicate experiments
-    others as above
-    Outputs:
-
-    the averaged model (called ortho_model below as it models the ortho-product data)
-    predictions from the model from the inputs
-    the inputs measured (called ground_truth below)
-    coeffs: the coefficients of the models
-    R2S: a list of the  𝑅2  values for each model
-    R2: the  𝑅2  correlation coefficient on the training data for the averaged model (the fitting coefficient)
-    Q2: the  𝑄2  correlation coefficient on the testing data for the averaged model (the predicting coefficient)
+    :param inputs: full set of terms for the model (x_n)
+    :param responses: responses to model (ground truth, y)
+    :param key: Method used to calculate Q2, e.g. 'ortho'
+    :param drop_duplicates: what to do with duplicates:
+        'Yes' or True: drop them
+        'average': average their values
+        otherwise: leave them in
+    :param fit_intercept: whether to fit the intercept
+    :param do_scaling_here: whether to scale the data
+    :param use_scaled_inputs:
+    :return: A tuple of the following:
+        The ortho (averaged) model.
+        Predictions from the model for the inputs.
+        The inputs measured (the ground truth).
+        The coefficients of the models.
+        A list of the R2 values for the models.
+        The R2 correlation coefficient for the ortho model.
+        The Q2 correlation coefficient for the ortho model.
     """
+
     # first we copy the data sideways
     if use_scaled_inputs:
         inputs, _, _ = orthogonal_scaling(inputs)
@@ -530,8 +532,14 @@ def calulate_R2_and_Q2_for_models(
             plt.clf()
         if do_plot:
             coeff_plot(
-                coeffs, labels=selected_input_terms, errors="p95", normalise=True
-            )  # print(averaged_coeffs)  # scaled_coeffs = orthogonal_scaling(coefficient_list)  # plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
+                coeffs,
+                labels=selected_input_terms,
+                errors="p95",
+                normalise=True,
+            )
+            # print(averaged_coeffs)
+            # scaled_coeffs = orthogonal_scaling(coefficient_list)
+            # plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
 
     return new_model, R2, temp_tuple, selected_input_terms
 
@@ -555,7 +563,12 @@ def tune_model(
     and a scaled model coefficients for ease of choosing"""
 
     # scaled model, use this for picking your coefficients
-    this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
+    (
+        this_model,
+        R2,
+        temp_tuple,
+        selected_input_terms,
+    ) = calulate_R2_and_Q2_for_models(
         inputs,
         responses,
         input_selector=input_selector,
@@ -658,8 +671,10 @@ def autotune_model(
         # print("Cell 2:")
         print(f"Selected terms {selected_input_terms}")
         print(f"Source List: {source_list}")
-        # build a dictionary mapping from input term to the set of derived term's indices.
-        # Note that we are only caring about indices still in selected_input_indices (I.e. ones we have not thrown out!)
+        # build a dictionary mapping from input term to the
+        # set of derived term's indices.
+        # Note that we are only caring about indices still in
+        # selected_input_indices (I.e. ones we have not thrown out!)
         dependency_dict = {}
         for i in selected_input_indices:
             dependency_dict[i] = set()
@@ -676,21 +691,26 @@ def autotune_model(
                     if i in selected_input_indices:
                         try:
                             dependency_dict[x].add(i)
-                        except:
+                        except: #TODO:: fix blank except. I _think_ KeyError
                             if do_hierarchical:
                                 print(
                                     "Error: Heirarchical model missing lower level terms!!!!"
                                 )
         print(dependency_dict)
         # Handy shortcut - since the empty set is considered false,
-        # we can just test dependency_dict[some_term] to see if there are still dependents.
+        # we can just test dependency_dict[some_term] to see if there
+        # are still dependents.
 
         # cell 3
         # enforce_hierarchical_model = do_hierarchical
-        # whether to enforce hierarchy over terms (i.e. a lower order term must be present for a higher order one)
+        # whether to enforce hierarchy over terms (i.e. a lower order term
+        # must be present for a higher order one)
 
         ave_coeffs, error_bars = calc_ave_coeffs_and_errors(
-            coeffs=coeffs, labels=selected_input_terms, errors="p95", normalise=True
+            coeffs=coeffs,
+            labels=selected_input_terms,
+            errors="p95",
+            normalise=True,
         )
         n_terms_over_opt.append(len(ave_coeffs))
 
@@ -730,7 +750,9 @@ def autotune_model(
             if do_hierarchical:
                 if dependency_dict[idx]:
                     continue
-            print(f"removing term {input_terms[idx]} ({idx}) with error {error_value}")
+            print(
+                f"removing term {input_terms[idx]} ({idx}) with error {error_value}"
+            )
             output_indices.remove(idx)
             have_removed = True
             break
@@ -937,20 +959,26 @@ def four_D_contour_plot(
     fig.suptitle(fig_label)
     egg = ax1.contourf(X_1, Y_1, Z_1, num_of_levels, levels=levels, cmap=cmap)
 
-    egg1 = ax1.contour(X_1, Y_1, Z_1, num_of_levels, levels=levels, colors="black")
+    egg1 = ax1.contour(
+        X_1, Y_1, Z_1, num_of_levels, levels=levels, colors="black"
+    )
     if np.max(levels) > 10:
         plt.clabel(egg1, fontsize=16, inline=1, fmt="%1.0f")
     else:
         plt.clabel(egg1, fontsize=16, inline=1, fmt="%1.2f")
     # egg.xlabel('egg')
     ax2.contourf(X_2, Y_2, Z_2, num_of_levels, levels=levels, cmap=cmap)
-    egg2 = ax2.contour(X_2, Y_2, Z_2, num_of_levels, levels=levels, colors="black")
+    egg2 = ax2.contour(
+        X_2, Y_2, Z_2, num_of_levels, levels=levels, colors="black"
+    )
     if np.max(levels) > 10:
         plt.clabel(egg2, fontsize=16, inline=1, fmt="%1.0f")
     else:
         plt.clabel(egg2, fontsize=16, inline=1, fmt="%1.2f")
     ax3.contourf(X_3, Y_3, Z_3, num_of_levels, levels=levels, cmap=cmap)
-    egg3 = ax3.contour(X_3, Y_3, Z_3, num_of_levels, levels=levels, colors="black")
+    egg3 = ax3.contour(
+        X_3, Y_3, Z_3, num_of_levels, levels=levels, colors="black"
+    )
     if np.max(levels) > 10:
         plt.clabel(egg3, fontsize=16, inline=1, fmt="%1.0f")
     else:
@@ -982,7 +1010,11 @@ def four_D_contour_plot(
 
 
 def add_higher_order_terms(
-    inputs, add_squares=True, add_interactions=True, column_list=[], verbose=True
+    inputs,
+    add_squares=True,
+    add_interactions=True,
+    column_list=[],
+    verbose=True,
 ):
     """Adds in squares and interactions terms
     inputs: the input/feature/variable array with data
@@ -1024,7 +1056,9 @@ def add_higher_order_terms(
                 new_name = input_name_1 + "*" + input_name_2
                 if verbose:
                     print(new_name)
-                sat_inputs[new_name] = inputs[input_name_1] * inputs[input_name_2]
+                sat_inputs[new_name] = (
+                    inputs[input_name_1] * inputs[input_name_2]
+                )
 
     return sat_inputs, source_list
 
