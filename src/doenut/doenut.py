@@ -84,7 +84,7 @@ def train_model(
     """A simple function to train a model
     :param inputs: full set of terms for the model (x_n)
     :param responses: expected responses for the inputs (ground truth, y)
-    :param test_responses: expected responses for seperate test data (if used)
+    :param test_responses: expected responses for separate test data (if used)
     :param do_scaling_here: whether to scale the data
     :param fit_intercept: whether to fit the intercept
     :param verbose: whether to perform additional logging.
@@ -1014,7 +1014,7 @@ def add_higher_order_terms(
     add_squares=True,
     add_interactions=True,
     column_list=[],
-    verbose=True,
+    verbose=False,
 ):
     """Adds in squares and interactions terms
     inputs: the input/feature/variable array with data
