@@ -11,7 +11,7 @@ class Model:
                 self.inputs,
                 self.scaling_Mj,
                 self.scaling_Rj,
-            ) = doenut.orthogonal_scaling(inputs)
+            ) = doenut.orthogonal_scaling(inputs, axis=0)
         else:
             self.inputs = inputs
             self.scaling_Rj = 1

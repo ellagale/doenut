@@ -57,7 +57,7 @@ class AveragedModel(Model):
             train_input = self.inputs.drop(row_idx).to_numpy()
             train_responses = responses.drop(row_idx)
             if self.data_is_scaled:
-                train_input, mj, rj = doenut.orthogonal_scaling(train_input)
+                train_input, mj, rj = doenut.orthogonal_scaling(train_input, 0)
                 test_input = doenut.scale_by(test_input, mj, rj)
             model = Model(train_input, train_responses, False, fit_intercept)
             r2s.append(model.get_r2())

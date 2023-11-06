@@ -13,10 +13,10 @@ import doenut
 from doenut.models.averaged_model import AveragedModel
 
 
-def orthogonal_scaling(inputs):
+def orthogonal_scaling(inputs, axis=0):
     # the scaling thingy that Modde uses
-    inputs_max = np.max(inputs)
-    inputs_min = np.min(inputs)
+    inputs_max = np.max(inputs, axis)
+    inputs_min = np.min(inputs, axis)
     Mj = (inputs_min + inputs_max) / 2
     Rj = (inputs_max - inputs_min) / 2
     scaled_inputs = (inputs - Mj) / Rj
@@ -69,7 +69,7 @@ def train_model(
         the predictions that model makes for the original inputs
     """
     if do_scaling_here:
-        inputs, _, _ = orthogonal_scaling(inputs)
+        inputs, _, _ = orthogonal_scaling(inputs, axis=0)
     if test_responses is None:
         test_responses = responses
     model = LinearRegression(fit_intercept=fit_intercept)
@@ -239,7 +239,7 @@ def calc_averaged_model(
 
     # first we copy the data sideways
     if use_scaled_inputs:
-        inputs, _, _ = orthogonal_scaling(inputs)
+        inputs, _, _ = orthogonal_scaling(inputs, axis=0)
     whole_inputs = inputs
     whole_responses = responses
     if (drop_duplicates == "Yes") or (
