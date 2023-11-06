@@ -283,21 +283,12 @@ def calculate_R2_and_Q2_for_models(
         edited_input_data = inputs.iloc[:, input_selector]
         selected_input_terms = [x for x in edited_input_data.columns]
         print("Selected input terms:\t{}".format(selected_input_terms))
-        # makes a new model
-        # temp_tuple = calc_averaged_model(
-        #     edited_input_data,
-        #     this_model_responses,
-        #     key=response_key,
-        #     drop_duplicates=drop_duplicates,
-        #     fit_intercept=fit_intercept,
-        #     use_scaled_inputs=use_scaled_inputs,
-        #     do_scaling_here=do_scaling_here,
-        # )
 
         model = AveragedModel(
             edited_input_data,
             this_model_responses,
             use_scaled_inputs,
+            do_scaling_here,
             fit_intercept,
             response_key,
             drop_duplicates,

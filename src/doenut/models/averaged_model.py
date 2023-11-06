@@ -15,6 +15,7 @@ class AveragedModel(Model):
         inputs,
         responses,
         scale_data=True,
+        scale_run_data=True,
         fit_intercept=True,
         response_key="ortho",
         drop_duplicates=True,
@@ -24,6 +25,7 @@ class AveragedModel(Model):
         @param inputs: The inputs to create a model from as a numpy array-like
         @param responses: The ground truths for the inputs
         @param scale_data: Whether to normalise the input data
+        @param scale_run_data: Whether to normalise the data for each run
         @param fit_intercept: Whether to fit the intercept to zero
         @param response_key: for multi-column responses, which one to test on
         @param drop_duplicates: whether to drop duplicate values or not.
@@ -77,7 +79,7 @@ class AveragedModel(Model):
             train_responses = responses.drop(row_idx)
             # We need to re-scale each column, using the training data *only*,
             # but then applying the same scaling to the test data.
-            if self.data_is_scaled:
+            if scale_run_data:
                 train_input, mj, rj = doenut.orthogonal_scaling(train_input, 0)
                 test_input = doenut.scale_by(test_input, mj, rj)
             model = Model(train_input, train_responses, False, fit_intercept)
