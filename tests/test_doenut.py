@@ -1,5 +1,6 @@
 import pandas as pd
 import doenut
+import doenut.models
 import pytest
 import os
 
@@ -48,7 +49,7 @@ def pytest_namespace():
     }
 
 
-def test_calulate_r2_and_q2_for_models():
+def test_calculate_r2_and_q2_for_models():
     input_selector = range(len(inputs.columns))
     this_model, R2, temp_tuple, _ = doenut.calculate_R2_and_Q2_for_models(
         inputs,
@@ -62,7 +63,6 @@ def test_calulate_r2_and_q2_for_models():
     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
     assert round(R2, 3) == 0.604
     assert round(Q2, 3) == 0.170
-
 
 def test_add_higher_order_terms():
     sat_inputs_orig, sat_source_list = doenut.add_higher_order_terms(

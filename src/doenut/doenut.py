@@ -10,6 +10,7 @@ import copy
 from sklearn.linear_model import LinearRegression
 
 import doenut
+from doenut.models.averaged_model import AveragedModel
 
 
 def orthogonal_scaling(inputs):
@@ -30,8 +31,9 @@ def scale_1D_data(scaler, data, do_fit=True):
     return data_scaled, scaler
 
 
-def applying_orthogonal_scaling_to_new_data(new_data, Mj, Rj):
+def scale_by(new_data, Mj, Rj):
     # the scaling thingy that Modde uses
+    # TODO:: Any form of sanity checking whatsoever.
     new_data = (new_data - Mj) / Rj
     return new_data
 
@@ -43,7 +45,6 @@ def find_replicates(inputs):
     b = [x for x in inputs[inputs.duplicated(keep="last")].index]
     replicate_row_list = np.unique(np.array(a + b))
     return replicate_row_list
-
 
 
 def train_model(
@@ -303,9 +304,10 @@ def calc_averaged_model(
         errors.append(error)
         # predictions_out = np.array(predictions)
         # test_responses = np.array(ground_truth)
-        egg = np.array(coeffs)
+
         R2s.append(R2)
     # these coefficients is what defines the final model
+    egg = np.array(coeffs)
     averaged_coeffs = np.array(np.mean(egg, axis=0))
     # here we overwrite the final model with the averaged coefficients
     model.coef_ = averaged_coeffs
@@ -408,15 +410,35 @@ def calculate_R2_and_Q2_for_models(
         selected_input_terms = [x for x in edited_input_data.columns]
         print("Selected input terms:\t{}".format(selected_input_terms))
         # makes a new model
-        temp_tuple = calc_averaged_model(
+        # temp_tuple = calc_averaged_model(
+        #     edited_input_data,
+        #     this_model_responses,
+        #     key=response_key,
+        #     drop_duplicates=drop_duplicates,
+        #     fit_intercept=fit_intercept,
+        #     use_scaled_inputs=use_scaled_inputs,
+        #     do_scaling_here=do_scaling_here,
+        # )
+
+        model = AveragedModel(
             edited_input_data,
             this_model_responses,
-            key=response_key,
-            drop_duplicates=drop_duplicates,
-            fit_intercept=fit_intercept,
-            use_scaled_inputs=use_scaled_inputs,
-            do_scaling_here=do_scaling_here,
+            use_scaled_inputs,
+            fit_intercept,
+            response_key,
+            drop_duplicates,
         )
+
+        temp_tuple = (
+            model.model,
+            model.df_pred,
+            model.df_gt,
+            model.coeffs,
+            model.r2s,
+            model.get_r2(),
+            model.q2,
+        )
+
         new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
         # we fit it as this is hte easiest way to set up the new model correctly
         new_model.fit(edited_input_data, this_model_responses)
@@ -596,7 +618,7 @@ def autotune_model(
                     if i in selected_input_indices:
                         try:
                             dependency_dict[x].add(i)
-                        except: #TODO:: fix blank except. I _think_ KeyError
+                        except:  # TODO:: fix blank except. I _think_ KeyError
                             if do_hierarchical:
                                 print(
                                     "Error: Heirarchical model missing lower level terms!!!!"
@@ -813,7 +835,6 @@ def add_higher_order_terms(
                 )
 
     return sat_inputs, source_list
-
 
 
 def predict_from_model(model, inputs, input_selector):
