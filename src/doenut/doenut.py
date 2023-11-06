@@ -352,7 +352,7 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     return ave_coeffs, error_bars
 
 
-def calulate_R2_and_Q2_for_models(
+def calculate_R2_and_Q2_for_models(
     inputs,
     responses,
     input_selector=None,
@@ -462,7 +462,7 @@ def tune_model(
     do_r2=True,
     verbose=True,
 ):
-    """Wrapper to calulate_R2_and_Q2_for_models to make life easy
+    """Wrapper to calculate_R2_and_Q2_for_models to make life easy
     It does both scaled and unscaled models
     assumes you want an unscaled model for ease of plotting
     and a scaled model coefficients for ease of choosing"""
@@ -473,7 +473,7 @@ def tune_model(
         R2,
         temp_tuple,
         selected_input_terms,
-    ) = calulate_R2_and_Q2_for_models(
+    ) = calculate_R2_and_Q2_for_models(
         inputs,
         responses,
         input_selector=input_selector,
@@ -485,7 +485,7 @@ def tune_model(
     scaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
 
     # unscaled model, use this for picking your coefficients
-    # this_model, R2, temp_tuple, selected_input_terms = calulate_R2_and_Q2_for_models(
+    # this_model, R2, temp_tuple, selected_input_terms = calculate_R2_and_Q2_for_models(
     #                    inputs,
     #                    responses[['Profit']],
     #                    input_selector=input_selector,
@@ -556,7 +556,7 @@ def autotune_model(
             R2,
             temp_tuple,
             selected_input_terms,
-        ) = calulate_R2_and_Q2_for_models(
+        ) = calculate_R2_and_Q2_for_models(
             sat_inputs,
             responses,
             input_selector=selected_input_indices,
@@ -759,13 +759,6 @@ def map_chemical_space_new(
     mesh_z = unscaled_model.predict(z_df).reshape(n_points, n_points)
 
     return mesh_x, mesh_y, mesh_z
-
-
-def my_function(df_1):
-    pass
-    return df_1
-
-
 
 
 def add_higher_order_terms(

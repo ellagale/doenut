@@ -50,7 +50,7 @@ def pytest_namespace():
 
 def test_calulate_r2_and_q2_for_models():
     input_selector = range(len(inputs.columns))
-    this_model, R2, temp_tuple, _ = doenut.calulate_R2_and_Q2_for_models(
+    this_model, R2, temp_tuple, _ = doenut.calculate_R2_and_Q2_for_models(
         inputs,
         responses,
         input_selector=input_selector,

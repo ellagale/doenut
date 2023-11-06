@@ -428,7 +428,7 @@ data!]]</figcaption>
 
 trains new model with different numbers of coefficients. Change input selector to remove different factors, for example, `input_selector = [0,1,2,3,5,6]` has removed t he 4th and 7th factors.
 
-    this_model, R2, temp_tuple = doenut.calulate_R2_and_Q2_for_models(
+    this_model, R2, temp_tuple = doenut.calculate_R2_and_Q2_for_models(
         inputs, 
         responses, 
         input_selector=[0,1,2,3,4,5,6,7], 
