@@ -9,4 +9,5 @@ __version__ = version("doenut")
 
 from . import doenut
 from . import designer
+from . import plot
 from .doenut import *
