@@ -5,6 +5,11 @@ from doenut.models.model import Model
 
 
 class AveragedModel(Model):
+    """
+    Model generated as the average of multiple models generated from a single
+    set of inputs via a leave-one-out approach.
+    """
+
     def __init__(
         self,
         inputs,
@@ -14,8 +19,22 @@ class AveragedModel(Model):
         response_key="ortho",
         drop_duplicates=True,
     ):
+        """
+        Constructor
+        @param inputs: The inputs to create a model from as a numpy array-like
+        @param responses: The ground truths for the inputs
+        @param scale_data: Whether to normalise the input data
+        @param fit_intercept: Whether to fit the intercept to zero
+        @param response_key: for multi-column responses, which one to test on
+        @param drop_duplicates: whether to drop duplicate values or not.
+        May also be 'average' which will cause them to be dropped, but the one
+        left will have its response value(s) set to the average of all the
+        duplicates.
+        """
+        # Call super to setup basic model
         super().__init__(inputs, responses, scale_data, fit_intercept)
 
+        # handle checking the duplicates
         self.duplicates = None
         if isinstance(drop_duplicates, str):
             if str.lower(drop_duplicates) == "yes":
@@ -56,11 +75,13 @@ class AveragedModel(Model):
             test_response = self.responses.iloc[i]
             train_input = self.inputs.drop(row_idx).to_numpy()
             train_responses = responses.drop(row_idx)
+            # We need to re-scale each column, using the training data *only*,
+            # but then applying the same scaling to the test data.
             if self.data_is_scaled:
                 train_input, mj, rj = doenut.orthogonal_scaling(train_input, 0)
                 test_input = doenut.scale_by(test_input, mj, rj)
             model = Model(train_input, train_responses, False, fit_intercept)
-            r2s.append(model.get_r2())
+            r2s.append(model.r2)
             coeffs.append(model.model.coef_)
             predictions = model.get_predictions_for(test_input)[0]
             model_predictions.append(predictions)
@@ -71,21 +92,24 @@ class AveragedModel(Model):
         self.coeffs = coeffs
         self.averaged_coeffs = np.mean(np.array(coeffs), axis=0)
         self.averaged_intercepts = np.mean(np.array(intercepts), axis=0)
+        self.r2s = r2s
 
         # replace our initial model with the averaged one.
         self.model.coef_ = self.averaged_coeffs
         self.model.intercept_ = self.averaged_intercepts
-        self.r2s = r2s
+        self.r2 = self.get_r2_for(self.inputs, self.responses)
+        self.predictions = self.get_predictions_for(self.inputs)
 
         # Now calculate q2
-        self.df_pred = pd.DataFrame.from_records(
+        self.q2_predictions = pd.DataFrame.from_records(
             model_predictions, columns=self.responses.columns
         )
-        self.df_gt = pd.DataFrame.from_records(
+        self.q2_groundtruths = pd.DataFrame.from_records(
             model_responses, columns=self.responses.columns
         )
         self.q2 = doenut.Calculate_Q2(
-            self.df_gt, self.df_pred, self.responses, response_key
+            self.q2_groundtruths,
+            self.q2_predictions,
+            self.responses,
+            response_key,
         )
-
-        # return model, df_pred, df_GT, coeffs, R2s, R2, Q2

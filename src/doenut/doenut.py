@@ -206,132 +206,6 @@ def average_replicates(inputs, responses, verbose=False):
     return averaged_inputs, averaged_responses
 
 
-def calc_averaged_model(
-    inputs,
-    responses,
-    key="",
-    drop_duplicates="Yes",
-    fit_intercept=False,
-    do_scaling_here=False,
-    use_scaled_inputs=False,
-):
-    """Use 'leave one out' method to train and test a series of models.
-
-    :param inputs: full set of terms for the model (x_n)
-    :param responses: responses to model (ground truth, y)
-    :param key: Method used to calculate Q2, e.g. 'ortho'
-    :param drop_duplicates: what to do with duplicates:
-        'Yes' or True: drop them
-        'average': average their values
-        otherwise: leave them in
-    :param fit_intercept: whether to fit the intercept
-    :param do_scaling_here: whether to scale the data
-    :param use_scaled_inputs:
-    :return: A tuple of the following:
-        The ortho (averaged) model.
-        Predictions from the model for the inputs.
-        The inputs measured (the ground truth).
-        The coefficients of the models.
-        A list of the R2 values for the models.
-        The R2 correlation coefficient for the ortho model.
-        The Q2 correlation coefficient for the ortho model.
-    """
-
-    # first we copy the data sideways
-    if use_scaled_inputs:
-        inputs, _, _ = orthogonal_scaling(inputs, axis=0)
-    whole_inputs = inputs
-    whole_responses = responses
-    if (drop_duplicates == "Yes") or (
-        type(drop_duplicates) == bool and drop_duplicates
-    ):
-        print("Dropping replicates")
-        duplicates = [x for x in whole_inputs[whole_inputs.duplicated()].index]
-    elif drop_duplicates == "average":
-        # averages the replicates
-        print("Averaging replicates")
-        whole_inputs, whole_responses = average_replicates(inputs, responses)
-        duplicates = []
-    else:
-        print("Have found no replicates")
-        duplicates = []
-    # we drop the duplicates
-    inputs = whole_inputs.drop(duplicates)
-    responses = whole_responses.drop(duplicates)
-
-    predictions = []
-    ground_truth = []
-    errors = []
-    coeffs = []
-    intercepts = []
-    R2s = []
-    print(f"Input data is {len(whole_inputs)} points long")
-    print(f"We are using {len(inputs)} data points")
-    for idx, i in enumerate([x for x in inputs.index]):
-        # print(i)
-        # pick a row of the dataset and make that the test set
-        test_input = inputs.iloc[idx].to_numpy().reshape(1, -1)
-        test_response = responses.iloc[idx]
-        # drop that row from the training data
-        train_inputs = inputs.drop(i).to_numpy()
-        train_responses = responses.drop(i)
-        # here we instantiate the model
-        model, _, _, _ = train_model(
-            train_inputs,
-            train_responses,
-            test_responses=None,
-            fit_intercept=fit_intercept,
-            do_scaling_here=do_scaling_here,
-            verbose=False,
-        )
-        R2 = model.score(train_inputs, train_responses)
-        # we save the coordinates
-        coeffs.append(model.coef_)
-        intercepts.append(model.intercept_)
-        # use the model to predict on the test set and get errors
-        prediction = model.predict(test_input)
-        prediction = prediction[0]
-        error = test_response - prediction
-        # error = error[0][0]
-        print(
-            "Left out data point {}:\tR2 = {:.3}\tAve. Error = {:.3}".format(
-                i, R2, np.mean(error)
-            )
-        )
-        # this saves the data for this model
-        predictions.append(prediction)
-        ground_truth.append(test_response)
-        errors.append(error)
-        # predictions_out = np.array(predictions)
-        # test_responses = np.array(ground_truth)
-
-        R2s.append(R2)
-    # these coefficients is what defines the final model
-    egg = np.array(coeffs)
-    averaged_coeffs = np.array(np.mean(egg, axis=0))
-    # here we overwrite the final model with the averaged coefficients
-    model.coef_ = averaged_coeffs
-    # same with intercepts
-    average_intercept = np.mean(intercepts, axis=0)
-    model.intercept_ = average_intercept
-    # and score the model, this is for all responses together
-    R2 = model.score(whole_inputs.to_numpy(), whole_responses.to_numpy())
-    print("R2 overall is {:.3}".format(R2))
-    df_pred = pd.DataFrame.from_records(predictions, columns=responses.columns)
-    df_GT = pd.DataFrame.from_records(ground_truth, columns=responses.columns)
-    Q2 = Calculate_Q2(
-        ground_truth=df_GT,
-        predictions=df_pred,
-        train_responses=whole_responses,  # is it this one?
-        word="test",
-        key=key,
-        verbose=True,
-    )
-    doenut.plot.plot_summary_of_fit_small(R2, Q2)
-
-    return model, df_pred, df_GT, coeffs, R2s, R2, Q2
-
-
 def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     """Coefficient plot
     set error to 'std' for standard deviation
@@ -431,11 +305,11 @@ def calculate_R2_and_Q2_for_models(
 
         temp_tuple = (
             model.model,
-            model.df_pred,
-            model.df_gt,
+            model.q2_predictions,
+            model.q2_groundtruths,
             model.coeffs,
             model.r2s,
-            model.get_r2(),
+            model.r2,
             model.q2,
         )
 
