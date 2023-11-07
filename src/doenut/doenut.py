@@ -10,7 +10,6 @@ import copy
 from sklearn.linear_model import LinearRegression
 
 import doenut
-from doenut.models.averaged_model import AveragedModel
 
 
 def orthogonal_scaling(inputs, axis=0):
@@ -284,7 +283,7 @@ def calculate_R2_and_Q2_for_models(
         selected_input_terms = [x for x in edited_input_data.columns]
         print("Selected input terms:\t{}".format(selected_input_terms))
 
-        model = AveragedModel(
+        model = doenut.models.AveragedModel(
             edited_input_data,
             this_model_responses,
             use_scaled_inputs,
