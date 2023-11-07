@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import doenut
+from doenut.models.modelset import ModelSet
 from doenut.models.model import Model
 
 
@@ -34,7 +35,7 @@ class AveragedModel(Model):
         left will have its response value(s) set to the average of all the
         duplicates.
         """
-        # Call super to setup basic model
+        # Call super to set up basic model
         super().__init__(inputs, responses, scale_data, fit_intercept)
 
         # handle checking the duplicates
@@ -66,12 +67,9 @@ class AveragedModel(Model):
             self.responses = self.responses.drop(self.duplicates)
 
         # Use leave-one-out on the input data rows to generate a set of models
-        self.models = []
+        self.models = ModelSet(None, None, scale_data, fit_intercept)
         model_predictions = []
-        r2s = []
-        intercepts = []
         errors = []
-        coeffs = []
         model_responses = []
         for i, row_idx in enumerate(self.inputs.index):
             test_input = self.inputs.iloc[i].to_numpy().reshape(1, -1)
@@ -83,19 +81,18 @@ class AveragedModel(Model):
             if scale_run_data:
                 train_input, mj, rj = doenut.orthogonal_scaling(train_input, 0)
                 test_input = doenut.scale_by(test_input, mj, rj)
-            model = Model(train_input, train_responses, False, fit_intercept)
-            r2s.append(model.r2)
-            coeffs.append(model.model.coef_)
+            model = self.models.add_model(
+                train_input, train_responses, False, fit_intercept
+            )
             predictions = model.get_predictions_for(test_input)[0]
             model_predictions.append(predictions)
             model_responses.append(test_response)
             errors.append(test_response - predictions)
-            intercepts.append(model.model.intercept_)
-            self.models.append(model)
-        self.coeffs = coeffs
-        self.averaged_coeffs = np.mean(np.array(coeffs), axis=0)
-        self.averaged_intercepts = np.mean(np.array(intercepts), axis=0)
-        self.r2s = r2s
+        self.coeffs = self.models.get_attributes("coef_")
+        self.intercepts = self.models.get_attributes("intercept_")
+        self.averaged_coeffs = np.mean(np.array(self.coeffs), axis=0)
+        self.averaged_intercepts = np.mean(np.array(self.intercepts), axis=0)
+        self.r2s = self.models.get_r2s()
 
         # replace our initial model with the averaged one.
         self.model.coef_ = self.averaged_coeffs
@@ -107,6 +104,7 @@ class AveragedModel(Model):
         self.q2_predictions = pd.DataFrame.from_records(
             model_predictions, columns=self.responses.columns
         )
+        model_responses2 = self.models.get_attributes("responses")
         self.q2_groundtruths = pd.DataFrame.from_records(
             model_responses, columns=self.responses.columns
         )
