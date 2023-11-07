@@ -64,6 +64,13 @@ def test_calculate_r2_and_q2_for_models():
     assert round(R2, 3) == 0.604
     assert round(Q2, 3) == 0.170
 
+
+def test_selective_model():
+    model = doenut.models.SelectiveModel(inputs, responses, response_key='PCE')
+    assert round(model.r2, 3) == 0.604
+    assert round(model.q2, 3) == 0.170
+
+
 def test_add_higher_order_terms():
     sat_inputs_orig, sat_source_list = doenut.add_higher_order_terms(
         inputs, add_squares=True, add_interactions=True, column_list=[]
