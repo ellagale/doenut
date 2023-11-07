@@ -9,6 +9,7 @@ class AveragedModel(Model):
     Model generated as the average of multiple models generated from a single
     set of inputs via a leave-one-out approach.
     """
+
     # TODO: response_key should probably be moved to selective model
     def __init__(
         self,

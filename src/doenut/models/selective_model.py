@@ -7,18 +7,17 @@ from doenut.models.averaged_model import AveragedModel
 
 
 class SelectiveModel(AveragedModel):
-
-    def __init__(self,
-                 inputs: pd.DataFrame,
-                 responses: pd.DataFrame,
-                 scale_data: bool = True,
-                 scale_run_data: bool = True,
-                 fit_intercept: bool = True,
-                 response_key: str = None,
-                 drop_duplicates: bool = True,
-                 input_selector: List = None,
-                 response_selector: List = None) -> None:
-
+    def __init__(
+        self,
+        inputs: pd.DataFrame,
+        responses: pd.DataFrame,
+        scale_data: bool = True,
+        scale_run_data: bool = True,
+        fit_intercept: bool = True,
+        drop_duplicates: bool = True,
+        input_selector: List = None,
+        response_selector: List = None,
+    ) -> None:
         # first filter out the input and/or response columns we want
         input_column_list = list(inputs.columns)
         response_column_list = list(responses.columns)
@@ -28,7 +27,11 @@ class SelectiveModel(AveragedModel):
             input_column_indices = list(range(len(inputs.columns)))
         else:
             input_sorter = np.argsort(input_column_list)
-            input_column_indices = input_sorter[np.searchsorted(input_column_list, input_selector, sorter=input_sorter)]
+            input_column_indices = input_sorter[
+                np.searchsorted(
+                    input_column_list, input_selector, sorter=input_sorter
+                )
+            ]
 
         if len(input_column_indices) == 0:
             raise ValueError("No input columns specified")
@@ -47,10 +50,12 @@ class SelectiveModel(AveragedModel):
         response_column = response_selector[0]
         filtered_responses = responses[[response_column]]
 
-        super().__init__(filtered_inputs,
-                         filtered_responses,
-                         scale_data,
-                         scale_run_data,
-                         fit_intercept,
-                         response_key,
-                         drop_duplicates)
+        super().__init__(
+            filtered_inputs,
+            filtered_responses,
+            scale_data,
+            scale_run_data,
+            fit_intercept,
+            response_column,
+            drop_duplicates,
+        )
