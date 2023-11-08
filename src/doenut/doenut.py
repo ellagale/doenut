@@ -307,16 +307,16 @@ def calculate_R2_and_Q2_for_models(
 
         new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
         # we fit it as this is hte easiest way to set up the new model correctly
-        new_model.fit(edited_input_data, this_model_responses)
+        # new_model.fit(edited_input_data, this_model_responses)
         # we overwrite the coefficients with the averaged model
-        if len(res_col_num_list) == 1:
-            coefficient_list = new_model.coef_[0]
-        else:
-            coefficient_list = new_model.coef_[res_col_num]
-        # selected_coefficient_list = coefficient_list[input_selector]
-        # print("Coefficients:\t{}".format(selected_coefficient_list))
-        new_model.coef_ = coefficient_list
-        # now get the R2 value
+        # if len(res_col_num_list) == 1:
+        #     coefficient_list = new_model.coef_[0]
+        # else:
+        #     coefficient_list = new_model.coef_[res_col_num]
+        # # selected_coefficient_list = coefficient_list[input_selector]
+        # # print("Coefficients:\t{}".format(selected_coefficient_list))
+        # new_model.coef_ = coefficient_list
+        # # now get the R2 value
         R2 = new_model.score(edited_input_data, this_model_responses)
         if verbose:
             print("Response {} R2 is {:.3}".format(response_key, R2))

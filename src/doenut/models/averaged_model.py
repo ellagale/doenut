@@ -109,11 +109,11 @@ class AveragedModel(Model):
         self.averaged_intercepts = np.mean(np.array(self.intercepts), axis=0)
         self.r2s = self.models.get_r2s()
 
-        # replace our initial model with the averaged one.
+        # replace our initial model with the averaged one to determine R2/Q2 from
         self.model.coef_ = self.averaged_coeffs
         self.model.intercept_ = self.averaged_intercepts
-        self.r2 = self.get_r2_for(self.inputs, self.responses)
-        self.predictions = self.get_predictions_for(self.inputs)
+
+        self.r2 = self.get_r2_for(self.inputs, responses)
 
         # Now calculate q2
         self.q2_predictions = pd.DataFrame.from_records(
@@ -128,3 +128,6 @@ class AveragedModel(Model):
             self.responses,
             response_key,
         )
+        # finally make a fitted model.
+        self.model.fit(inputs, self.responses)
+        self.predictions = self.get_predictions_for(self.inputs)
