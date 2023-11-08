@@ -650,11 +650,11 @@ def map_chemical_space_new(
 
 
 def add_higher_order_terms(
-    inputs,
-    add_squares=True,
-    add_interactions=True,
-    column_list=[],
-    verbose=True,
+    inputs: pd.DataFrame,
+    add_squares: bool = True,
+    add_interactions: bool = True,
+    column_list: list = [],
+    verbose: bool = True,
 ):
     """Adds in squares and interactions terms
     inputs: the input/feature/variable array with data
@@ -666,7 +666,7 @@ def add_higher_order_terms(
     returns saturated array and a list of which inputs created which column"""
 
     sat_inputs = copy.deepcopy(inputs)
-    if column_list == []:
+    if not column_list:
         # do all columns
         column_list = [x for x in inputs.columns]
     if verbose:

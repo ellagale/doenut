@@ -37,6 +37,10 @@ new_inputs = pd.concat(
 new_responses = pd.concat([responses, responses_2], axis=0, ignore_index=True)
 
 
+def _get_column_names_by_number(input, numbers):
+    return [input.columns[x] for x in numbers]
+
+
 def pytest_namespace():
     """
     Helper function to store calculated values that are passed from one test
@@ -113,6 +117,43 @@ def test_tune_model_parsimonious():
     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
     assert round(R2, 3) == 0.813
     assert round(Q2, 3) == 0.332
+
+
+def test_hand_tune_fully_quad():
+    input_selector = _get_column_names_by_number(
+        pytest.sat_inputs_orig, range(8)
+    )
+    model = doenut.models.AveragedModel(
+        pytest.sat_inputs_orig,
+        responses,
+        input_selector=input_selector,
+        scale_data=True,
+        scale_run_data=True,
+        drop_duplicates="no",
+    )
+    assert round(model.r2, 3) == 0.815
+    assert round(model.q2, 3) == -0.176
+
+
+def test_hand_tune_parsnip():
+    # Index(['Donor %', 'Conc.', 'Spin', 'Add.', 'Donor %**2', 'Conc.**2', 'Spin**2',
+    #'Add.**2', 'Donor %*Conc.', 'Donor %*Spin', 'Donor %*Add.',
+    #'Conc.*Spin', 'Conc.*Add.', 'Spin*Add.'],
+    # dtype='object')
+    # input_selector = ['Donor %', 'Conc.', 'Spin', 'Donor %**2', 'Conc.**2', 'Spin**2']
+    input_selector = _get_column_names_by_number(
+        pytest.sat_inputs_orig, [0, 1, 2, 4, 5, 6]
+    )
+    model = doenut.models.AveragedModel(
+        pytest.sat_inputs_orig,
+        responses,
+        input_selector=input_selector,
+        scale_data=True,
+        scale_run_data=True,
+        drop_duplicates="no",
+    )
+    assert round(model.r2, 3) == 0.813
+    assert round(model.q2, 3) == 0.332
 
 
 def test_saturated_models():

@@ -1,5 +1,4 @@
 from typing import List
-
 import numpy as np
 import pandas as pd
 import doenut
@@ -22,7 +21,7 @@ class AveragedModel(Model):
         scale_run_data: bool = True,
         fit_intercept: bool = True,
         response_key: str = None,
-        drop_duplicates: bool = True,
+        drop_duplicates: str = True,
         input_selector: List = [],
     ):
         """
@@ -52,7 +51,7 @@ class AveragedModel(Model):
                 raise ValueError(
                     "No response key specified and multiple response columns"
                 )
-            response_key = [0]
+            response_key = responses.columns[0]
 
         # handle checking the duplicates
         self.duplicates = None
