@@ -283,6 +283,7 @@ def calculate_R2_and_Q2_for_models(
         selected_input_terms = [x for x in edited_input_data.columns]
         print("Selected input terms:\t{}".format(selected_input_terms))
 
+        # Note we don't pass input_selector in here as we have already done it.
         model = doenut.models.AveragedModel(
             edited_input_data,
             this_model_responses,
@@ -291,6 +292,7 @@ def calculate_R2_and_Q2_for_models(
             fit_intercept,
             response_key,
             drop_duplicates,
+            None,
         )
 
         temp_tuple = (

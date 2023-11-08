@@ -71,6 +71,15 @@ def test_selective_model():
     assert round(model.q2, 3) == 0.170
 
 
+def test_averaged_model_set():
+    modelset = doenut.models.AveragedModelSet.multiple_response_columns(
+        inputs, responses
+    )
+    model = modelset.models[0]
+    assert round(model.r2, 3) == 0.604
+    assert round(model.q2, 3) == 0.170
+
+
 def test_add_higher_order_terms():
     sat_inputs_orig, sat_source_list = doenut.add_higher_order_terms(
         inputs, add_squares=True, add_interactions=True, column_list=[]

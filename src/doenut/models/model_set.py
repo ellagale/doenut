@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 
 from doenut.models import Model
 
@@ -21,37 +21,23 @@ class ModelSet:
         self.default_fit_intercept = default_fit_intercept
         self.models = []
 
+    def _validate_value(self, name: str, value: Any = None) -> Any:
+        if value is not None:
+            return value
+        default_name = f"default_{name}"
+        if hasattr(self, default_name):
+            value = getattr(self, default_name)
+            if value is not None:
+                return value
+        raise ValueError(f"model set lacks default value for {name}")
+
     def add_model(
         self, inputs=None, responses=None, scale_data=None, fit_intercept=None
     ):
-        if inputs is None:
-            inputs = self.default_inputs
-        if inputs is None:
-            raise ValueError(
-                "inputs not specified and no default inputs given"
-            )
-
-        if responses is None:
-            responses = self.default_responses
-        if responses is None:
-            raise ValueError(
-                "responses not specified and no default responses given"
-            )
-
-        if scale_data is None:
-            scale_data = self.default_scale_data
-        if scale_data is None:
-            raise ValueError(
-                "scale_data not specified and no default scale_data given"
-            )
-
-        if fit_intercept is None:
-            fit_intercept = self.default_fit_intercept
-        if fit_intercept is None:
-            raise ValueError(
-                "fit_intercept not specified and no default fit_intercept given"
-            )
-
+        inputs = self._validate_value("inputs", inputs)
+        responses = self._validate_value("responses", responses)
+        scale_data = self._validate_value("scale_data", scale_data)
+        fit_intercept = self._validate_value("fit_intercept", fit_intercept)
         model = Model(inputs, responses, scale_data, fit_intercept)
         self.models.append(model)
         return model

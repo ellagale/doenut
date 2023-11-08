@@ -1,7 +1,9 @@
+from typing import List
+
 import numpy as np
 import pandas as pd
 import doenut
-from doenut.models.modelset import ModelSet
+from doenut.models.model_set import ModelSet
 from doenut.models.model import Model
 
 
@@ -14,13 +16,14 @@ class AveragedModel(Model):
     # TODO: response_key should probably be moved to selective model
     def __init__(
         self,
-        inputs,
-        responses,
-        scale_data=True,
-        scale_run_data=True,
-        fit_intercept=True,
-        response_key="ortho",
-        drop_duplicates=True,
+        inputs: pd.DataFrame,
+        responses: pd.DataFrame,
+        scale_data: bool = True,
+        scale_run_data: bool = True,
+        fit_intercept: bool = True,
+        response_key: str = None,
+        drop_duplicates: bool = True,
+        input_selector: List = [],
     ):
         """
         Constructor
@@ -31,12 +34,25 @@ class AveragedModel(Model):
         @param fit_intercept: Whether to fit the intercept to zero
         @param response_key: for multi-column responses, which one to test on
         @param drop_duplicates: whether to drop duplicate values or not.
+        @param input_selector: Optional list of columns to filter input by
         May also be 'average' which will cause them to be dropped, but the one
         left will have its response value(s) set to the average of all the
         duplicates.
         """
+        # Handle input selector
+        if input_selector is not None and len(input_selector) > 0:
+            inputs = inputs[input_selector]
+
         # Call super to set up basic model
         super().__init__(inputs, responses, scale_data, fit_intercept)
+
+        # check the columns
+        if response_key is None:
+            if len(responses.columns) > 1:
+                raise ValueError(
+                    "No response key specified and multiple response columns"
+                )
+            response_key = [0]
 
         # handle checking the duplicates
         self.duplicates = None
@@ -104,7 +120,6 @@ class AveragedModel(Model):
         self.q2_predictions = pd.DataFrame.from_records(
             model_predictions, columns=self.responses.columns
         )
-        model_responses2 = self.models.get_attributes("responses")
         self.q2_groundtruths = pd.DataFrame.from_records(
             model_responses, columns=self.responses.columns
         )

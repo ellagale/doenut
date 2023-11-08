@@ -58,4 +58,5 @@ class SelectiveModel(AveragedModel):
             fit_intercept,
             response_column,
             drop_duplicates,
+            input_selector,
         )
