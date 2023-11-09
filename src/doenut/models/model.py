@@ -26,7 +26,10 @@ class Model:
         self.responses = responses
 
         self.model = LinearRegression(fit_intercept=fit_intercept)
-        self.model.fit(inputs, responses)
+        try:
+            self.model.fit(inputs, responses)
+        except ValueError as e:
+            raise e
         self.predictions = self.get_predictions_for(self.inputs)
         self.r2 = self.get_r2_for(self.inputs, self.responses)
 
@@ -46,4 +49,7 @@ class Model:
         @param responses: The ground truths to test against as an array-like
         @return: the calculated R2 value as a float
         """
-        return self.model.score(inputs, responses)
+        try:
+            return self.model.score(inputs, responses)
+        except ValueError as e:
+            raise e

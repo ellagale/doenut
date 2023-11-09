@@ -2,6 +2,7 @@
 DOENUT
 Design of Experiments Numerical Utility Toolkit
 """
+from typing import Tuple
 
 # first we import some useful libraries
 import numpy as np
@@ -149,41 +150,51 @@ def dunk(setting=None):
     return
 
 
-def average_replicates(inputs, responses, verbose=False):
+def average_replicates(
+    inputs: pd.DataFrame, responses: pd.DataFrame, verbose: bool = False
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """averages inputs that are the same
     TO-DO - you can make it pick nearly teh same inputs if
     if you add the actual values which are not always the expected values
     inputs = inputs
     responses = responses"""
-
     whole_inputs = inputs
+    averaged_responses = pd.DataFrame()
+    averaged_inputs = pd.DataFrame()
+
     duplicates = [x for x in whole_inputs[whole_inputs.duplicated()].index]
     duplicates_for_averaging = {}
     non_duplicate_list = [x for x in whole_inputs.index if x not in duplicates]
     for non_duplicate in non_duplicate_list:
         this_duplicate_list = []
-        non_duplicate_row = whole_inputs.loc[[non_duplicate]].to_numpy()
+        non_duplicate_row = whole_inputs.loc[[non_duplicate]]
         for duplicate in duplicates:
-            duplicate_row = whole_inputs.loc[[duplicate]].to_numpy()
-            if (non_duplicate_row == duplicate_row).all():
-                this_duplicate_list.append(duplicate)
-                if verbose:
-                    print(
-                        f"found duplicate pairs: {non_duplicate}, {duplicate}"
-                    )
-        duplicates_for_averaging[non_duplicate] = this_duplicate_list
-
-    averaged_responses = []
-    averaged_inputs = []
+            duplicate_row = whole_inputs.loc[[duplicate]]
+            try:
+                if non_duplicate_row.equals(duplicate_row):
+                    this_duplicate_list.append(duplicate)
+                    if verbose:
+                        print(
+                            f"found duplicate pairs: {non_duplicate}, {duplicate}"
+                        )
+            except ValueError as e:
+                raise e
+        if len(this_duplicate_list) > 0:
+            duplicates_for_averaging[non_duplicate] = this_duplicate_list
+        else:
+            averaged_inputs = pd.concat([averaged_inputs, non_duplicate_row])
+            averaged_responses = pd.concat(
+                [averaged_responses, responses.iloc[[non_duplicate]]]
+            )
 
     for non_duplicate, duplicates in duplicates_for_averaging.items():
         # print(f"nd: {non_duplicate}")
         to_average = whole_inputs.loc[[non_duplicate]]
         to_average_responses = responses.loc[[non_duplicate]]
         for duplicate in duplicates:
-            to_average = to_average.append(whole_inputs.loc[[duplicate]])
-            to_average_responses = to_average_responses.append(
-                responses.loc[[duplicate]]
+            to_average = pd.concat([to_average, whole_inputs.loc[[duplicate]]])
+            to_average_responses = pd.concat(
+                [to_average_responses, responses.loc[[duplicate]]]
             )
         meaned = to_average.mean(axis=0)
         meaned_responses = to_average_responses.mean(axis=0)
@@ -202,6 +213,7 @@ def average_replicates(inputs, responses, verbose=False):
         except TypeError:
             averaged_inputs = pd.DataFrame(meaned).transpose()
             averaged_responses = pd.DataFrame(meaned_responses).transpose()
+
     return averaged_inputs, averaged_responses
 
 
@@ -263,12 +275,13 @@ def calculate_R2_and_Q2_for_models(
     # make a linear regression model
     if response_selector is None:
         # do all columns
-        res_col_num_list = [x for x in range(len(responses.columns))]
-    else:
-        res_col_num_list = range(len(response_selector))
+        response_selector = range(len(responses.columns))
+    res_col_num_list = range(len(response_selector))
     if input_selector is None:
         # saturated model - do all columns
         input_selector = range(len(input_column_list))
+    if response_selector is None:
+        print("mo")
     for res_col_num in response_selector:
         # loops over responses, to get R2 for all responses at once
         # don't use this function
@@ -433,6 +446,7 @@ def autotune_model(
     terms = []
 
     while have_removed:
+        print("Beginning loop")
         selected_input_indices = output_indices
 
         # print(selected_input_indices)
@@ -448,7 +462,6 @@ def autotune_model(
             sat_inputs,
             responses,
             input_selector=selected_input_indices,
-            response_selector=[0],
             use_scaled_inputs=True,
             do_scaling_here=True,
             drop_duplicates=drop_duplicates,
@@ -533,7 +546,7 @@ def autotune_model(
 
         # Now sort in order of ave_coeff
         insignificant_terms = sorted(insignificant_terms, key=lambda x: x[1])
-        print(insignificant_terms)
+        print(f"Insignificant Terms: {insignificant_terms}")
 
         # Now find the first term we can remove (if any)
         have_removed = False

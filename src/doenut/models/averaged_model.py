@@ -90,7 +90,7 @@ class AveragedModel(Model):
             test_input = self.inputs.iloc[i].to_numpy().reshape(1, -1)
             test_response = self.responses.iloc[i]
             train_input = self.inputs.drop(row_idx).to_numpy()
-            train_responses = responses.drop(row_idx)
+            train_responses = self.responses.drop(row_idx)
             # We need to re-scale each column, using the training data *only*,
             # but then applying the same scaling to the test data.
             if scale_run_data:
@@ -113,7 +113,7 @@ class AveragedModel(Model):
         self.model.coef_ = self.averaged_coeffs
         self.model.intercept_ = self.averaged_intercepts
 
-        self.r2 = self.get_r2_for(self.inputs, responses)
+        self.r2 = self.get_r2_for(self.inputs, self.responses)
 
         # Now calculate q2
         self.q2_predictions = pd.DataFrame.from_records(
@@ -129,5 +129,5 @@ class AveragedModel(Model):
             response_key,
         )
         # finally make a fitted model.
-        self.model.fit(inputs, self.responses)
+        self.model.fit(inputs, responses)
         self.predictions = self.get_predictions_for(self.inputs)

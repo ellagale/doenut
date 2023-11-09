@@ -48,7 +48,9 @@ def pytest_namespace():
     """
     return {
         "sat_inputs_orig": None,
+        "sat_inputs_orig_source_list": None,
         "sat_inputs_2": None,
+        "sat_inputs_2_source_list": None,
         "scaled_model": None,
         "scaled_model_2": None,
     }
@@ -92,6 +94,7 @@ def test_add_higher_order_terms():
     assert sat_inputs_orig.size == 210
     assert len(sat_source_list) == 14
     pytest.sat_inputs_orig = sat_inputs_orig
+    pytest.sat_inputs_orig_source_list = sat_source_list
 
 
 def test_tune_model_fully_quad():
@@ -164,6 +167,7 @@ def test_saturated_models():
     assert sat_inputs_2.size == 243
     assert len(sat_source_list) == 9
     pytest.sat_inputs_2 = sat_inputs_2
+    pytest.sat_inputs_2_source_list = sat_source_list
 
 
 def test_saturated_9_terms():
@@ -259,3 +263,36 @@ def test_run_model():
 
     assert expected_results == actual_results
     assert expected_results == actual_results_2
+
+
+def test_autotune():
+    # input_selector = _get_column_names_by_number(pytest.sat_inputs_2, range(9))
+    # model = doenut.models.AveragedModel(
+    #     pytest.sat_inputs_2,
+    #     new_responses,
+    #     input_selector=input_selector,
+    #     drop_duplicates="no",
+    # )
+
+    (
+        output_indices,
+        new_model,
+        predictions,
+        ground_truth,
+        coeffs,
+        R2s,
+        R2,
+        Q2,
+        R2_over_opt,
+        Q2_over_opt,
+        n_terms_over_opt,
+        terms,
+    ) = doenut.autotune_model(
+        pytest.sat_inputs_2,
+        new_responses,
+        pytest.sat_inputs_2_source_list,
+        verbose=True,
+    )
+
+    assert round(R2, 3) == 0.886
+    assert round(Q2, 3) == 0.486
