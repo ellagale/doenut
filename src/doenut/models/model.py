@@ -49,7 +49,4 @@ class Model:
         @param responses: The ground truths to test against as an array-like
         @return: the calculated R2 value as a float
         """
-        try:
-            return self.model.score(inputs, responses)
-        except ValueError as e:
-            raise e
+        return self.model.score(inputs, responses)

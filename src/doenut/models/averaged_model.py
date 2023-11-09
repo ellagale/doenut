@@ -8,7 +8,7 @@ from doenut.models.model import Model
 
 class AveragedModel(Model):
     """
-    Model generated as the average of multiple models generated from a single
+    Model scored as the average of multiple models generated from a single
     set of inputs via a leave-one-out approach.
     """
 

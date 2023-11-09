@@ -435,10 +435,12 @@ def autotune_model(
     output_indices = input_selector
     # global list of all column names.
     input_terms = list(sat_inputs.columns)
+    output_terms = input_terms
     if verbose:
         print("numbers\tnames")
         for i, v in enumerate(input_terms):
             print(f"{i}\t{v}")
+    this_model = None
     have_removed = True
     R2_over_opt = []
     Q2_over_opt = []
@@ -448,30 +450,37 @@ def autotune_model(
     while have_removed:
         print("Beginning loop")
         selected_input_indices = output_indices
-
-        # print(selected_input_indices)
-        # print(sat_inputs)
+        selected_input_terms = output_terms
         if len(selected_input_indices) == 0:
             break
-        (
-            this_model,
-            R2,
-            temp_tuple,
-            selected_input_terms,
-        ) = calculate_R2_and_Q2_for_models(
+        this_model = doenut.models.AveragedModel(
             sat_inputs,
             responses,
-            input_selector=selected_input_indices,
-            use_scaled_inputs=True,
-            do_scaling_here=True,
+            input_selector=selected_input_terms,
+            scale_data=True,
+            scale_run_data=True,
             drop_duplicates=drop_duplicates,
-            do_r2=False,
-            verbose=False,
         )
-        new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-
-        R2_over_opt.append(R2)
-        Q2_over_opt.append(Q2)
+        # (
+        #     this_model,
+        #     R2,
+        #     temp_tuple,
+        #     selected_input_terms,
+        # ) = calculate_R2_and_Q2_for_models(
+        #     sat_inputs,
+        #     responses,
+        #     input_selector=selected_input_indices,
+        #     use_scaled_inputs=True,
+        #     do_scaling_here=True,
+        #     drop_duplicates=drop_duplicates,
+        #     do_r2=False,
+        #     verbose=False,
+        # )
+        # new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+        selected_inputs = sat_inputs.iloc[:, selected_input_indices]
+        selected_input_terms = list(selected_inputs.columns)
+        R2_over_opt.append(this_model.r2)
+        Q2_over_opt.append(this_model.q2)
 
         # cell 2
         # print("Cell 2:")
@@ -513,7 +522,7 @@ def autotune_model(
         # must be present for a higher order one)
 
         ave_coeffs, error_bars = calc_ave_coeffs_and_errors(
-            coeffs=coeffs,
+            coeffs=this_model.coeffs,
             labels=selected_input_terms,
             errors="p95",
             normalise=True,
@@ -560,6 +569,7 @@ def autotune_model(
                 f"removing term {input_terms[idx]} ({idx}) with error {error_value}"
             )
             output_indices.remove(idx)
+            output_terms.remove(output_terms[idx])
             have_removed = True
             break
 
@@ -567,17 +577,18 @@ def autotune_model(
         terms.append(output_indices)
     return (
         output_indices,
-        new_model,
-        predictions,
-        ground_truth,
-        coeffs,
-        R2s,
-        R2,
-        Q2,
-        R2_over_opt,
-        Q2_over_opt,
-        n_terms_over_opt,
-        terms,
+        this_model,
+        # new_model,
+        # predictions,
+        # ground_truth,
+        # coeffs,
+        # R2s,
+        # R2,
+        # Q2,
+        # R2_over_opt,
+        # Q2_over_opt,
+        # n_terms_over_opt,
+        # terms,
     )
 
 

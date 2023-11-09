@@ -277,16 +277,6 @@ def test_autotune():
     (
         output_indices,
         new_model,
-        predictions,
-        ground_truth,
-        coeffs,
-        R2s,
-        R2,
-        Q2,
-        R2_over_opt,
-        Q2_over_opt,
-        n_terms_over_opt,
-        terms,
     ) = doenut.autotune_model(
         pytest.sat_inputs_2,
         new_responses,
@@ -294,5 +284,5 @@ def test_autotune():
         verbose=True,
     )
 
-    assert round(R2, 3) == 0.886
-    assert round(Q2, 3) == 0.486
+    assert round(new_model.r2, 3) == 0.886
+    assert round(new_model.q2, 3) == 0.486
