@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Set, Tuple
 
 import pandas as pd
 
@@ -27,59 +27,19 @@ class DataFrameSet(FilteredDataFrame):
     def get_filtered_responses(self):
         return self.responses.get_filtered()
 
-    # def get_average
-    # whole_inputs = inputs
-    # averaged_responses = pd.DataFrame()
-    # averaged_inputs = pd.DataFrame()
-    #
-    # duplicates = [x for x in whole_inputs[whole_inputs.duplicated()].index]
-    # duplicates_for_averaging = {}
-    # non_duplicate_list = [x for x in whole_inputs.index if x not in duplicates]
-    # for non_duplicate in non_duplicate_list:
-    #     this_duplicate_list = []
-    #     non_duplicate_row = whole_inputs.loc[[non_duplicate]]
-    #     for duplicate in duplicates:
-    #         duplicate_row = whole_inputs.loc[[duplicate]]
-    #         if non_duplicate_row.equals(duplicate_row):
-    #             this_duplicate_list.append(duplicate)
-    #             if verbose:
-    #                 print(
-    #                     f"found duplicate pairs: {non_duplicate}, {duplicate}"
-    #                 )
-    #     if len(this_duplicate_list) > 0:
-    #         duplicates_for_averaging[non_duplicate] = this_duplicate_list
-    #     else:
-    #         averaged_inputs = pd.concat([averaged_inputs, non_duplicate_row])
-    #         averaged_responses = pd.concat(
-    #             [averaged_responses, responses.iloc[[non_duplicate]]]
-    #         )
-    #
-    # for non_duplicate, duplicates in duplicates_for_averaging.items():
-    #     # print(f"nd: {non_duplicate}")
-    #     to_average = whole_inputs.loc[[non_duplicate]]
-    #     to_average_responses = responses.loc[[non_duplicate]]
-    #     for duplicate in duplicates:
-    #         to_average = pd.concat([to_average, whole_inputs.loc[[duplicate]]])
-    #         to_average_responses = pd.concat(
-    #             [to_average_responses, responses.loc[[duplicate]]]
-    #         )
-    #     meaned = to_average.mean(axis=0)
-    #     meaned_responses = to_average_responses.mean(axis=0)
-    #     try:
-    #         averaged_inputs = pd.concat(
-    #             [averaged_inputs, pd.DataFrame(meaned).transpose()],
-    #             ignore_index=True,
-    #         )
-    #         averaged_responses = pd.concat(
-    #             [
-    #                 averaged_responses,
-    #                 pd.DataFrame(meaned_responses).transpose(),
-    #             ],
-    #             ignore_index=True,
-    #         )
-    #     except TypeError:
-    #         averaged_inputs = pd.DataFrame(meaned).transpose()
-    #         averaged_responses = pd.DataFrame(meaned_responses).transpose()
-    #
-    # return averaged_inputs, averaged_responses
-    #
+    def remove_duplicates(
+        self, duplicates_dict: Dict[int, Set[int]] = None
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        if duplicates_dict is None:
+            duplicates_dict = self.get_duplicate_rows()
+        return super().remove_duplicates(
+            duplicates_dict
+        ), self.responses.remove_duplicates(duplicates_dict)
+
+    def average_duplicates(
+        self, duplicates_dict: Dict[int, Set[int]]
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        duplicates_dict = self.get_duplicate_rows()
+        return super().average_duplicates(
+            duplicates_dict
+        ), self.responses.average_duplicates(duplicates_dict)

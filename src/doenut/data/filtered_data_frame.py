@@ -105,7 +105,7 @@ class FilteredDataFrame:
             x for x in self.data.index if x not in duplicate_indices
         ]
 
-        return self.data.iloc[non_duplicates]
+        return self.get_filtered().data.iloc[non_duplicates]
 
     def average_duplicates(
         self, duplicates_dict: Dict[int, Set[int]]
