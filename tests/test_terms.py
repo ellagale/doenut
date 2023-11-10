@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from doenut.terms import Terms
+from doenut.data import FilteredDataFrame
 
 # since pytest runs from an arbitrary location, fix that.
 os.chdir(os.path.dirname(__file__))
@@ -19,7 +19,7 @@ responses = pd.DataFrame({"PCE": [float(x) for x in df["PCE"][1:-1]]})
 
 
 def test_terms():
-    data = Terms(inputs)
+    data = FilteredDataFrame(inputs)
     assert data.data.size == 60
     assert len(data.data.columns) == 4
     assert data.get_filtered().equals(inputs)
@@ -27,7 +27,7 @@ def test_terms():
 
 def test_filter_columns():
     selector = ["Spin", "Add."]
-    data = Terms(inputs).filter(selector)
+    data = FilteredDataFrame(inputs).filter(selector)
     filtered_data = data.get_filtered()
     assert filtered_data.size == 30
     assert len(filtered_data.columns) == 2
@@ -35,7 +35,7 @@ def test_filter_columns():
 
 def test_filter_columns_by_index():
     indices = [2, 3]
-    data = Terms(inputs).filter_by_indices(indices)
+    data = FilteredDataFrame(inputs).filter_by_indices(indices)
     filtered_data = data.get_filtered()
     assert filtered_data.size == 30
     assert len(filtered_data.columns) == 2
@@ -43,9 +43,9 @@ def test_filter_columns_by_index():
 
 def test_filter_both_ways():
     selector = ["Spin", "Add."]
-    data = Terms(inputs).filter(selector)
+    data = FilteredDataFrame(inputs).filter(selector)
     filtered_data = data.get_filtered()
     indices = [2, 3]
-    indexed_data = Terms(inputs).filter_by_indices(indices)
+    indexed_data = FilteredDataFrame(inputs).filter_by_indices(indices)
     filtered_indexed_data = data.get_filtered()
     assert filtered_data.equals(filtered_indexed_data)

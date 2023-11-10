@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 
 
-class Terms:
+class FilteredDataFrame:
     """
     A piece of data, that may have a selector applied to filter it.
     """
@@ -15,7 +15,7 @@ class Terms:
         self.selector = None
         self.indices = None
 
-    def filter(self, selector: List[str]) -> "Terms":
+    def filter(self, selector: List[str]) -> "FilteredDataFrame":
         """
         Defines the filter of what columns we want to use from the data.
         @param selector: List of colunn names to filter with
@@ -31,7 +31,7 @@ class Terms:
         ]
         return self
 
-    def filter_by_indices(self, indices: List[int]) -> "Terms":
+    def filter_by_indices(self, indices: List[int]) -> "FilteredDataFrame":
         """
         Defines the filter of what columsn we want to use from the data
         @param indices: list of column indices to filter with
