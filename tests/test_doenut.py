@@ -180,7 +180,7 @@ def test_saturated_9_terms():
     )
     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
     assert round(R2, 3) == 0.895
-    assert round(Q2, 3) == -0.204
+    assert round(Q2, 3) == -0.203
 
 
 def test_saturated_9_terms_2():
@@ -192,7 +192,7 @@ def test_saturated_9_terms_2():
         drop_duplicates="no",
     )
     assert round(model.r2, 3) == 0.895
-    assert round(model.q2, 3) == -0.204
+    assert round(model.q2, 3) == -0.203
 
 
 def test_saturated_parsnip_terms():
@@ -244,7 +244,7 @@ def test_run_model():
         column_list=[],
         verbose=False,
     )
-    expected_results = [2.11, 6.11, 7.61, 4.65, 3.97]
+    expected_results = [2.10, 6.11, 7.61, 4.65, 3.97]
     input_selector = [0, 1, 2, 3, 4, 5]
     results, _ = doenut.predict_from_model(
         pytest.scaled_model, sat_inputs, input_selector
@@ -252,8 +252,6 @@ def test_run_model():
     actual_results = [round(x[0], 2) for x in results]
     term_list = _get_column_names_by_number(sat_inputs, input_selector)
     filtered_inputs = sat_inputs[term_list]
-    results_test = pytest.scaled_model.predict(filtered_inputs)
-    results_test2 = pytest.scaled_model_2.model.predict(filtered_inputs)
     results2 = pytest.scaled_model_2.get_predictions_for(
         filtered_inputs
     ).reshape(

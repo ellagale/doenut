@@ -170,15 +170,12 @@ def average_replicates(
         non_duplicate_row = whole_inputs.loc[[non_duplicate]]
         for duplicate in duplicates:
             duplicate_row = whole_inputs.loc[[duplicate]]
-            try:
-                if non_duplicate_row.equals(duplicate_row):
-                    this_duplicate_list.append(duplicate)
-                    if verbose:
-                        print(
-                            f"found duplicate pairs: {non_duplicate}, {duplicate}"
-                        )
-            except ValueError as e:
-                raise e
+            if non_duplicate_row.equals(duplicate_row):
+                this_duplicate_list.append(duplicate)
+                if verbose:
+                    print(
+                        f"found duplicate pairs: {non_duplicate}, {duplicate}"
+                    )
         if len(this_duplicate_list) > 0:
             duplicates_for_averaging[non_duplicate] = this_duplicate_list
         else:
