@@ -2,6 +2,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import doenut
+from doenut.data import DataSet
 from doenut.models.model_set import ModelSet
 from doenut.models.model import Model
 
@@ -15,8 +16,7 @@ class AveragedModel(Model):
     # TODO: response_key should probably be moved to selective model
     def __init__(
         self,
-        inputs: pd.DataFrame,
-        responses: pd.DataFrame,
+        data: DataSet,
         scale_data: bool = True,
         scale_run_data: bool = True,
         fit_intercept: bool = True,
@@ -26,70 +26,61 @@ class AveragedModel(Model):
     ):
         """
         Constructor
-        @param inputs: The inputs to create a model from as a numpy array-like
-        @param responses: The ground truths for the inputs
-        @param scale_data: Whether to normalise the input data
+        @param data: the data to run / test against.
         @param scale_run_data: Whether to normalise the data for each run
         @param fit_intercept: Whether to fit the intercept to zero
         @param response_key: for multi-column responses, which one to test on
         @param drop_duplicates: whether to drop duplicate values or not.
-        @param input_selector: Optional list of columns to filter input by
+        @param input_selector: Optional list of columns to set_filter input by
         May also be 'average' which will cause them to be dropped, but the one
         left will have its response value(s) set to the average of all the
         duplicates.
         """
+        new_data = data.get_filtered_frameset()
         # Handle input selector
         if input_selector is not None and len(input_selector) > 0:
-            inputs = inputs[input_selector]
+            new_data.set_filter(input_selector)
 
         # Call super to set up basic model
-        super().__init__(inputs, responses, scale_data, fit_intercept)
+        super().__init__(new_data, scale_data, fit_intercept)
 
         # check the columns
         if response_key is None:
-            if len(responses.columns) > 1:
+            if len(new_data.get_filtered_responses().columns) > 1:
                 raise ValueError(
                     "No response key specified and multiple response columns"
                 )
-            response_key = responses.columns[0]
+            response_key = new_data.get_filtered_responses().columns[0]
 
         # handle checking the duplicates
         self.duplicates = None
+        new_inputs, new_responses = None, None
         if isinstance(drop_duplicates, str):
             if str.lower(drop_duplicates) == "yes":
-                self.duplicates = [
-                    x for x in inputs[inputs.duplicated()].index
-                ]
+                new_data = new_data.remove_duplicates()
+
             elif str.lower(drop_duplicates) == "average":
-                self.inputs, self.responses = doenut.average_replicates(
-                    self.inputs, self.responses
-                )
-                self.duplicates = []
+                new_inputs, new_responses = new_data.get_with_average_duplicates()
             elif str.lower(drop_duplicates) == "no":
-                self.duplicates = []
-        if isinstance(drop_duplicates, bool) and drop_duplicates:
-            self.duplicates = [x for x in inputs[inputs.duplicated()].index]
+                new_inputs, new_responses = data.get(), data.get_filtered_responses()
+            else:
+                raise ValueError(
+                    f"Invalid drop_duplicates value {drop_duplicates}"
+                    " - should one of 'yes', 'no', 'average'"
+                )
 
-        if self.duplicates is None:
-            raise ValueError(
-                f"Invalid drop_duplicates value {drop_duplicates}"
-                " - should be boolean or  one of 'yes', 'no', 'average'"
-            )
+        self.data = DataSet(new_inputs, new_responses)
 
-        # If there are any duplicates, remove them.
-        if len(self.duplicates) > 0:
-            self.inputs = self.inputs.drop(self.duplicates)
-            self.responses = self.responses.drop(self.duplicates)
 
         # Use leave-one-out on the input data rows to generate a set of models
         self.models = ModelSet(None, None, scale_data, fit_intercept)
         model_predictions = []
         errors = []
         model_responses = []
-        for i, row_idx in enumerate(self.inputs.index):
-            test_input = self.inputs.iloc[i].to_numpy().reshape(1, -1)
+        for i, row_idx in enumerate(new_inputs.index):
+            test_input = new_inputs.iloc[i].to_numpy().reshape(1, -1)
             test_response = self.responses.iloc[i]
-            train_input = self.inputs.drop(row_idx).to_numpy()
+            train_input = new_inputs.drop(row_idx).to_numpy()
             train_responses = self.responses.drop(row_idx)
             # We need to re-scale each column, using the training data *only*,
             # but then applying the same scaling to the test data.
@@ -113,21 +104,21 @@ class AveragedModel(Model):
         self.model.coef_ = self.averaged_coeffs
         self.model.intercept_ = self.averaged_intercepts
 
-        self.r2 = self.get_r2_for(self.inputs, self.responses)
+        self.r2 = self.get_r2_for(self.data)
 
         # Now calculate q2
         self.q2_predictions = pd.DataFrame.from_records(
-            model_predictions, columns=self.responses.columns
+            model_predictions, columns=new_responses.columns
         )
         self.q2_groundtruths = pd.DataFrame.from_records(
-            model_responses, columns=self.responses.columns
+            model_responses, columns=new_responses.columns
         )
         self.q2 = doenut.Calculate_Q2(
             self.q2_groundtruths,
             self.q2_predictions,
-            self.responses,
+            new_responses,
             response_key,
         )
         # finally make a fitted model.
         self.model.fit(inputs, responses)
-        self.predictions = self.get_predictions_for(self.inputs)
+        self.predictions = self.get_predictions_for(new_inputs)

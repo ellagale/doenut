@@ -18,7 +18,7 @@ class SelectiveModel(AveragedModel):
         input_selector: List = None,
         response_selector: List = None,
     ) -> None:
-        # first filter out the input and/or response columns we want
+        # first set_filter out the input and/or response columns we want
         input_column_list = list(inputs.columns)
         response_column_list = list(responses.columns)
 

@@ -1,45 +1,49 @@
-from typing import List, Dict, Set, Tuple
-
+from typing import List
 import pandas as pd
 
 from doenut.data import FilteredDataFrame
 
 
-class DataFrameSet(FilteredDataFrame):
-    def __init__(self, data: pd.DataFrame, responses: pd.DataFrame) -> None:
-        super().__init__(data)
-        if responses is None:
-            raise ValueError("responses must not be null")
-        if len(data) != len(responses):
-            raise ValueError("Data and responses must have the same length")
+class DataSet():
+    def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
+        if inputs is None or len(inputs) == 0:
+            raise ValueError("Inputs must not be empty")
+        if responses is None or len(responses) == 0:
+            raise ValueError("Responses must not be empty")
+        if len(inputs) != len(responses):
+            raise ValueError("Inputs and Responses must have the same length")
+
+        self.inputs = FilteredDataFrame(inputs)
         self.responses = FilteredDataFrame(responses)
 
-    def filter_responses(self, selector: List[str]) -> "DataFrameSet":
-        self.responses.filter(selector)
-        return self
+    def set_selector(self, selector:List[str]) -> "DataSet":
+        self.inputs.set_filter(selector)
 
-    def filter_responses_by_indices(
-        self, indices: List[int]
-    ) -> "FilteredDataFrame":
+    def set_selector_by_indices(self, indices: List[int]) -> "DataSet":
+        self.inputs.filter_by_indices(indices)
+
+    def set_response_selector(self, selector: List[str]) -> "DataSet":
+        self.responses.set_filter(selector)
+
+    def set_response_selector_by_indices(self, indices: List[int]) -> "DataSet":
         self.responses.filter_by_indices(indices)
-        return self
 
-    def get_filtered_responses(self):
-        return self.responses.get_filtered()
+    def get_filtered_inputs(self) -> pd.DataFrame:
+        return self.inputs.get()
 
-    def remove_duplicates(
-        self, duplicates_dict: Dict[int, Set[int]] = None
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        if duplicates_dict is None:
-            duplicates_dict = self.get_duplicate_rows()
-        return super().remove_duplicates(
-            duplicates_dict
-        ), self.responses.remove_duplicates(duplicates_dict)
+    def get_filtered_responses(self) -> pd.DataFrame:
+        return self.responses.get()
 
-    def average_duplicates(
-        self, duplicates_dict: Dict[int, Set[int]]
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        duplicates_dict = self.get_duplicate_rows()
-        return super().average_duplicates(
-            duplicates_dict
-        ), self.responses.average_duplicates(duplicates_dict)
+    def get_inputs_without_duplicates(self) -> pd.DataFrame:
+        return self.inputs.get_without_duplicates()
+
+    def get_responses_without_duplicates(self) -> pd.DataFrame:
+        duplicate_dict = self.inputs.get_duplicate_rows()
+        return self.responses.get_without_duplicates(duplicate_dict)
+
+    def get_inputs_with_averaged_duplicates(self) -> pd.DataFrame:
+        return self.inputs.get_with_average_duplicates()
+
+    def get_responses_with_averaged_duplicates(self) -> pd.DataFrame:
+        duplicate_dict = self.inputs.get_duplicate_rows()
+        return self.responses.get_without_duplicates(duplicate_dict)

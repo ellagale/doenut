@@ -5,7 +5,7 @@ import pandas as pd
 
 class FilteredDataFrame:
     """
-    A piece of data, that may have a selector applied to filter it.
+    A piece of data, that may have a selector applied to set_filter it.
     """
 
     def __init__(self, data: pd.DataFrame) -> None:
@@ -15,10 +15,10 @@ class FilteredDataFrame:
         self.selector = None
         self.indices = None
 
-    def filter(self, selector: List[str]) -> "FilteredDataFrame":
+    def set_filter(self, selector: List[str]) -> "FilteredDataFrame":
         """
-        Defines the filter of what columns we want to use from the data.
-        @param selector: List of colunn names to filter with
+        Defines the set_filter of what columns we want to use from the data.
+        @param selector: List of colunn names to set_filter with
         @return: self for use as a builder
         """
         # First validate it
@@ -33,8 +33,8 @@ class FilteredDataFrame:
 
     def filter_by_indices(self, indices: List[int]) -> "FilteredDataFrame":
         """
-        Defines the filter of what columsn we want to use from the data
-        @param indices: list of column indices to filter with
+        Defines the set_filter of what columsn we want to use from the data
+        @param indices: list of column indices to set_filter with
         @return: self for use as a builder
         """
         # first validate it
@@ -45,9 +45,9 @@ class FilteredDataFrame:
         self.selector = [self.data.columns[i] for i in self.indices]
         return self
 
-    def get_filtered(self) -> pd.DataFrame:
+    def get(self) -> pd.DataFrame:
         """
-        Get a (shallow) copy of the data, applying the filter (if present)
+        Get a view of the data, applying the set_filter (if present)
         @return: the data, filtered
         """
         if not self.indices:
@@ -59,7 +59,7 @@ class FilteredDataFrame:
         Finds which rows are duplicated in the data frame.
         @return:A set of sets of duplicate row's indices,
         """
-        whole_inputs = self.get_filtered()
+        whole_inputs = self.get()
         duplicates = [x for x in whole_inputs[whole_inputs.duplicated()].index]
         non_duplicate_list = [
             x for x in whole_inputs.index if x not in duplicates
@@ -83,16 +83,7 @@ class FilteredDataFrame:
                     break
         return results
 
-    def remove_duplicates(
-        self, duplicates_dict: Dict[int, Set[int]] = None
-    ) -> pd.DataFrame:
-        """
-        Returns a shallow copy of the data with duplicate rows having their values removed
-        The lowest indexed instance of each duplicate set will be retained.
-
-        @param duplicates_dict: Optional Set of Sets of indices of duplicates.
-        @return: the data, with all bar one copy of each duplicate removed
-        """
+    def _get_non_duplicate_rows(self, duplicates_dict: Dict[int, Set[int]] = None) -> List[int]:
         if duplicates_dict is None:
             # assume we are removing according to this dataset
             duplicates_dict = self.get_duplicate_rows()
@@ -104,14 +95,30 @@ class FilteredDataFrame:
         non_duplicates = [
             x for x in self.data.index if x not in duplicate_indices
         ]
+        return non_duplicates
 
-        return self.get_filtered().data.iloc[non_duplicates]
-
-    def average_duplicates(
-        self, duplicates_dict: Dict[int, Set[int]]
+    def get_without_duplicates(
+        self, duplicates_dict: Dict[int, Set[int]] = None
     ) -> pd.DataFrame:
         """
-        Returns a shallow copy of the data with duplicate rows having their values averaged.
+        Returns a view of the data with duplicate rows having their values removed
+        The lowest indexed instance of each duplicate set will be retained.
+
+        @param duplicates_dict: Optional Set of Sets of indices of duplicates.
+        @return: the data, with all bar one copy of each duplicate removed
+        """
+        non_duplicates = self._get_non_duplicate_rows(duplicates_dict)
+        return self.get().iloc[non_duplicates]
+
+    def remove_duplicates(self, duplicates_dict: Dict[int, Set[int]] = None) -> None:
+        non_duplicates = self._get_non_duplicate_rows(duplicates_dict)
+        self.data = self.data.iloc[non_duplicates]
+
+    def get_with_average_duplicates(
+        self, duplicates_dict: Dict[int, Set[int]]=None
+    ) -> pd.DataFrame:
+        """
+        Returns a view of the data with duplicate rows having their values averaged.
         The expectation is this list of duplicates is coming from a different DataFrame
         @param duplicates_dict: dict of sets of duplicates, keyed by the index
         of the first copy of that duplicate
@@ -119,11 +126,12 @@ class FilteredDataFrame:
         a single row whose value is the average of those it is replacing.
         """
         # first build a copy of the data with the duplicates removed
-        results = self.remove_duplicates(duplicates_dict)
+        results = self.get_without_duplicates(duplicates_dict).copy()
 
         # now figure out the averages for the ones that need averaging
+        filtered_data = self.get()
         for idx, dupes in duplicates_dict.items():
-            to_average = [self.data.iloc[dupe] for dupe in dupes]
+            to_average = [filtered_data.iloc[dupe] for dupe in dupes]
             to_average.append(results.iloc[idx])
             results.iloc[idx] = pd.concat(to_average).mean(axis=0)
 

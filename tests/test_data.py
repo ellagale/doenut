@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from doenut.data import FilteredDataFrame
+from doenut.data import FilteredDataFrame, DataSet
 
 # since pytest runs from an arbitrary location, fix that.
 os.chdir(os.path.dirname(__file__))
@@ -39,13 +39,13 @@ def test_terms():
     data = FilteredDataFrame(inputs)
     assert data.data.size == 60
     assert len(data.data.columns) == 4
-    assert data.get_filtered().equals(inputs)
+    assert data.get().equals(inputs)
 
 
 def test_filter_columns():
     selector = ["Spin", "Add."]
-    data = FilteredDataFrame(inputs).filter(selector)
-    filtered_data = data.get_filtered()
+    data = FilteredDataFrame(inputs).set_filter(selector)
+    filtered_data = data.get()
     assert filtered_data.size == 30
     assert len(filtered_data.columns) == 2
 
@@ -53,18 +53,17 @@ def test_filter_columns():
 def test_filter_columns_by_index():
     indices = [2, 3]
     data = FilteredDataFrame(inputs).filter_by_indices(indices)
-    filtered_data = data.get_filtered()
+    filtered_data = data.get()
     assert filtered_data.size == 30
     assert len(filtered_data.columns) == 2
 
 
 def test_filter_both_ways():
     selector = ["Spin", "Add."]
-    data = FilteredDataFrame(inputs).filter(selector)
-    filtered_data = data.get_filtered()
+    data = FilteredDataFrame(inputs).set_filter(selector)
+    filtered_data = data.get()
     indices = [2, 3]
-    indexed_data = FilteredDataFrame(inputs).filter_by_indices(indices)
-    filtered_indexed_data = data.get_filtered()
+    filtered_indexed_data = data.get()
     assert filtered_data.equals(filtered_indexed_data)
 
 
@@ -76,19 +75,31 @@ def test_get_duplicates():
 
 def test_remove_duplicates():
     frame = FilteredDataFrame(new_inputs)
-    data = frame.remove_duplicates()
+    data = frame.get_without_duplicates()
     frame2 = FilteredDataFrame(new_responses)
-    data2 = frame2.remove_duplicates(frame.get_duplicate_rows())
+    data2 = frame2.get_without_duplicates(frame.get_duplicate_rows())
     assert len(data) == 26
     assert max(data.index) == 25
     assert len(data2) == 26
     assert max(data2.index) == 25
-    assert data2.iloc[7][0] == 7.21
+    assert data2.iloc[7].iloc[0] == 7.21
+
+
+def test_remove_duplicates_from_dataset():
+    dset = DataSet(new_inputs, new_responses)
+    data = dset.get_inputs_without_duplicates()
+    data2 = dset.get_responses_without_duplicates()
+    assert len(data) == 26
+    assert max(data.index) == 25
+    assert len(data2) == 26
+    assert max(data2.index) == 25
+    assert data2.iloc[7].iloc[0] == 7.21
 
 
 def test_average_duplicates():
     duplicates = FilteredDataFrame(new_inputs).get_duplicate_rows()
-    data = FilteredDataFrame(new_responses).average_duplicates(duplicates)
+    data = FilteredDataFrame(new_responses).get_with_average_duplicates(duplicates)
     assert len(data) == 26
     assert max(data.index) == 25
-    assert round(data.iloc[7][0], 2) == 7.22
+    assert round(data.iloc[7].iloc[0],2) == 7.22
+
