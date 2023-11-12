@@ -13,7 +13,6 @@ class AveragedModel(Model):
     set of inputs via a leave-one-out approach.
     """
 
-    # TODO: response_key should probably be moved to selective model
     def __init__(
         self,
         data: DataSet,
@@ -21,8 +20,7 @@ class AveragedModel(Model):
         scale_run_data: bool = True,
         fit_intercept: bool = True,
         response_key: str = None,
-        drop_duplicates: str = True,
-        input_selector: List = [],
+        drop_duplicates: str = 'yes',
     ):
         """
         Constructor
@@ -31,57 +29,52 @@ class AveragedModel(Model):
         @param fit_intercept: Whether to fit the intercept to zero
         @param response_key: for multi-column responses, which one to test on
         @param drop_duplicates: whether to drop duplicate values or not.
-        @param input_selector: Optional list of columns to set_filter input by
         May also be 'average' which will cause them to be dropped, but the one
         left will have its response value(s) set to the average of all the
         duplicates.
         """
-        new_data = data.get_filtered_frameset()
-        # Handle input selector
-        if input_selector is not None and len(input_selector) > 0:
-            new_data.set_filter(input_selector)
-
         # Call super to set up basic model
-        super().__init__(new_data, scale_data, fit_intercept)
+        super().__init__(data, scale_data, fit_intercept)
 
+        filtered_responses = self.data.get_filtered_responses()
         # check the columns
         if response_key is None:
-            if len(new_data.get_filtered_responses().columns) > 1:
+            if len(filtered_responses.columns) > 1:
                 raise ValueError(
                     "No response key specified and multiple response columns"
                 )
-            response_key = new_data.get_filtered_responses().columns[0]
+            response_key = filtered_responses.columns[0]
 
-        # handle checking the duplicates
-        self.duplicates = None
-        new_inputs, new_responses = None, None
+        # Get the processed inputs + responses (after filtering + dedupe
+        proc_inputs, proc_responses = None, None
         if isinstance(drop_duplicates, str):
             if str.lower(drop_duplicates) == "yes":
-                new_data = new_data.remove_duplicates()
-
+                proc_inputs = self.data.get_inputs_without_duplicates()
+                proc_responses = self.data.get_responses_without_duplicates()
             elif str.lower(drop_duplicates) == "average":
-                new_inputs, new_responses = new_data.get_with_average_duplicates()
+                proc_inputs = self.data.get_inputs_with_averaged_duplicates()
+                proc_responses = self.data.get_responses_without_duplicates()
             elif str.lower(drop_duplicates) == "no":
-                new_inputs, new_responses = data.get(), data.get_filtered_responses()
+                proc_inputs = self.data.get_filtered_inputs()
+                proc_responses = self.data.get_filtered_responses()
             else:
                 raise ValueError(
                     f"Invalid drop_duplicates value {drop_duplicates}"
                     " - should one of 'yes', 'no', 'average'"
                 )
 
-        self.data = DataSet(new_inputs, new_responses)
-
+        proc_data = DataSet(proc_inputs, proc_responses)
 
         # Use leave-one-out on the input data rows to generate a set of models
         self.models = ModelSet(None, None, scale_data, fit_intercept)
         model_predictions = []
         errors = []
         model_responses = []
-        for i, row_idx in enumerate(new_inputs.index):
-            test_input = new_inputs.iloc[i].to_numpy().reshape(1, -1)
-            test_response = self.responses.iloc[i]
-            train_input = new_inputs.drop(row_idx).to_numpy()
-            train_responses = self.responses.drop(row_idx)
+        for i, row_idx in enumerate(proc_inputs.index):
+            test_input = proc_inputs.iloc[i].to_numpy().reshape(1, -1)
+            test_response = proc_responses.iloc[i]
+            train_input = proc_inputs.drop(row_idx).to_numpy()
+            train_responses = proc_responses.drop(row_idx)
             # We need to re-scale each column, using the training data *only*,
             # but then applying the same scaling to the test data.
             if scale_run_data:
@@ -104,21 +97,21 @@ class AveragedModel(Model):
         self.model.coef_ = self.averaged_coeffs
         self.model.intercept_ = self.averaged_intercepts
 
-        self.r2 = self.get_r2_for(self.data)
+        self.r2 = self.get_r2_for(proc_data)
 
         # Now calculate q2
         self.q2_predictions = pd.DataFrame.from_records(
-            model_predictions, columns=new_responses.columns
+            model_predictions, columns=proc_responses.columns
         )
-        self.q2_groundtruths = pd.DataFrame.from_records(
-            model_responses, columns=new_responses.columns
+        self.q2_ground_truths = pd.DataFrame.from_records(
+            model_responses, columns=proc_responses.columns
         )
         self.q2 = doenut.Calculate_Q2(
-            self.q2_groundtruths,
+            self.q2_ground_truths,
             self.q2_predictions,
-            new_responses,
+            proc_responses,
             response_key,
         )
         # finally make a fitted model.
-        self.model.fit(inputs, responses)
-        self.predictions = self.get_predictions_for(new_inputs)
+        self.model.fit(data.inputs.data, data.inputs.data)
+        self.predictions = self.get_predictions_for(proc_inputs)

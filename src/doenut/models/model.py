@@ -24,7 +24,7 @@ class Model:
             # No scaling. Set the co-efficients to identity values.
             self.scaling_Rj = 1
             self.scaling_Mj = 0
-        inputs = self.data.get()
+        inputs = self.data.get_filtered_inputs()
         responses = self.data.get_filtered_responses()
         self.model = LinearRegression(fit_intercept=fit_intercept)
         self.model.fit(inputs, responses)

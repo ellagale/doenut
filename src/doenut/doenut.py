@@ -308,7 +308,7 @@ def calculate_R2_and_Q2_for_models(
         temp_tuple = (
             model.model,
             model.q2_predictions,
-            model.q2_groundtruths,
+            model.q2_ground_truths,
             model.coeffs,
             model.r2s,
             model.r2,

@@ -4,6 +4,8 @@ import doenut.models
 import pytest
 import os
 
+from doenut.data import DataSet
+
 # since pytest runs from an arbitrary location, fix that.
 os.chdir(os.path.dirname(__file__))
 df = pd.read_csv("solar_cells_1.csv")
@@ -72,8 +74,9 @@ def test_calculate_r2_and_q2_for_models():
     assert round(Q2, 3) == 0.170
 
 
-def test_selective_model():
-    model = doenut.models.SelectiveModel(inputs, responses)
+def test_averaged_model():
+    data = DataSet(inputs, responses)
+    model = doenut.models.AveragedModel(data)
     assert round(model.r2, 3) == 0.604
     assert round(model.q2, 3) == 0.170
 

@@ -4,7 +4,7 @@ import pandas as pd
 from doenut.data import FilteredDataFrame
 
 
-class DataSet():
+class DataSet:
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
         if inputs is None or len(inputs) == 0:
             raise ValueError("Inputs must not be empty")
