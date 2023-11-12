@@ -1,2 +1,2 @@
-from .filtered_data_frame import FilteredDataFrame
-from .filtered_data_set import DataSet
+from .data_set import DataSet
+from .filtered_data_set import FilteredDataSet

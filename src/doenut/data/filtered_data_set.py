@@ -1,58 +1,54 @@
-from typing import Iterable, List
+from typing import List, Tuple
 import pandas as pd
 
-from doenut.data import FilteredDataFrame
-from doenut.data.DataSet import DataSet
-from doenut.data.DataSetModifier import DataSetModifier
+from doenut.data.data_set import DataSet
+from doenut.data.data_set_modifier import DataSetModifier
 
 
 class FilteredDataSet(DataSetModifier):
+    @classmethod
+    def _parse_selector(cls,
+                        data: pd.DataFrame,
+                        selector: List[str|int]) -> Tuple[List[str], List[int]]:
+        if isinstance(selector[0], str):  # columns provided
+            # First validate it
+            for col in selector:
+                if col not in data.columns:
+                    raise ValueError(f"Data lacks column {col}")
+            return selector, [i for i, j in enumerate(data.columns) if j in input_selector]
+        elif isinstance(selector[0], int):  # column indices provided
+            for idx in selector:
+                if idx >= len(data):
+                    raise IndexError(f"Index {idx} out of range for data")
+            return [data.columns[i] for i in selector], selector
+
+        raise ValueError("Type of selector needs to be string or int")
+
     def __init__(self,
-                 data: DataSet,
-                 input_selector: Iterable[str|int],
-                 response_selector: Iterable[str|int] = None
+                 data: DataSetModifier,
+                 input_selector: List[str|int],
+                 response_selector: List[str|int] = None
                  ):
         super().__init__(data)
+
+        # Parse / Validate the input selector
         if input_selector is None:
             raise ValueError("Input selector must select at least one column!")
-        self.input_selector = 
+        self.input_selector, self.input_indices = self._parse_selector(self.data.get_inputs(), input_selector)
 
+        if response_selector is not None:
+            self.response_selector, self.response_indices = self._parse_selector(self.data.get_responses(), response_selector)
+        else:
+            self.response_selector = None
+            self.response_indices = None
 
+    def _parse_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
+        if not self.input_indices:
+            # Should never happen, but hey
+            return data
+        return data.iloc[:, self.input_indices]
 
-
-
-    def set_selector(self, selector: Iterable[str]) -> "DataSet":
-        self.inputs.set_filter(selector)
-        return self
-
-    def set_selector_by_indices(self, indices: Iterable[int]) -> "DataSet":
-        self.inputs.filter_by_indices(indices)
-        return self
-
-    def set_response_selector(self, selector: Iterable[str]) -> "DataSet":
-        self.responses.set_filter(selector)
-        return self
-
-    def set_response_selector_by_indices(self, indices: Iterable[int]) -> "DataSet":
-        self.responses.filter_by_indices(indices)
-        return self
-
-    def get_filtered_inputs(self) -> pd.DataFrame:
-        return self.inputs.get()
-
-    def get_filtered_responses(self) -> pd.DataFrame:
-        return self.responses.get()
-
-    def get_inputs_without_duplicates(self) -> pd.DataFrame:
-        return self.inputs.get_without_duplicates()
-
-    def get_responses_without_duplicates(self) -> pd.DataFrame:
-        duplicate_dict = self.inputs.get_duplicate_rows()
-        return self.responses.get_without_duplicates(duplicate_dict)
-
-    def get_inputs_with_averaged_duplicates(self) -> pd.DataFrame:
-        return self.inputs.get_with_average_duplicates()
-
-    def get_responses_with_averaged_duplicates(self) -> pd.DataFrame:
-        duplicate_dict = self.inputs.get_duplicate_rows()
-        return self.responses.get_without_duplicates(duplicate_dict)
+    def _parse_responses(self, data: pd.DataFrame) -> pd.DataFrame:
+        if not self.response_indices:
+            return data
+        return data.iloc[:, self.response_indices]

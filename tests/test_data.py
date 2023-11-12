@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from doenut.data import FilteredDataFrame, DataSet
+from doenut.data import FilteredDataFrame, data_set
 
 # since pytest runs from an arbitrary location, fix that.
 os.chdir(os.path.dirname(__file__))
