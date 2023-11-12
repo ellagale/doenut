@@ -1,4 +1,4 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Iterable
 
 import pandas as pd
 
@@ -15,7 +15,7 @@ class FilteredDataFrame:
         self.selector = None
         self.indices = None
 
-    def set_filter(self, selector: List[str]) -> "FilteredDataFrame":
+    def set_filter(self, selector: Iterable[str]) -> "FilteredDataFrame":
         """
         Defines the set_filter of what columns we want to use from the data.
         @param selector: List of colunn names to set_filter with
@@ -31,7 +31,7 @@ class FilteredDataFrame:
         ]
         return self
 
-    def filter_by_indices(self, indices: List[int]) -> "FilteredDataFrame":
+    def filter_by_indices(self, indices: Iterable[int]) -> "FilteredDataFrame":
         """
         Defines the set_filter of what columsn we want to use from the data
         @param indices: list of column indices to set_filter with
@@ -83,7 +83,7 @@ class FilteredDataFrame:
                     break
         return results
 
-    def _get_non_duplicate_rows(self, duplicates_dict: Dict[int, Set[int]] = None) -> List[int]:
+    def _get_non_duplicate_rows(self, duplicates_dict: Dict[int, Iterable[int]] = None) -> List[int]:
         if duplicates_dict is None:
             # assume we are removing according to this dataset
             duplicates_dict = self.get_duplicate_rows()
@@ -98,7 +98,7 @@ class FilteredDataFrame:
         return non_duplicates
 
     def get_without_duplicates(
-        self, duplicates_dict: Dict[int, Set[int]] = None
+        self, duplicates_dict: Dict[int, Iterable[int]] = None
     ) -> pd.DataFrame:
         """
         Returns a view of the data with duplicate rows having their values removed
@@ -110,12 +110,12 @@ class FilteredDataFrame:
         non_duplicates = self._get_non_duplicate_rows(duplicates_dict)
         return self.get().iloc[non_duplicates]
 
-    def remove_duplicates(self, duplicates_dict: Dict[int, Set[int]] = None) -> None:
+    def remove_duplicates(self, duplicates_dict: Dict[int, Iterable[int]] = None) -> None:
         non_duplicates = self._get_non_duplicate_rows(duplicates_dict)
         self.data = self.data.iloc[non_duplicates]
 
     def get_with_average_duplicates(
-        self, duplicates_dict: Dict[int, Set[int]]=None
+        self, duplicates_dict: Dict[int, Iterable[int]] = None
     ) -> pd.DataFrame:
         """
         Returns a view of the data with duplicate rows having their values averaged.

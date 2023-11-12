@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 import pandas as pd
 
 from doenut.data import FilteredDataFrame
@@ -16,17 +16,21 @@ class DataSet():
         self.inputs = FilteredDataFrame(inputs)
         self.responses = FilteredDataFrame(responses)
 
-    def set_selector(self, selector:List[str]) -> "DataSet":
+    def set_selector(self, selector: Iterable[str]) -> "DataSet":
         self.inputs.set_filter(selector)
+        return self
 
-    def set_selector_by_indices(self, indices: List[int]) -> "DataSet":
+    def set_selector_by_indices(self, indices: Iterable[int]) -> "DataSet":
         self.inputs.filter_by_indices(indices)
+        return self
 
-    def set_response_selector(self, selector: List[str]) -> "DataSet":
+    def set_response_selector(self, selector: Iterable[str]) -> "DataSet":
         self.responses.set_filter(selector)
+        return self
 
-    def set_response_selector_by_indices(self, indices: List[int]) -> "DataSet":
+    def set_response_selector_by_indices(self, indices: Iterable[int]) -> "DataSet":
         self.responses.filter_by_indices(indices)
+        return self
 
     def get_filtered_inputs(self) -> pd.DataFrame:
         return self.inputs.get()
