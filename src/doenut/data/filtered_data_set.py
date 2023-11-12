@@ -1,20 +1,25 @@
-from typing import Iterable
+from typing import Iterable, List
 import pandas as pd
 
 from doenut.data import FilteredDataFrame
+from doenut.data.DataSet import DataSet
+from doenut.data.DataSetModifier import DataSetModifier
 
 
-class DataSet:
-    def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
-        if inputs is None or len(inputs) == 0:
-            raise ValueError("Inputs must not be empty")
-        if responses is None or len(responses) == 0:
-            raise ValueError("Responses must not be empty")
-        if len(inputs) != len(responses):
-            raise ValueError("Inputs and Responses must have the same length")
+class FilteredDataSet(DataSetModifier):
+    def __init__(self,
+                 data: DataSet,
+                 input_selector: Iterable[str|int],
+                 response_selector: Iterable[str|int] = None
+                 ):
+        super().__init__(data)
+        if input_selector is None:
+            raise ValueError("Input selector must select at least one column!")
+        self.input_selector = 
 
-        self.inputs = FilteredDataFrame(inputs)
-        self.responses = FilteredDataFrame(responses)
+
+
+
 
     def set_selector(self, selector: Iterable[str]) -> "DataSet":
         self.inputs.set_filter(selector)
