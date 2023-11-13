@@ -40,9 +40,7 @@ class ModelSet:
         scale_data = self._validate_value("scale_data", scale_data)
         fit_intercept = self._validate_value("fit_intercept", fit_intercept)
         dataset = DataSet(inputs, responses)
-        if scale_data:
-            dataset.scale()
-        model = Model(dataset, fit_intercept)
+        model = Model(dataset, scale_data, fit_intercept)
         self.models.append(model)
         return model
 

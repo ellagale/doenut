@@ -91,6 +91,7 @@ def test_avg_duplicates():
 
 def test_copy():
     import copy
+
     x = DataSet(new_inputs, new_responses)
     y = copy.deepcopy(x).drop_duplicates()
     assert len(x.get_inputs()) == 27

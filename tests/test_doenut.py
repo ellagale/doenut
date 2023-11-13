@@ -75,7 +75,7 @@ def pytest_namespace():
 
 
 def test_averaged_model():
-    data = DataSet(inputs, responses).scale()
+    data = DataSet(inputs, responses)
     model = doenut.models.AveragedModel(data)
     assert round(model.r2, 3) == 0.604
     assert round(model.q2, 3) == 0.170
@@ -130,7 +130,11 @@ def test_hand_tune_fully_quad():
     input_selector = _get_column_names_by_number(
         pytest.sat_inputs_orig, range(8)
     )
-    data = DataSet(pytest.sat_inputs_orig, responses).filter(input_selector).scale()
+    data = (
+        DataSet(pytest.sat_inputs_orig, responses)
+        .filter(input_selector)
+        .scale()
+    )
     model = doenut.models.AveragedModel(
         data,
         scale_run_data=True,
@@ -144,7 +148,7 @@ def test_hand_tune_parsnip():
     input_selector = _get_column_names_by_number(
         pytest.sat_inputs_orig, [0, 1, 2, 4, 5, 6]
     )
-    data = DataSet(pytest.sat_inputs_orig, responses).filter(input_selector).scale()
+    data = DataSet(pytest.sat_inputs_orig, responses).filter(input_selector)
     model = doenut.models.AveragedModel(
         data,
         scale_run_data=True,
@@ -179,7 +183,7 @@ def test_saturated_models():
 
 def test_saturated_9_terms_2():
     input_selector = _get_column_names_by_number(pytest.sat_inputs_2, range(9))
-    data = DataSet(pytest.sat_inputs_2, new_responses).filter(input_selector).scale()
+    data = DataSet(pytest.sat_inputs_2, new_responses).filter(input_selector)
     model = doenut.models.AveragedModel(
         data,
         drop_duplicates="no",
@@ -206,7 +210,7 @@ def test_saturated_parsnip_terms_2():
     input_selector = _get_column_names_by_number(
         pytest.sat_inputs_2, [0, 1, 2, 3, 4, 5]
     )
-    data = DataSet(pytest.sat_inputs_2, new_responses).filter(input_selector).scale()
+    data = DataSet(pytest.sat_inputs_2, new_responses).filter(input_selector)
     model = doenut.models.AveragedModel(
         data,
         drop_duplicates="no",

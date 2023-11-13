@@ -1,4 +1,6 @@
 import pandas as pd
+
+from doenut.data import DataSet
 from doenut.models import ModelSet
 from doenut.models import AveragedModel
 
@@ -60,6 +62,8 @@ class AveragedModelSet(ModelSet):
         scale_run_data=None,
         fit_intercept=None,
         response_key=None,
+        drop_duplicates=None,
+        input_selector=None,
     ):
         inputs = self._validate_value("inputs", inputs)
         responses = self._validate_value("responses", responses)
@@ -71,12 +75,16 @@ class AveragedModelSet(ModelSet):
         )
         input_selector = self._validate_value("input_selector", input_selector)
 
+        data = DataSet(inputs, responses)
+        if input_selector:
+            data.filter(input_selector)
         model = AveragedModel(
-            inputs,
-            responses,
+            data,
+            scale_data,
             scale_run_data,
             fit_intercept,
             response_key,
+            drop_duplicates,
         )
         self.models.append(model)
         return model

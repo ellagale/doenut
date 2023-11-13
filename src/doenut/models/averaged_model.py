@@ -17,6 +17,7 @@ class AveragedModel(Model):
     def __init__(
         self,
         data: DataSet,
+        scale_data: bool = True,
         scale_run_data: bool = True,
         fit_intercept: bool = True,
         response_key: str = None,
@@ -25,6 +26,7 @@ class AveragedModel(Model):
         """
         Constructor
         @param data: the data to run / test against.
+        @param scale_data: Whether to scale the overall data before running it.
         @param scale_run_data: Whether to normalise the data for each run
         @param fit_intercept: Whether to fit the intercept to zero
         @param response_key: for multi-column responses, which one to test on
@@ -34,7 +36,7 @@ class AveragedModel(Model):
         duplicates.
         """
         # Call super to set up basic model
-        super().__init__(data, fit_intercept)
+        super().__init__(data, scale_data, fit_intercept)
 
         inputs = self.data.get_inputs()
         responses = self.data.get_responses()
@@ -113,5 +115,5 @@ class AveragedModel(Model):
             response_key,
         )
         # finally make a fitted model.
-        self.model.fit(inputs, responses)
+        self.model.fit(data.get_inputs(), data.get_responses())
         self.predictions = self.get_predictions_for(proc_inputs)
