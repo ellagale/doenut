@@ -4,7 +4,7 @@ import doenut.models
 import pytest
 import os
 
-from doenut.data import data_set
+from doenut.data import data_set, DataSet
 
 # since pytest runs from an arbitrary location, fix that.
 os.chdir(os.path.dirname(__file__))

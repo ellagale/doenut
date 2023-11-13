@@ -2,6 +2,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import doenut
+import copy
 from doenut.data import DataSet
 from doenut.models.model_set import ModelSet
 from doenut.models.model import Model
@@ -16,7 +17,6 @@ class AveragedModel(Model):
     def __init__(
         self,
         data: DataSet,
-        scale_data: bool = True,
         scale_run_data: bool = True,
         fit_intercept: bool = True,
         response_key: str = None,
@@ -34,39 +34,39 @@ class AveragedModel(Model):
         duplicates.
         """
         # Call super to set up basic model
-        super().__init__(data, scale_data, fit_intercept)
+        super().__init__(data, fit_intercept)
 
-        filtered_responses = self.data.get_filtered_responses()
+        inputs = self.data.get_inputs()
+        responses = self.data.get_responses()
+
         # check the columns
         if response_key is None:
-            if len(filtered_responses.columns) > 1:
+            if len(responses.columns) > 1:
                 raise ValueError(
                     "No response key specified and multiple response columns"
                 )
-            response_key = filtered_responses.columns[0]
+            response_key = responses.columns[0]
 
         # Get the processed inputs + responses (after filtering + dedupe
-        proc_inputs, proc_responses = None, None
+        proc_data, proc_inputs, proc_responses = None, None, None
         if isinstance(drop_duplicates, str):
             if str.lower(drop_duplicates) == "yes":
-                proc_inputs = self.data.get_inputs_without_duplicates()
-                proc_responses = self.data.get_responses_without_duplicates()
+                proc_data = copy.deepcopy(self.data).drop_duplicates()
             elif str.lower(drop_duplicates) == "average":
-                proc_inputs = self.data.get_inputs_with_averaged_duplicates()
-                proc_responses = self.data.get_responses_without_duplicates()
+                proc_data = copy.deepcopy(self.data).average_duplicates()
             elif str.lower(drop_duplicates) == "no":
-                proc_inputs = self.data.get_filtered_inputs()
-                proc_responses = self.data.get_filtered_responses()
+                proc_data = self.data
             else:
                 raise ValueError(
                     f"Invalid drop_duplicates value {drop_duplicates}"
                     " - should one of 'yes', 'no', 'average'"
                 )
 
-        proc_data = DataSet(proc_inputs, proc_responses)
+        proc_inputs = proc_data.get_inputs()
+        proc_responses = proc_data.get_responses()
 
         # Use leave-one-out on the input data rows to generate a set of models
-        self.models = ModelSet(None, None, scale_data, fit_intercept)
+        self.models = ModelSet(None, None, fit_intercept)
         model_predictions = []
         errors = []
         model_responses = []
@@ -113,5 +113,5 @@ class AveragedModel(Model):
             response_key,
         )
         # finally make a fitted model.
-        self.model.fit(data.inputs.data, data.inputs.data)
+        self.model.fit(inputs, responses)
         self.predictions = self.get_predictions_for(proc_inputs)

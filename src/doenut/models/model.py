@@ -1,33 +1,20 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-import doenut
 from doenut.data import DataSet
 
 
 class Model:
     def __init__(
-        self, data: DataSet, scale_data: bool, fit_intercept: bool
+        self, data: DataSet, fit_intercept: bool
     ) -> None:
         """
         Generate a simple model from the given values
-        @param data:  The inputs and responses to the model
-        @param scale_data: Whether to normalise the input data
+        @param data: The inputs and responses to the model
         @param fit_intercept: Whether to fit the intercept to zero
         """
-        self.data_is_scaled = scale_data
         self.data = data
-        if scale_data:
-            (
-                self.data.data,
-                self.scaling_Mj,
-                self.scaling_Rj,
-            ) = doenut.orthogonal_scaling(self.data.data, axis=0)
-        else:
-            # No scaling. Set the co-efficients to identity values.
-            self.scaling_Rj = 1
-            self.scaling_Mj = 0
-        inputs = self.data.get_filtered_inputs()
-        responses = self.data.get_filtered_responses()
+        inputs = self.data.get_inputs()
+        responses = self.data.get_responses()
         self.model = LinearRegression(fit_intercept=fit_intercept)
         self.model.fit(inputs, responses)
         self.predictions = self.get_predictions_for(inputs)
@@ -48,4 +35,4 @@ class Model:
         @param data: The data to test.
         @return: the calculated R2 value as a float
         """
-        return self.model.score(data.get(), data.get_filtered_responses())
+        return self.model.score(data.get_inputs(), data.get_responses())

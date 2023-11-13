@@ -87,3 +87,11 @@ def test_avg_duplicates():
     assert len(x.get_raw_responses()) == 27
     # check the rounding has occurred
     assert round(x.get_responses().iloc[7]["PCE"], 2) == 7.22
+
+
+def test_copy():
+    import copy
+    x = DataSet(new_inputs, new_responses)
+    y = copy.deepcopy(x).drop_duplicates()
+    assert len(x.get_inputs()) == 27
+    assert len(y.get_inputs()) == 26
