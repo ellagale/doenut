@@ -1,11 +1,14 @@
 from typing import List, Tuple
 import pandas as pd
-
-from doenut.data import DataSet
 from doenut.data.data_set_modifier import DataSetModifier
 
+from typing import TYPE_CHECKING
 
-class FilteredDataSet(DataSetModifier):
+if TYPE_CHECKING:
+    from doenut.data.data_set import DataSet
+
+
+class DataSetFilter(DataSetModifier):
     @classmethod
     def _parse_selector(
         cls, data: pd.DataFrame, selector: List[str | int]
@@ -28,7 +31,7 @@ class FilteredDataSet(DataSetModifier):
 
     def __init__(
         self,
-        data: DataSet,
+        data: "DataSet",
         input_selector: List[str | int],
         response_selector: List[str | int] = None,
     ):
@@ -45,9 +48,7 @@ class FilteredDataSet(DataSetModifier):
             (
                 self.response_selector,
                 self.response_indices,
-            ) = self._parse_selector(
-                data.get_responses(), response_selector
-            )
+            ) = self._parse_selector(data.get_responses(), response_selector)
         else:
             self.response_selector = None
             self.response_indices = None

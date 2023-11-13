@@ -1,9 +1,16 @@
+from typing import Type, List
+
 import pandas as pd
 
-from doenut.data.data_set_modifier import DataSetModifier
+from doenut.data.data_set_filter import DataSetFilter
+from doenut.data.data_set_scaler import DataSetScaler
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from doenut.data.data_set_modifier import DataSetModifier
 
 
-class DataSet(DataSetModifier):
+class DataSet:
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
         super().__init__()
         if inputs is None or len(inputs) == 0:
@@ -15,14 +22,19 @@ class DataSet(DataSetModifier):
 
         self.inputs = inputs
         self.responses = responses
+        self.modifiers = []
 
     def get_inputs(self) -> pd.DataFrame:
-        # Override the base class to just hand the raw data
-        return self.inputs
+        results = self.inputs
+        for modifier in self.modifiers:
+            results = modifier.apply_to_inputs(results)
+        return results
 
     def get_responses(self) -> pd.DataFrame:
-        # override the base class to just hand the raw data
-        return self.responses
+        results = self.responses
+        for modifier in self.modifiers:
+            results = modifier.apply_to_responses(results)
+        return results
 
     def get_raw_inputs(self) -> pd.DataFrame:
         return self.inputs
@@ -30,10 +42,23 @@ class DataSet(DataSetModifier):
     def get_raw_responses(self) -> pd.DataFrame:
         return self.responses
 
-    def _parse_responses(self, data: pd.DataFrame) -> pd.DataFrame:
-        # Base class does nothing.
-        return data
+    def add_modifier(
+        self, modifier: Type["DataSetModifier"], **kwargs
+    ) -> None:
+        self.modifiers.append(modifier(self, **kwargs))
 
-    def _parse_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
-        # Base class does nothing.
-        return data
+    def filter(
+        self,
+        input_selector: List[str | int],
+        response_selector: List[str | int] = None,
+    ) -> "DataSet":
+        self.add_modifier(
+            DataSetFilter,
+            input_selector=input_selector,
+            response_selector=response_selector,
+        )
+        return self
+
+    def scale(self) -> "DataSet":
+        self.add_modifier(DataSetScaler)
+        return self

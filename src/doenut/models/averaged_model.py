@@ -20,7 +20,7 @@ class AveragedModel(Model):
         scale_run_data: bool = True,
         fit_intercept: bool = True,
         response_key: str = None,
-        drop_duplicates: str = 'yes',
+        drop_duplicates: str = "yes",
     ):
         """
         Constructor

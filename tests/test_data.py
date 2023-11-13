@@ -98,8 +98,9 @@ def test_remove_duplicates_from_dataset():
 
 def test_average_duplicates():
     duplicates = FilteredDataFrame(new_inputs).get_duplicate_rows()
-    data = FilteredDataFrame(new_responses).get_with_average_duplicates(duplicates)
+    data = FilteredDataFrame(new_responses).get_with_average_duplicates(
+        duplicates
+    )
     assert len(data) == 26
     assert max(data.index) == 25
-    assert round(data.iloc[7].iloc[0],2) == 7.22
-
+    assert round(data.iloc[7].iloc[0], 2) == 7.22

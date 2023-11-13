@@ -1,6 +1,11 @@
 from abc import abstractmethod, ABC
 import pandas as pd
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from doenut.data.data_set import DataSet
+
 
 class DataSetModifier(ABC):
     """
@@ -8,25 +13,14 @@ class DataSetModifier(ABC):
     They take a dataset in, perform some form of operation on it and then
     pass it along
     """
-    def __init__(self, data: "DataSetModifier" = None):
-        self.data = data
 
-    @abstractmethod
-    def _parse_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
+    def __init__(self, dataset: "DataSet", **kwargs):
         pass
 
-    def get_inputs(self) -> pd.DataFrame:
-        return self._parse_inputs(self.data.get_inputs())
-
     @abstractmethod
-    def _parse_responses(self, data: pd.DataFrame) -> pd.DataFrame:
+    def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
         pass
 
-    def get_responses(self) -> pd.DataFrame:
-        return self._parse_responses(self.data.get_responses())
-
-    def get_raw_inputs(self) -> pd.DataFrame:
-        return self.data.get_raw_inputs()
-
-    def get_raw_responses(self) -> pd.DataFrame:
-        return self.get_responses()
+    @abstractmethod
+    def apply_to_responses(self, data: pd.DataFrame) -> pd.DataFrame:
+        pass

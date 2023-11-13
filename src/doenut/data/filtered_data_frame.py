@@ -83,7 +83,9 @@ class FilteredDataFrame:
                     break
         return results
 
-    def _get_non_duplicate_rows(self, duplicates_dict: Dict[int, Iterable[int]] = None) -> List[int]:
+    def _get_non_duplicate_rows(
+        self, duplicates_dict: Dict[int, Iterable[int]] = None
+    ) -> List[int]:
         if duplicates_dict is None:
             # assume we are removing according to this dataset
             duplicates_dict = self.get_duplicate_rows()
@@ -110,7 +112,9 @@ class FilteredDataFrame:
         non_duplicates = self._get_non_duplicate_rows(duplicates_dict)
         return self.get().iloc[non_duplicates]
 
-    def remove_duplicates(self, duplicates_dict: Dict[int, Iterable[int]] = None) -> None:
+    def remove_duplicates(
+        self, duplicates_dict: Dict[int, Iterable[int]] = None
+    ) -> None:
         non_duplicates = self._get_non_duplicate_rows(duplicates_dict)
         self.data = self.data.iloc[non_duplicates]
 

@@ -5,7 +5,9 @@ from doenut.data import DataSet
 
 
 class Model:
-    def __init__(self, data: DataSet, scale_data: bool, fit_intercept: bool) -> None:
+    def __init__(
+        self, data: DataSet, scale_data: bool, fit_intercept: bool
+    ) -> None:
         """
         Generate a simple model from the given values
         @param data:  The inputs and responses to the model
