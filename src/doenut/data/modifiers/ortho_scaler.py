@@ -2,13 +2,13 @@ import numpy as np
 import pandas as pd
 
 from typing import TYPE_CHECKING, Tuple
-from doenut.data.data_set_modifier import DataSetModifier
+from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
 if TYPE_CHECKING:
     from doenut.data.data_set import DataSet
 
 
-class DataSetScaler(DataSetModifier):
+class OrthoScaler(DataSetModifier):
     @classmethod
     def _compute_scaling(cls, data: pd.DataFrame) -> Tuple[float, float]:
         data_max = np.max(data, axis=0)

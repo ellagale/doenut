@@ -2,12 +2,12 @@ from typing import Type, List
 
 import pandas as pd
 
-from doenut.data.data_set_filter import DataSetFilter
-from doenut.data.data_set_scaler import DataSetScaler
+from doenut.data.modifiers.column_selector import ColumnSelector
+from doenut.data.modifiers.ortho_scaler import OrthoScaler
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from doenut.data.data_set_modifier import DataSetModifier
+    from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
 
 class DataSet:
@@ -53,12 +53,12 @@ class DataSet:
         response_selector: List[str | int] = None,
     ) -> "DataSet":
         self.add_modifier(
-            DataSetFilter,
+            ColumnSelector,
             input_selector=input_selector,
             response_selector=response_selector,
         )
         return self
 
     def scale(self) -> "DataSet":
-        self.add_modifier(DataSetScaler)
+        self.add_modifier(OrthoScaler)
         return self

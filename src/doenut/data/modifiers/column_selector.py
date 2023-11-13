@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import pandas as pd
-from doenut.data.data_set_modifier import DataSetModifier
+from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
 from typing import TYPE_CHECKING
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from doenut.data.data_set import DataSet
 
 
-class DataSetFilter(DataSetModifier):
+class ColumnSelector(DataSetModifier):
     @classmethod
     def _parse_selector(
         cls, data: pd.DataFrame, selector: List[str | int]
