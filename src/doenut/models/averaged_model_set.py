@@ -14,7 +14,7 @@ class AveragedModelSet(ModelSet):
         scale_data: bool = True,
         scale_run_data: bool = True,
         fit_intercept: bool = True,
-        drop_duplicates: str = "average",
+        drop_duplicates: str = "yes",
         input_selector: list = [],
     ) -> "AveragedModelSet":
         result = AveragedModelSet(
@@ -29,7 +29,6 @@ class AveragedModelSet(ModelSet):
         )
         for column in responses.columns:
             result.add_model(response_key=column)
-
         return result
 
     def __init__(
@@ -40,7 +39,7 @@ class AveragedModelSet(ModelSet):
         default_scale_run_data: bool = True,
         default_fit_intercept: bool = True,
         default_response_key: list = [0],
-        default_drop_duplicates: str = "average",
+        default_drop_duplicates: str = "yes",
         default_input_selector: list = [],
     ):
         super().__init__(
@@ -67,6 +66,7 @@ class AveragedModelSet(ModelSet):
     ):
         inputs = self._validate_value("inputs", inputs)
         responses = self._validate_value("responses", responses)
+        scale_data = self._validate_value("scale_data", scale_data)
         scale_run_data = self._validate_value("scale_run_data", scale_run_data)
         fit_intercept = self._validate_value("fit_intercept", fit_intercept)
         response_key = self._validate_value("response_key", response_key)

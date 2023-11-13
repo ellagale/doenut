@@ -11,6 +11,7 @@ import copy
 from sklearn.linear_model import LinearRegression
 
 import doenut
+from doenut.data import DataSet
 
 
 def orthogonal_scaling(inputs, axis=0):
@@ -450,10 +451,11 @@ def autotune_model(
         selected_input_terms = output_terms
         if len(selected_input_indices) == 0:
             break
+        data = DataSet(sat_inputs, responses)
+        if selected_input_terms:
+            data.filter(selected_input_terms)
         this_model = doenut.models.AveragedModel(
-            sat_inputs,
-            responses,
-            input_selector=selected_input_terms,
+            data,
             scale_data=True,
             scale_run_data=True,
             drop_duplicates=drop_duplicates,
