@@ -60,12 +60,9 @@ class AveragedModelSet(ModelSet):
         scale_run_data=None,
         fit_intercept=None,
         response_key=None,
-        drop_duplicates=None,
-        input_selector=None,
     ):
         inputs = self._validate_value("inputs", inputs)
         responses = self._validate_value("responses", responses)
-        scale_data = self._validate_value("scale_data", scale_data)
         scale_run_data = self._validate_value("scale_run_data", scale_run_data)
         fit_intercept = self._validate_value("fit_intercept", fit_intercept)
         response_key = self._validate_value("response_key", response_key)
@@ -77,12 +74,9 @@ class AveragedModelSet(ModelSet):
         model = AveragedModel(
             inputs,
             responses,
-            scale_data,
             scale_run_data,
             fit_intercept,
             response_key,
-            drop_duplicates,
-            input_selector,
         )
         self.models.append(model)
         return model

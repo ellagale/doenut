@@ -58,24 +58,24 @@ def pytest_namespace():
     }
 
 
-def test_calculate_r2_and_q2_for_models():
-    input_selector = range(len(inputs.columns))
-    this_model, R2, temp_tuple, _ = doenut.calculate_R2_and_Q2_for_models(
-        inputs,
-        responses,
-        input_selector=input_selector,
-        response_selector=[0],
-        use_scaled_inputs=True,
-        do_scaling_here=True,
-    )
-
-    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-    assert round(R2, 3) == 0.604
-    assert round(Q2, 3) == 0.170
+# def test_calculate_r2_and_q2_for_models():
+#     input_selector = range(len(inputs.columns))
+#     this_model, R2, temp_tuple, _ = doenut.calculate_R2_and_Q2_for_models(
+#         inputs,
+#         responses,
+#         input_selector=input_selector,
+#         response_selector=[0],
+#         use_scaled_inputs=True,
+#         do_scaling_here=True,
+#     )
+#
+#     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+#     assert round(R2, 3) == 0.604
+#     assert round(Q2, 3) == 0.170
 
 
 def test_averaged_model():
-    data = DataSet(inputs, responses)
+    data = DataSet(inputs, responses).scale()
     model = doenut.models.AveragedModel(data)
     assert round(model.r2, 3) == 0.604
     assert round(model.q2, 3) == 0.170
@@ -100,41 +100,39 @@ def test_add_higher_order_terms():
     pytest.sat_inputs_orig_source_list = sat_source_list
 
 
-def test_tune_model_fully_quad():
-    input_selector = [0, 1, 2, 3, 4, 5, 6, 7]
-    scaled_model, R2, temp_tuple, _ = doenut.tune_model(
-        pytest.sat_inputs_orig,
-        responses,
-        input_selector=input_selector,
-        response_selector=[0],
-    )
-    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-    assert round(R2, 3) == 0.815
-    assert round(Q2, 3) == -0.176
+# def test_tune_model_fully_quad():
+#     input_selector = [0, 1, 2, 3, 4, 5, 6, 7]
+#     scaled_model, R2, temp_tuple, _ = doenut.tune_model(
+#         pytest.sat_inputs_orig,
+#         responses,
+#         input_selector=input_selector,
+#         response_selector=[0],
+#     )
+#     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+#     assert round(R2, 3) == 0.815
+#     assert round(Q2, 3) == -0.176
 
 
-def test_tune_model_parsimonious():
-    input_selector = [0, 1, 2, 4, 5, 6]
-    scaled_model, R2, temp_tuple, _ = doenut.tune_model(
-        pytest.sat_inputs_orig,
-        responses,
-        input_selector=input_selector,
-        response_selector=[0],
-    )
-    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-    assert round(R2, 3) == 0.813
-    assert round(Q2, 3) == 0.332
+# def test_tune_model_parsimonious():
+#     input_selector = [0, 1, 2, 4, 5, 6]
+#     scaled_model, R2, temp_tuple, _ = doenut.tune_model(
+#         pytest.sat_inputs_orig,
+#         responses,
+#         input_selector=input_selector,
+#         response_selector=[0],
+#     )
+#     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+#     assert round(R2, 3) == 0.813
+#     assert round(Q2, 3) == 0.332
 
 
 def test_hand_tune_fully_quad():
     input_selector = _get_column_names_by_number(
         pytest.sat_inputs_orig, range(8)
     )
+    data = DataSet(pytest.sat_inputs_orig, responses).filter(input_selector).scale()
     model = doenut.models.AveragedModel(
-        pytest.sat_inputs_orig,
-        responses,
-        input_selector=input_selector,
-        scale_data=True,
+        data,
         scale_run_data=True,
         drop_duplicates="no",
     )
@@ -143,19 +141,12 @@ def test_hand_tune_fully_quad():
 
 
 def test_hand_tune_parsnip():
-    # Index(['Donor %', 'Conc.', 'Spin', 'Add.', 'Donor %**2', 'Conc.**2', 'Spin**2',
-    #'Add.**2', 'Donor %*Conc.', 'Donor %*Spin', 'Donor %*Add.',
-    #'Conc.*Spin', 'Conc.*Add.', 'Spin*Add.'],
-    # dtype='object')
-    # input_selector = ['Donor %', 'Conc.', 'Spin', 'Donor %**2', 'Conc.**2', 'Spin**2']
     input_selector = _get_column_names_by_number(
         pytest.sat_inputs_orig, [0, 1, 2, 4, 5, 6]
     )
+    data = DataSet(pytest.sat_inputs_orig, responses).filter(input_selector).scale()
     model = doenut.models.AveragedModel(
-        pytest.sat_inputs_orig,
-        responses,
-        input_selector=input_selector,
-        scale_data=True,
+        data,
         scale_run_data=True,
         drop_duplicates="no",
     )
@@ -173,57 +164,53 @@ def test_saturated_models():
     pytest.sat_inputs_2_source_list = sat_source_list
 
 
-def test_saturated_9_terms():
-    input_selector = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    scaled_model, R2, temp_tuple, _ = doenut.tune_model(
-        pytest.sat_inputs_2,
-        new_responses,
-        input_selector=input_selector,
-        response_selector=[0],
-    )
-    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-    assert round(R2, 3) == 0.895
-    assert round(Q2, 3) == -0.203
+# def test_saturated_9_terms():
+#     input_selector = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+#     scaled_model, R2, temp_tuple, _ = doenut.tune_model(
+#         pytest.sat_inputs_2,
+#         new_responses,
+#         input_selector=input_selector,
+#         response_selector=[0],
+#     )
+#     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+#     assert round(R2, 3) == 0.895
+#     assert round(Q2, 3) == -0.203
 
 
 def test_saturated_9_terms_2():
     input_selector = _get_column_names_by_number(pytest.sat_inputs_2, range(9))
+    data = DataSet(pytest.sat_inputs_2, new_responses).filter(input_selector).scale()
     model = doenut.models.AveragedModel(
-        pytest.sat_inputs_2,
-        new_responses,
-        input_selector=input_selector,
+        data,
         drop_duplicates="no",
     )
     assert round(model.r2, 3) == 0.895
     assert round(model.q2, 3) == -0.203
 
 
-def test_saturated_parsnip_terms():
-    input_selector = [0, 1, 2, 3, 4, 5]
-    scaled_model, R2, temp_tuple, _ = doenut.tune_model(
-        pytest.sat_inputs_2,
-        new_responses,
-        input_selector=input_selector,
-        response_selector=[0],
-    )
-    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-    assert round(R2, 3) == 0.871
-    assert round(Q2, 3) == 0.716
-    pytest.scaled_model = scaled_model
+# def test_saturated_parsnip_terms():
+#     input_selector = [0, 1, 2, 3, 4, 5]
+#     scaled_model, R2, temp_tuple, _ = doenut.tune_model(
+#         pytest.sat_inputs_2,
+#         new_responses,
+#         input_selector=input_selector,
+#         response_selector=[0],
+#     )
+#     new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+#     assert round(R2, 3) == 0.871
+#     assert round(Q2, 3) == 0.716
+#     pytest.scaled_model = scaled_model
 
 
 def test_saturated_parsnip_terms_2():
     input_selector = _get_column_names_by_number(
         pytest.sat_inputs_2, [0, 1, 2, 3, 4, 5]
     )
+    data = DataSet(pytest.sat_inputs_2, new_responses).filter(input_selector).scale()
     model = doenut.models.AveragedModel(
-        pytest.sat_inputs_2,
-        new_responses,
-        input_selector=input_selector,
+        data,
         drop_duplicates="no",
     )
-    filtered_inputs = pytest.sat_inputs_2[input_selector]
-    # model.model.fit(filtered_inputs, new_responses)
     assert round(model.r2, 3) == 0.871
     assert round(model.q2, 3) == 0.716
 
@@ -249,10 +236,6 @@ def test_run_model():
     )
     expected_results = [2.10, 6.11, 7.61, 4.65, 3.97]
     input_selector = [0, 1, 2, 3, 4, 5]
-    results, _ = doenut.predict_from_model(
-        pytest.scaled_model, sat_inputs, input_selector
-    )
-    actual_results = [round(x[0], 2) for x in results]
     term_list = _get_column_names_by_number(sat_inputs, input_selector)
     filtered_inputs = sat_inputs[term_list]
     results2 = pytest.scaled_model_2.get_predictions_for(
@@ -262,7 +245,6 @@ def test_run_model():
     )
     actual_results_2 = [round(x, 2) for x in results2]
 
-    assert expected_results == actual_results
     assert expected_results == actual_results_2
 
 
