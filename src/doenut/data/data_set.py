@@ -3,6 +3,8 @@ from typing import Type, List
 import pandas as pd
 
 from doenut.data.modifiers.column_selector import ColumnSelector
+from doenut.data.modifiers.duplicate_averager import DuplicateAverager
+from doenut.data.modifiers.duplicate_remover import DuplicateRemover
 from doenut.data.modifiers.ortho_scaler import OrthoScaler
 from typing import TYPE_CHECKING
 
@@ -61,4 +63,12 @@ class DataSet:
 
     def scale(self) -> "DataSet":
         self.add_modifier(OrthoScaler)
+        return self
+
+    def drop_duplicates(self) -> "DataSet":
+        self.add_modifier(DuplicateRemover)
+        return self
+
+    def average_duplicates(self) -> "DataSet":
+        self.add_modifier(DuplicateAverager)
         return self

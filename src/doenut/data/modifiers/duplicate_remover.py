@@ -30,7 +30,7 @@ class DuplicateRemover(DataSetModifier):
                     except KeyError:
                         results[index] = {duplicate}
                     break
-                return results
+        return results
 
     @classmethod
     def _get_non_duplicate_rows(

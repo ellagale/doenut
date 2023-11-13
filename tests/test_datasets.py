@@ -17,6 +17,23 @@ inputs = pd.DataFrame(
 
 responses = pd.DataFrame({"PCE": [float(x) for x in df["PCE"][1:-1]]})
 
+df2 = pd.read_csv("solar_cells_2.csv")
+
+inputs_2 = pd.DataFrame(
+    {
+        "Donor %": [float(x) for x in df2.iloc[1:-1, 1]],
+        "Conc.": [float(x) for x in df2.iloc[1:-1, 2]],
+        "Spin": [float(x) for x in df2.iloc[1:-1, 3]],
+    }
+)
+
+responses_2 = pd.DataFrame({"PCE": [float(x) for x in df2["PCE"][1:-1]]})
+
+new_inputs = pd.concat(
+    [inputs[["Donor %", "Conc.", "Spin"]], inputs_2], axis=0, ignore_index=True
+)
+new_responses = pd.concat([responses, responses_2], axis=0, ignore_index=True)
+
 
 def test_dataset():
     x = DataSet(inputs, responses)
@@ -51,3 +68,22 @@ def test_scaled_filtered_ordering():
     y = DataSet(inputs, responses).filter([0, 1, 3]).scale()
     assert x.get_inputs().equals(y.get_inputs())
     assert x.get_responses().equals(y.get_responses())
+
+
+def test_drop_duplicates():
+    x = DataSet(new_inputs, new_responses).drop_duplicates()
+    assert len(x.get_inputs()) == 26
+    assert len(x.get_responses()) == 26
+    assert len(x.get_raw_inputs()) == 27
+    assert len(x.get_raw_responses()) == 27
+    assert x.get_responses().iloc[7].equals(x.get_raw_responses().iloc[7])
+
+
+def test_avg_duplicates():
+    x = DataSet(new_inputs, new_responses).average_duplicates()
+    assert len(x.get_inputs()) == 26
+    assert len(x.get_responses()) == 26
+    assert len(x.get_raw_inputs()) == 27
+    assert len(x.get_raw_responses()) == 27
+    # check the rounding has occurred
+    assert round(x.get_responses().iloc[7]["PCE"], 2) == 7.22
