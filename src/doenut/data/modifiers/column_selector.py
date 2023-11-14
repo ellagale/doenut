@@ -9,10 +9,21 @@ if TYPE_CHECKING:
 
 
 class ColumnSelector(DataSetModifier):
+    """
+    DataSet Modifier to remove columns from the dataset
+    """
+
     @classmethod
     def _parse_selector(
         cls, data: pd.DataFrame, selector: List[str | int]
     ) -> Tuple[List[str], List[int]]:
+        """
+        Internal helper function to take either a list of column names or
+        column indices and convert it to the other.
+        @param data: The data set the list applies to
+        @param selector: The known selector list
+        @return: Tuple of the column names and indices as lists
+        """
         if isinstance(selector[0], str):  # columns provided
             # First validate it
             for col in selector:

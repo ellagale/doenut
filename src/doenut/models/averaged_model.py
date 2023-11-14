@@ -1,4 +1,3 @@
-from typing import List
 import numpy as np
 import pandas as pd
 import doenut
@@ -38,10 +37,8 @@ class AveragedModel(Model):
         # Call super to set up basic model
         super().__init__(data, scale_data, fit_intercept)
 
-        inputs = self.data.get_inputs()
-        responses = self.data.get_responses()
-
         # check the columns
+        responses = self.data.get_responses()
         if response_key is None:
             if len(responses.columns) > 1:
                 raise ValueError(

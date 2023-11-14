@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from doenut.data import data_set, DataSet
+from doenut.data import DataSet
 from doenut.models import Model
 
 

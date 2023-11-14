@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Tuple, Dict, Set, Iterable, List
+from typing import TYPE_CHECKING, Dict, Set, Iterable, List
 
 import pandas as pd
 
@@ -9,10 +9,15 @@ if TYPE_CHECKING:
 
 
 class DuplicateRemover(DataSetModifier):
+    """
+    Parses a dataset and removes all but the _first_ instance of any row that
+    has duplicate values for the _inputs_. Will also remove the corresponding
+    row in the responses.
+    """
+
     @classmethod
     def _get_duplicate_rows(cls, data: pd.DataFrame) -> Dict[int, Set[int]]:
         duplicates = [x for x in data[data.duplicated()].index]
-        non_duplicates = [x for x in data.index if x not in duplicates]
         results = {}
         for duplicate in duplicates:
             # find first row it is a dupe of

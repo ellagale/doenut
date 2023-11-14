@@ -1,14 +1,18 @@
-from typing import TYPE_CHECKING, Tuple, Dict, Set, Iterable, List
+from typing import Dict, Iterable, List
 
 import pandas as pd
 
 from doenut.data.modifiers.duplicate_remover import DuplicateRemover
 
-if TYPE_CHECKING:
-    from doenut.data.data_set import DataSet
-
 
 class DuplicateAverager(DuplicateRemover):
+    """
+    Parses a dataset and removes all but the _first_ instance of any row that
+    has duplicate values for the _inputs_. Will also remove the corresponding
+    row in the responses, replacing the remaining response with the averages
+    of the duplicates' values.
+    """
+
     @classmethod
     def _apply(
         cls,
@@ -17,7 +21,7 @@ class DuplicateAverager(DuplicateRemover):
         non_duplicate_rows: List[int],
     ) -> pd.DataFrame:
         # first build a copy of the data with the duplicates removed
-        results = data.iloc[non_duplicate_rows].copy()
+        results = data.iloc[non_duplicate_rows].copy(True)
         # now figure out the averages for the ones that need averaging
         for idx, dupes in duplicate_dict.items():
             to_average = [data.iloc[dupe] for dupe in dupes]

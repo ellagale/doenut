@@ -9,6 +9,11 @@ if TYPE_CHECKING:
 
 
 class OrthoScaler(DataSetModifier):
+    """
+    Takes a dataset and scales it per column using an ortho scaling to
+    the range -1 ... 1
+    """
+
     @classmethod
     def _compute_scaling(cls, data: pd.DataFrame) -> Tuple[float, float]:
         data_max = np.max(data, axis=0)
