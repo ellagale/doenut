@@ -5,7 +5,7 @@ import pandas as pd
 from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
 if TYPE_CHECKING:
-    from doenut.data.data_set import DataSet
+    from doenut.data.modifiable_data_set import ModifiableDataSet
 
 
 class DuplicateRemover(DataSetModifier):
@@ -54,13 +54,13 @@ class DuplicateRemover(DataSetModifier):
         non_duplicates = [x for x in data.index if x not in duplicate_indices]
         return non_duplicates
 
-    def __init__(self, data: "DataSet") -> None:
-        super().__init__(data)
+    def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
+        super().__init__(inputs, responses)
         # use input data to determine which rows are duplicates
-        input_data = data.get_inputs()
-        self.duplicate_dict = self._get_duplicate_rows(input_data)
+
+        self.duplicate_dict = self._get_duplicate_rows(inputs)
         self.non_duplicate_rows = self._get_non_duplicate_rows(
-            input_data, self.duplicate_dict
+            inputs, self.duplicate_dict
         )
 
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:

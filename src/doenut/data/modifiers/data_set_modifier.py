@@ -4,7 +4,7 @@ import pandas as pd
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from doenut.data.data_set import DataSet
+    from doenut.data.modifiable_data_set import ModifiableDataSet
 
 
 class DataSetModifier(ABC):
@@ -14,10 +14,13 @@ class DataSetModifier(ABC):
     pass it along
     """
 
-    def __init__(self, dataset: "DataSet", **kwargs):
+    def __init__(
+        self, inputs: pd.DataFrame, responses: pd.DataFrame, **kwargs
+    ):
         """
         Does nothing, but defines the constructor for all other DataSets
-        @param dataset: the dataset the modifier is being applied to.
+        @param inputs: the processed inputs up till this point
+        @param responses: the processed responses up till this point
         Use this to do things like check the size and ranges of the dataset.
         @param kwargs: any other arguments the modifier needs
         """
@@ -27,10 +30,8 @@ class DataSetModifier(ABC):
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Applies the modifier to the inputs of the dataset.
-        If the data needs to be changed, a deep copy should be made.
         @param data: The input data
-        @return: The data post modification. If any values are being directly
-        modified, a copy should be made.
+        @return: The data post modification.
         """
         pass
 
@@ -38,9 +39,7 @@ class DataSetModifier(ABC):
     def apply_to_responses(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Applies the modifier to the responses of the dataset.
-        If the data needs to be changed, a deep copy should be made.
         @param data: The response data
-        @return: The data post modification. If any values are being changed,
-        a copy should be made.
+        @return: The data post modification.
         """
         pass

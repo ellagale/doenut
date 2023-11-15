@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import doenut
 import copy
-from doenut.data import DataSet
+
+from doenut.data.modifiable_data_set import ModifiableDataSet
 from doenut.models.model_set import ModelSet
 from doenut.models.model import Model
 
@@ -15,7 +16,7 @@ class AveragedModel(Model):
 
     def __init__(
         self,
-        data: DataSet,
+        data: ModifiableDataSet,
         scale_data: bool = True,
         scale_run_data: bool = True,
         fit_intercept: bool = True,
@@ -34,8 +35,11 @@ class AveragedModel(Model):
         left will have its response value(s) set to the average of all the
         duplicates.
         """
+        proc_data = copy.deepcopy(data)
+        if scale_data:
+            proc_data.scale()
         # Call super to set up basic model
-        super().__init__(data, scale_data, fit_intercept)
+        super().__init__(proc_data.get(), fit_intercept)
 
         # check the columns
         responses = self.data.get_responses()
@@ -47,22 +51,23 @@ class AveragedModel(Model):
             response_key = responses.columns[0]
 
         # Get the processed inputs + responses (after filtering + dedupe
-        proc_data, proc_inputs, proc_responses = None, None, None
+        proc_inputs, proc_responses = None, None
         if isinstance(drop_duplicates, str):
             if str.lower(drop_duplicates) == "yes":
-                proc_data = copy.deepcopy(self.data).drop_duplicates()
+                proc_data.drop_duplicates()
             elif str.lower(drop_duplicates) == "average":
-                proc_data = copy.deepcopy(self.data).average_duplicates()
+                proc_data.average_duplicates()
             elif str.lower(drop_duplicates) == "no":
-                proc_data = self.data
+                pass
             else:
                 raise ValueError(
                     f"Invalid drop_duplicates value {drop_duplicates}"
                     " - should one of 'yes', 'no', 'average'"
                 )
 
-        proc_inputs = proc_data.get_inputs()
-        proc_responses = proc_data.get_responses()
+        final_data = proc_data.get()
+        proc_inputs = final_data.get_inputs()
+        proc_responses = final_data.get_responses()
 
         # Use leave-one-out on the input data rows to generate a set of models
         self.models = ModelSet(None, None, fit_intercept)
@@ -96,7 +101,7 @@ class AveragedModel(Model):
         self.model.coef_ = self.averaged_coeffs
         self.model.intercept_ = self.averaged_intercepts
 
-        self.r2 = self.get_r2_for(proc_data)
+        self.r2 = self.get_r2_for(final_data)
 
         # Now calculate q2
         self.q2_predictions = pd.DataFrame.from_records(
@@ -112,5 +117,6 @@ class AveragedModel(Model):
             response_key,
         )
         # finally make a fitted model.
-        self.model.fit(data.get_inputs(), data.get_responses())
+        start_data = data.get()
+        self.model.fit(start_data.get_inputs(), start_data.get_responses())
         self.predictions = self.get_predictions_for(proc_inputs)

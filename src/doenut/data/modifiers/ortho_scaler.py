@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Tuple
 from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
 if TYPE_CHECKING:
-    from doenut.data.data_set import DataSet
+    from doenut.data.modifiable_data_set import ModifiableDataSet
 
 
 class OrthoScaler(DataSetModifier):
@@ -22,14 +22,14 @@ class OrthoScaler(DataSetModifier):
         rj = (data_max - data_min) / 2
         return mj, rj
 
-    def __init__(self, data: "DataSet") -> None:
-        super().__init__(data)
-        self.inputs_mj, self.inputs_rj = self._compute_scaling(
-            data.get_inputs()
-        )
-        self.responses_mj, self.responses_rj = self._compute_scaling(
-            data.get_responses()
-        )
+    def __init__(
+        self,
+        inputs: pd.DataFrame,
+        responses: pd.DataFrame,
+    ) -> None:
+        super().__init__(inputs, responses)
+        self.inputs_mj, self.inputs_rj = self._compute_scaling(inputs)
+        self.responses_mj, self.responses_rj = self._compute_scaling(responses)
 
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
         return (data - self.inputs_mj) / self.inputs_rj

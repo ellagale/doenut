@@ -11,7 +11,7 @@ import copy
 from sklearn.linear_model import LinearRegression
 
 import doenut
-from doenut.data import DataSet
+from doenut.data import ModifiableDataSet
 
 
 def orthogonal_scaling(inputs, axis=0):
@@ -297,13 +297,10 @@ def calculate_R2_and_Q2_for_models(
         # Note we don't pass input_selector in here as we have already done it.
         model = doenut.models.AveragedModel(
             edited_input_data,
-            this_model_responses,
             use_scaled_inputs,
             do_scaling_here,
             fit_intercept,
             response_key,
-            drop_duplicates,
-            None,
         )
 
         temp_tuple = (
@@ -451,14 +448,11 @@ def autotune_model(
         selected_input_terms = output_terms
         if len(selected_input_indices) == 0:
             break
-        data = DataSet(sat_inputs, responses)
+        data = ModifiableDataSet(sat_inputs, responses)
         if selected_input_terms:
             data.filter(selected_input_terms)
         this_model = doenut.models.AveragedModel(
-            data,
-            scale_data=True,
-            scale_run_data=True,
-            drop_duplicates=drop_duplicates,
+            data, scale_run_data=True, drop_duplicates=drop_duplicates
         )
         # (
         #     this_model,

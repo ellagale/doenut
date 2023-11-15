@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from doenut.data import DataSet
+from doenut.data import ModifiableDataSet
 from doenut.models import Model
 
 
@@ -39,8 +39,8 @@ class ModelSet:
         responses = self._validate_value("responses", responses)
         scale_data = self._validate_value("scale_data", scale_data)
         fit_intercept = self._validate_value("fit_intercept", fit_intercept)
-        dataset = DataSet(inputs, responses)
-        model = Model(dataset, scale_data, fit_intercept)
+        dataset = ModifiableDataSet(inputs, responses).get()
+        model = Model(dataset, fit_intercept)
         self.models.append(model)
         return model
 

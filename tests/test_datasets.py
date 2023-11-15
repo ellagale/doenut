@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 
-from doenut.data import DataSet
+from doenut.data import ModifiableDataSet
 
 os.chdir(os.path.dirname(__file__))
 df = pd.read_csv("solar_cells_1.csv")
@@ -36,27 +36,27 @@ new_responses = pd.concat([responses, responses_2], axis=0, ignore_index=True)
 
 
 def test_dataset():
-    x = DataSet(inputs, responses)
+    x = ModifiableDataSet(inputs, responses).get()
     assert x.get_inputs().equals(inputs)
     assert x.get_responses().equals(responses)
-    assert x.get_raw_inputs().equals(inputs)
-    assert x.get_raw_responses().equals(responses)
 
 
 def test_filtered_dataset():
-    y = DataSet(inputs, responses).filter([0, 1, 3])
+    y = ModifiableDataSet(inputs, responses).filter([0, 1, 3]).get()
     assert list(y.get_inputs().columns) == ["Donor %", "Conc.", "Add."]
     assert y.get_responses().equals(responses)
-    assert y.get_raw_inputs().equals(inputs)
-    assert y.get_raw_responses().equals(responses)
-    z = DataSet(inputs, responses).filter(["Donor %", "Conc.", "Add."])
+    z = (
+        ModifiableDataSet(inputs, responses)
+        .filter(["Donor %", "Conc.", "Add."])
+        .get()
+    )
     assert z.get_inputs().equals(y.get_inputs())
 
 
 def test_scaled_dataset():
-    x = DataSet(inputs, responses).scale()
+    x = ModifiableDataSet(inputs, responses).scale().get()
     xi = x.get_inputs()
-    xr = x.get_inputs()
+    xr = x.get_responses()
     assert np.min(xi) >= -1
     assert np.max(xi) <= 1
     assert np.min(xr) >= -1
@@ -64,35 +64,22 @@ def test_scaled_dataset():
 
 
 def test_scaled_filtered_ordering():
-    x = DataSet(inputs, responses).scale().filter([0, 1, 3])
-    y = DataSet(inputs, responses).filter([0, 1, 3]).scale()
+    x = ModifiableDataSet(inputs, responses).scale().filter([0, 1, 3]).get()
+    y = ModifiableDataSet(inputs, responses).filter([0, 1, 3]).scale().get()
     assert x.get_inputs().equals(y.get_inputs())
     assert x.get_responses().equals(y.get_responses())
 
 
 def test_drop_duplicates():
-    x = DataSet(new_inputs, new_responses).drop_duplicates()
+    x = ModifiableDataSet(new_inputs, new_responses).drop_duplicates().get()
     assert len(x.get_inputs()) == 26
     assert len(x.get_responses()) == 26
-    assert len(x.get_raw_inputs()) == 27
-    assert len(x.get_raw_responses()) == 27
-    assert x.get_responses().iloc[7].equals(x.get_raw_responses().iloc[7])
+    assert x.get_responses().iloc[7].equals(new_responses.iloc[7])
 
 
 def test_avg_duplicates():
-    x = DataSet(new_inputs, new_responses).average_duplicates()
+    x = ModifiableDataSet(new_inputs, new_responses).average_duplicates().get()
     assert len(x.get_inputs()) == 26
     assert len(x.get_responses()) == 26
-    assert len(x.get_raw_inputs()) == 27
-    assert len(x.get_raw_responses()) == 27
     # check the rounding has occurred
     assert round(x.get_responses().iloc[7]["PCE"], 2) == 7.22
-
-
-def test_copy():
-    import copy
-
-    x = DataSet(new_inputs, new_responses)
-    y = copy.deepcopy(x).drop_duplicates()
-    assert len(x.get_inputs()) == 27
-    assert len(y.get_inputs()) == 26

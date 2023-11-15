@@ -2,28 +2,25 @@ import copy
 
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-from doenut.data import DataSet
+from doenut.data import ModifiableDataSet
+from doenut.data.data_set import DataSet
 
 
 class Model:
-    def __init__(
-        self, data: DataSet, scale_data: bool, fit_intercept: bool
-    ) -> None:
+    def __init__(self, data: DataSet, fit_intercept: bool) -> None:
         """
         Generate a simple model from the given values
         @param data: The inputs and responses to the model
-        @param scale_data: Whether to scale the data before use
         @param fit_intercept: Whether to fit the intercept to zero
         """
-        if scale_data:
-            self.data = copy.deepcopy(data).scale()
-        else:
-            self.data = data
-
+        self.data = data
         inputs = self.data.get_inputs()
         responses = self.data.get_responses()
         self.model = LinearRegression(fit_intercept=fit_intercept)
-        self.model.fit(inputs, responses)
+        try:
+            self.model.fit(inputs, responses)
+        except:
+            pass
         self.predictions = self.get_predictions_for(inputs)
         self.r2 = self.get_r2_for(self.data)
 

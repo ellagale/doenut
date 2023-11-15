@@ -5,7 +5,7 @@ from doenut.data.modifiers.data_set_modifier import DataSetModifier
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from doenut.data.data_set import DataSet
+    from doenut.data.modifiable_data_set import ModifiableDataSet
 
 
 class ColumnSelector(DataSetModifier):
@@ -42,24 +42,25 @@ class ColumnSelector(DataSetModifier):
 
     def __init__(
         self,
-        data: "DataSet",
+        inputs: pd.DataFrame,
+        responses: pd.DataFrame,
         input_selector: List[str | int],
         response_selector: List[str | int] = None,
     ):
-        super().__init__(data)
+        super().__init__(inputs, responses)
 
         # Parse / Validate the input selector
         if input_selector is None:
             raise ValueError("Input selector must select at least one column!")
         self.input_selector, self.input_indices = self._parse_selector(
-            data.get_inputs(), input_selector
+            inputs, input_selector
         )
 
         if response_selector is not None:
             (
                 self.response_selector,
                 self.response_indices,
-            ) = self._parse_selector(data.get_responses(), response_selector)
+            ) = self._parse_selector(responses, response_selector)
         else:
             self.response_selector = None
             self.response_indices = None

@@ -1,1 +1,1 @@
-from .data_set import DataSet
+from .modifiable_data_set import ModifiableDataSet

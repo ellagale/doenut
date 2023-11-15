@@ -1,6 +1,6 @@
 import pandas as pd
 
-from doenut.data import DataSet
+from doenut.data import ModifiableDataSet
 from doenut.models import ModelSet
 from doenut.models import AveragedModel
 
@@ -75,7 +75,9 @@ class AveragedModelSet(ModelSet):
         )
         input_selector = self._validate_value("input_selector", input_selector)
 
-        data = DataSet(inputs, responses)
+        data = ModifiableDataSet(inputs, responses)
+        # if scale_data:
+        #     data.scale()
         if input_selector:
             data.filter(input_selector)
         model = AveragedModel(
