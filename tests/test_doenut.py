@@ -4,7 +4,7 @@ import doenut.models
 import pytest
 import os
 
-from doenut.data import data_set, DataSet
+from doenut.data import DataSet
 
 # since pytest runs from an arbitrary location, fix that.
 os.chdir(os.path.dirname(__file__))
@@ -253,7 +253,8 @@ def test_run_model():
 
 
 def test_autotune():
-    # input_selector = _get_column_names_by_number(pytest.sat_inputs_2, range(9))
+    # input_selector =
+    #     _get_column_names_by_number(pytest.sat_inputs_2, range(9))
     # model = doenut.models.AveragedModel(
     #     pytest.sat_inputs_2,
     #     new_responses,

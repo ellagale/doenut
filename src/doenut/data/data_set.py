@@ -1,3 +1,4 @@
+import copy
 from typing import Type, List
 
 import pandas as pd
@@ -14,7 +15,6 @@ if TYPE_CHECKING:
 
 class DataSet:
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
-        super().__init__()
         if inputs is None or len(inputs) == 0:
             raise ValueError("Inputs must not be empty")
         if responses is None or len(responses) == 0:
@@ -46,29 +46,34 @@ class DataSet:
 
     def add_modifier(
         self, modifier: Type["DataSetModifier"], **kwargs
-    ) -> None:
-        self.modifiers.append(modifier(self, **kwargs))
+    ) -> "DataSet":
+        """
+        Returns a copy of this with the passed modifier added to the stack.
+        Note that the copy will be a shallow one. If the modifier requires a
+        deep copy, it is up to its __init__ function to handle that.
+        @param modifier: The new modifier to add
+        @param kwargs: Any additional arguments the modifier is expecting.
+        """
+        results = copy.copy(self)
+        results.modifiers.append(modifier(self, **kwargs))
+        return results
 
     def filter(
         self,
         input_selector: List[str | int],
         response_selector: List[str | int] = None,
     ) -> "DataSet":
-        self.add_modifier(
+        return self.add_modifier(
             ColumnSelector,
             input_selector=input_selector,
             response_selector=response_selector,
         )
-        return self
 
     def scale(self) -> "DataSet":
-        self.add_modifier(OrthoScaler)
-        return self
+        return self.add_modifier(OrthoScaler)
 
     def drop_duplicates(self) -> "DataSet":
-        self.add_modifier(DuplicateRemover)
-        return self
+        return self.add_modifier(DuplicateRemover)
 
     def average_duplicates(self) -> "DataSet":
-        self.add_modifier(DuplicateAverager)
-        return self
+        return self.add_modifier(DuplicateAverager)

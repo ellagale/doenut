@@ -92,7 +92,7 @@ class AveragedModel(Model):
         self.averaged_intercepts = np.mean(np.array(self.intercepts), axis=0)
         self.r2s = self.models.get_r2s()
 
-        # replace our initial model with the averaged one to determine R2/Q2 from
+        # replace our initial model with the averaged one to determine R2/Q2.
         self.model.coef_ = self.averaged_coeffs
         self.model.intercept_ = self.averaged_intercepts
 
