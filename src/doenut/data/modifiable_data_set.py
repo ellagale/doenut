@@ -61,8 +61,8 @@ class ModifiableDataSet:
             response_selector=response_selector,
         )
 
-    def scale(self) -> "ModifiableDataSet":
-        return self.add_modifier(OrthoScaler)
+    def scale(self, scale_responses:bool = True) -> "ModifiableDataSet":
+        return self.add_modifier(OrthoScaler, scale_responses=scale_responses)
 
     def drop_duplicates(self) -> "ModifiableDataSet":
         return self.add_modifier(DuplicateRemover)

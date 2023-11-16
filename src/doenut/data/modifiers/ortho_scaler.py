@@ -26,13 +26,17 @@ class OrthoScaler(DataSetModifier):
         self,
         inputs: pd.DataFrame,
         responses: pd.DataFrame,
+        scale_responses: bool = True,
     ) -> None:
         super().__init__(inputs, responses)
         self.inputs_mj, self.inputs_rj = self._compute_scaling(inputs)
         self.responses_mj, self.responses_rj = self._compute_scaling(responses)
+        self.scale_responses = scale_responses
 
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
         return (data - self.inputs_mj) / self.inputs_rj
 
     def apply_to_responses(self, data: pd.DataFrame) -> pd.DataFrame:
+        if not self.scale_responses:
+            return data
         return (data - self.responses_mj) / self.responses_rj

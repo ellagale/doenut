@@ -37,7 +37,7 @@ class AveragedModel(Model):
         """
         proc_data = copy.deepcopy(data)
         if scale_data:
-            proc_data.scale()
+            proc_data.scale(False)
         # Call super to set up basic model
         super().__init__(proc_data.get(), fit_intercept)
 
