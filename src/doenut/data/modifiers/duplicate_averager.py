@@ -26,7 +26,7 @@ class DuplicateAverager(DuplicateRemover):
         for idx, dupes in duplicate_dict.items():
             to_average = [data.iloc[dupe] for dupe in dupes]
             to_average.append(results.iloc[idx])
-            results.iloc[idx] = pd.concat(to_average).mean(axis=0)
+            results.iloc[idx] = pd.concat(to_average, axis=1).T.mean(axis=0)
         return results
 
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
