@@ -1,11 +1,7 @@
 import numpy as np
 import pandas as pd
-
-from typing import TYPE_CHECKING, Tuple
+from typing import Tuple
 from doenut.data.modifiers.data_set_modifier import DataSetModifier
-
-if TYPE_CHECKING:
-    from doenut.data.modifiable_data_set import ModifiableDataSet
 
 
 class OrthoScaler(DataSetModifier):
@@ -26,7 +22,7 @@ class OrthoScaler(DataSetModifier):
         self,
         inputs: pd.DataFrame,
         responses: pd.DataFrame,
-        scale_responses: bool = True,
+        scale_responses: bool = False,
     ) -> None:
         super().__init__(inputs, responses)
         self.inputs_mj, self.inputs_rj = self._compute_scaling(inputs)
