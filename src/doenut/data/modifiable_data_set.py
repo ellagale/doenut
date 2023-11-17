@@ -52,8 +52,8 @@ class ModifiableDataSet:
 
     def filter(
         self,
-        input_selector: List[str | int],
-        response_selector: List[str | int] = None,
+        input_selector: List["str | int"],
+        response_selector: List["str | int"] = None,
     ) -> "ModifiableDataSet":
         return self.add_modifier(
             ColumnSelector,
