@@ -175,18 +175,17 @@ def fact_designer(
     levels, do_midpoints=True, shuffle=True, repeats=1, num_midpoints=3
 ):
     levels_in = copy.deepcopy(levels)
+    # Build a basic full factorial design.
     design = full_fact(levels_in)
-    factor_names = [x for x in levels.keys()]
     if do_midpoints:
         midpoints = {}
         for factor in levels.keys():
             if len(levels[factor]) > 2:
-                midpoints[factor] = np.median(levels[factor])
+                midpoints[factor] = np.repeat(np.median(levels[factor]), num_midpoints)
             else:
-                midpoints[factor] = np.mean(levels[factor])
-        # midpoints = pd.DataFrame(midpoints, index=str(len(design)+1))
-        for i in range(num_midpoints):
-            design = design.append(midpoints, ignore_index=True)
+                midpoints[factor] = np.repeat(np.mean(levels[factor]), num_midpoints)
+        midpoint_df = pd.DataFrame.from_dict(midpoints)
+        design = pd.concat([design, midpoint_df], ignore_index=True)
 
         if shuffle:
             design = design.sample(frac=1)
