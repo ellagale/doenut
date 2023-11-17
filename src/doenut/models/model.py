@@ -1,8 +1,5 @@
-import copy
-
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-from doenut.data import ModifiableDataSet
 from doenut.data.data_set import DataSet
 
 
