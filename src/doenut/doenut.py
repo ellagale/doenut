@@ -225,176 +225,18 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     stds = np.std(coeffs, axis=0)[0]
     if normalise:
         ave_coeffs = ave_coeffs / stds
-        stds = stds / stds  # stds = np.std(coeffs, axis=0)[0]
+        stds = np.std(coeffs, axis=0)[0]
     if errors == "std":
         error_bars = stds
     elif errors == "p95":
         # this is an approximation assuming a gaussian distribution in your coeffs
         error_bars = 2 * stds
     else:
-        print(f"Error: errors setting {errors} not known, chose std or p95")
+        raise ValueError(
+            f"Error: errors setting {errors} not known, chose std or p95"
+        )
 
     return ave_coeffs, error_bars
-
-
-def calculate_R2_and_Q2_for_models(
-    inputs,
-    responses,
-    input_selector=None,
-    response_selector=None,
-    fit_intercept=True,
-    use_scaled_inputs=False,
-    do_scaling_here=False,
-    drop_duplicates="average",
-    do_plot=True,
-    do_r2=True,
-    verbose=True,
-):
-    """Calculates R2 for model, sub-models
-    and allows removal of terms
-    Can be called to loop over all responses
-    Or can be called on one response to allow for dropping terms
-    inputs: inputs dataframe
-    responses: response dataframe
-    model: trained model
-    input_selector: list of term numbers (column numbers) in input you want
-    response_selector: list of column numbers in response dataframe you want
-    use_scaled_inputs: this adds a bias term to the model
-    do_scaling_here: whether to calculate the scaling inside this function or not
-    """
-    # if use_scaled_inputs:
-    #    inputs = orthogonal_scaling(inputs)
-    # finds out which columns we're going to use
-    input_column_list = list(inputs.columns)
-    response_column_list = list(responses.columns)
-    if verbose:
-        print(f"Input terms are {input_column_list}")
-        print(f"Input Responses are {response_column_list}\n")
-    # make a linear regression model
-    if response_selector is None:
-        # do all columns
-        response_selector = range(len(responses.columns))
-    res_col_num_list = range(len(response_selector))
-    if input_selector is None:
-        # saturated model - do all columns
-        input_selector = range(len(input_column_list))
-    if response_selector is None:
-        print("mo")
-    for res_col_num in response_selector:
-        # loops over responses, to get R2 for all responses at once
-        # don't use this function
-        # finds key
-        response_key = response_column_list[res_col_num]
-        if verbose:
-            print(f"Selected Response is {response_key}")
-        # creates a new response dataframe of just the response requested
-        this_model_responses = responses[[response_key]]
-        # creates a new input dataframe of just the inputs desired
-        edited_input_data = inputs.iloc[:, input_selector]
-        selected_input_terms = [x for x in edited_input_data.columns]
-        print("Selected input terms:\t{}".format(selected_input_terms))
-
-        # Note we don't pass input_selector in here as we have already done it.
-        model = doenut.models.AveragedModel(
-            edited_input_data,
-            use_scaled_inputs,
-            do_scaling_here,
-            fit_intercept,
-            response_key,
-        )
-
-        temp_tuple = (
-            model.model,
-            model.q2_predictions,
-            model.q2_ground_truths,
-            model.coeffs,
-            model.r2s,
-            model.r2,
-            model.q2,
-        )
-
-        new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-        # we fit it as this is hte easiest way to set up the new model correctly
-        # new_model.fit(edited_input_data, this_model_responses)
-        # we overwrite the coefficients with the averaged model
-        # if len(res_col_num_list) == 1:
-        #     coefficient_list = new_model.coef_[0]
-        # else:
-        #     coefficient_list = new_model.coef_[res_col_num]
-        # # selected_coefficient_list = coefficient_list[input_selector]
-        # # print("Coefficients:\t{}".format(selected_coefficient_list))
-        # new_model.coef_ = coefficient_list
-        # # now get the R2 value
-        R2 = new_model.score(edited_input_data, this_model_responses)
-        if verbose:
-            print("Response {} R2 is {:.3}".format(response_key, R2))
-            print("Input selector was {}".format(input_selector))
-        if not do_r2:
-            doenut.plot.clear_figure()
-        if do_plot:
-            doenut.plot.coeff_plot(
-                coeffs,
-                labels=selected_input_terms,
-                errors="p95",
-                normalise=True,
-            )
-            # print(averaged_coeffs)
-            # scaled_coeffs = orthogonal_scaling(coefficient_list)
-            # plt.bar([x for x in range(len(scaled_coeffs))],scaled_coeffs)
-
-    return new_model, R2, temp_tuple, selected_input_terms
-
-
-def tune_model(
-    inputs,
-    responses,
-    input_selector=None,
-    response_selector=None,
-    fit_intercept=True,
-    use_scaled_inputs=False,
-    do_scaling_here=False,
-    drop_duplicates="average",
-    do_plot=True,
-    do_r2=True,
-    verbose=True,
-):
-    """Wrapper to calculate_R2_and_Q2_for_models to make life easy
-    It does both scaled and unscaled models
-    assumes you want an unscaled model for ease of plotting
-    and a scaled model coefficients for ease of choosing"""
-
-    # scaled model, use this for picking your coefficients
-    (
-        this_model,
-        R2,
-        temp_tuple,
-        selected_input_terms,
-    ) = calculate_R2_and_Q2_for_models(
-        inputs,
-        responses,
-        input_selector=input_selector,
-        response_selector=response_selector,
-        use_scaled_inputs=True,
-        drop_duplicates="No",
-        do_scaling_here=True,
-    )
-    scaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
-
-    # unscaled model, use this for picking your coefficients
-    # this_model, R2, temp_tuple, selected_input_terms = calculate_R2_and_Q2_for_models(
-    #                    inputs,
-    #                    responses[['Profit']],
-    #                    input_selector=input_selector,
-    #                    response_selector=response_selector,
-    #                    use_scaled_inputs=False,
-    #                    drop_duplicates='No',
-    #                    do_scaling_here=False,
-    #                    do_plot=False,
-    #                    verbose=False)
-    # unscaled_model, predictions, ground_truth, coeffs, R2s, R2, Q2= temp_tuple
-    # unscaled_model = []
-
-    return scaled_model, R2, temp_tuple, selected_input_terms
 
 
 def autotune_model(
@@ -454,22 +296,7 @@ def autotune_model(
         this_model = doenut.models.AveragedModel(
             data, scale_run_data=True, drop_duplicates=drop_duplicates
         )
-        # (
-        #     this_model,
-        #     R2,
-        #     temp_tuple,
-        #     selected_input_terms,
-        # ) = calculate_R2_and_Q2_for_models(
-        #     sat_inputs,
-        #     responses,
-        #     input_selector=selected_input_indices,
-        #     use_scaled_inputs=True,
-        #     do_scaling_here=True,
-        #     drop_duplicates=drop_duplicates,
-        #     do_r2=False,
-        #     verbose=False,
-        # )
-        # new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+
         selected_inputs = sat_inputs.iloc[:, selected_input_indices]
         selected_input_terms = list(selected_inputs.columns)
         R2_over_opt.append(this_model.r2)
@@ -571,17 +398,6 @@ def autotune_model(
     return (
         output_indices,
         this_model,
-        # new_model,
-        # predictions,
-        # ground_truth,
-        # coeffs,
-        # R2s,
-        # R2,
-        # Q2,
-        # R2_over_opt,
-        # Q2_over_opt,
-        # n_terms_over_opt,
-        # terms,
     )
 
 
@@ -651,15 +467,6 @@ def map_chemical_space_new(
     z_df[y_key] = mesh_y.reshape(-1)
     z_df[c_key] = constant
     z_df = hook_function(z_df)
-
-    # sat_inputs = add_higher_order_terms(
-    #         z_df,
-    #         add_squares=True,
-    #         add_interactions=True,
-    #         column_list=source_list,
-    #         verbose=True,
-    #     )
-    # predict_from_model(model, inputs, input_selector)
 
     mesh_z = unscaled_model.predict(z_df).reshape(n_points, n_points)
 

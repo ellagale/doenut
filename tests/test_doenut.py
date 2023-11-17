@@ -180,15 +180,6 @@ def test_run_model():
 
 
 def test_autotune():
-    # input_selector =
-    #     _get_column_names_by_number(pytest.sat_inputs_2, range(9))
-    # model = doenut.models.AveragedModel(
-    #     pytest.sat_inputs_2,
-    #     new_responses,
-    #     input_selector=input_selector,
-    #     drop_duplicates="no",
-    # )
-
     (
         output_indices,
         new_model,

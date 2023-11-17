@@ -1,11 +1,8 @@
-from typing import TYPE_CHECKING, Dict, Set, Iterable, List
+from typing import Dict, Set, Iterable, List
 
 import pandas as pd
 
 from doenut.data.modifiers.data_set_modifier import DataSetModifier
-
-if TYPE_CHECKING:
-    from doenut.data.modifiable_data_set import ModifiableDataSet
 
 
 class DuplicateRemover(DataSetModifier):
