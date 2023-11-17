@@ -15,7 +15,7 @@ class ColumnSelector(DataSetModifier):
 
     @classmethod
     def _parse_selector(
-        cls, data: pd.DataFrame, selector: List[str | int]
+        cls, data: pd.DataFrame, selector: List["str | int"]
     ) -> Tuple[List[str], List[int]]:
         """
         Internal helper function to take either a list of column names or
@@ -44,8 +44,8 @@ class ColumnSelector(DataSetModifier):
         self,
         inputs: pd.DataFrame,
         responses: pd.DataFrame,
-        input_selector: List[str | int],
-        response_selector: List[str | int] = None,
+        input_selector: List["str | int"],
+        response_selector: List["str | int"] = None,
     ):
         super().__init__(inputs, responses)
 
