@@ -108,6 +108,7 @@ def coeff_plot(coeffs, labels, errors="std", normalise=False):
     f.set_figheight(9)
     print(f"Input_selector was: {x_points}")
     print(f"Average coefficients are: {ave_coeffs}")
+    print(f"Errors are {error_bars}")
     # print(errors)
     print(f"Coefficient labels are: {labels}")
     plt.bar(x_points, ave_coeffs, yerr=error_bars, capsize=20)
