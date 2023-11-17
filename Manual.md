@@ -31,7 +31,7 @@ The first thing to do is check for experimental error.
 
 types of error. bias error etc.
 
-        doenut.replicate_plot(inputs, # the input dataframe
+        doenut.plot.replicate_plot(inputs, # the input dataframe
             responses, # the response dataframe
             key="ortho")
 
@@ -121,16 +121,11 @@ below. (N.B. the first term is
 
 ## Implementation in DoENUT
 
-Based on `scikit-learn` so could add in any model here. Simpler linear
+Built on top of `scikit-learn` so could add in any model here. Simpler linear
 regression is the best etc.
 
-        original_model, inputs_used, original_model_R2, predictions = doenut.train_model(
-        inputs, 
-        responses['ortho'], 
-        test_responses=None,
-        do_scaling_here=False,
-        fit_intercept=True,
-        verbose=True)
+        data_set = doenut.data.ModifiableDataSet(inputs, responses['ortho'])
+        model = doenut.models.AveragedModel(data_set, scale_run_data=False) 
 
 # Prediction
 
@@ -286,7 +281,7 @@ optimise the data.
 <img src="images/first_order_measured_predicted.png" alt="image" />  
 <img src="images/final_model_predicted_measured.png" alt="image" />  
 
-        model_1_graph= doenut.plot_observed_vs_predicted(responses['ortho'], 
+        model_1_graph= doenut.plot.plot_observed_vs_predicted(responses['ortho'], 
             ortho_model.predict(inputs),
             range_x=[],
             label='ortho')
@@ -384,7 +379,7 @@ The coefficients plots are given by the averaged model code, or
 alternatively can be plotted using the code below, using the averaged
 coefficients returned
 
-        doenut.coeff_plot(saturated_coeffs, 
+        doenut.plot.coeff_plot(saturated_coeffs, 
                labels=[x for x in sat_inputs.columns], 
                errors='std',
                normalise=True)
@@ -428,14 +423,10 @@ data!]]</figcaption>
 
 trains new model with different numbers of coefficients. Change input selector to remove different factors, for example, `input_selector = [0,1,2,3,5,6]` has removed t he 4th and 7th factors.
 
-    this_model, R2, temp_tuple = doenut.calulate_R2_and_Q2_for_models(
-        inputs, 
-        responses, 
-        input_selector=[0,1,2,3,4,5,6,7], 
-        response_selector=[0],
-        use_scaled_inputs=True,
-        do_scaling_here=True)
-    new_model, predictions, ground_truth, coeffs, R2s, R2, Q2 = temp_tuple
+    data_set = doenut.data.ModifiableDataSet(inputs, responses)
+                     .filter([0,1,2,3,4,5,6,7])
+                     .scale()
+    model = doenut.models.AveragedModel(data_set)
 
 It is possible to autotune a model, where DoENUT will sucessively remove
 the smallest terms and retrain the model. It can respect hierarchical
