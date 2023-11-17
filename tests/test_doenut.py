@@ -148,6 +148,26 @@ def test_saturated_parsnip_terms_2():
     pytest.scaled_model_2 = model
 
 
+def test_tune():
+    input_selector = _get_column_names_by_number(
+        pytest.sat_inputs_2, [0, 1, 2, 3, 4, 5]
+    )
+    data = ModifiableDataSet(pytest.sat_inputs_2, new_responses).filter(
+        input_selector
+    )
+    scaled_model, unscaled_model = doenut.models.AveragedModel.tune_model(
+        data, drop_duplicates="no"
+    )
+    assert round(scaled_model.r2, 3) == 0.871
+    assert round(scaled_model.q2, 3) == 0.716
+    # use round on these as the scaling will introduce floating point variance at deep SF.
+    assert round(scaled_model.r2, 5) == round(unscaled_model.r2, 5)
+    assert round(scaled_model.q2, 5) == round(unscaled_model.q2, 5)
+    assert (
+        scaled_model.averaged_coeffs != unscaled_model.averaged_coeffs
+    ).any()
+
+
 def test_run_model():
     runs = pd.DataFrame(
         {

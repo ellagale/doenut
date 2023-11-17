@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 import doenut
@@ -13,6 +15,32 @@ class AveragedModel(Model):
     Model scored as the average of multiple models generated from a single
     set of inputs via a leave-one-out approach.
     """
+
+    @classmethod
+    def tune_model(
+        cls,
+        data: ModifiableDataSet,
+        fit_intercept: bool = True,
+        response_key: str = None,
+        drop_duplicates: str = "yes",
+    ) -> Tuple["AveragedModel", "AveragedModel"]:
+        scaled_model = AveragedModel(
+            data,
+            scale_data=True,
+            scale_run_data=True,
+            fit_intercept=fit_intercept,
+            response_key=response_key,
+            drop_duplicates=drop_duplicates,
+        )
+        unscaled_model = AveragedModel(
+            data,
+            scale_data=False,
+            scale_run_data=False,
+            fit_intercept=fit_intercept,
+            response_key=response_key,
+            drop_duplicates=drop_duplicates,
+        )
+        return scaled_model, unscaled_model
 
     def __init__(
         self,
