@@ -10,7 +10,7 @@ To get started, see the workbooks under Tutorials or look at AveragedModel
 and ModifiableDataSet.
 
 As a very quick start, assuming your data is split into a pair of pandas
-DataFrames, one for the input data and one for the repsonses, the following
+DataFrames, one for the input data and one for the responses, the following
 code will create a standard model and generate some stats on how good it is.
 
 dataset = doenut.data.ModifiableDataSet(inputs, responses)
