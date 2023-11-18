@@ -1,7 +1,5 @@
 from typing import Dict, Iterable, List
-
 import pandas as pd
-
 from doenut.data.modifiers.duplicate_remover import DuplicateRemover
 
 
@@ -28,6 +26,17 @@ class DuplicateAverager(DuplicateRemover):
             to_average.append(results.iloc[idx])
             results.iloc[idx] = pd.concat(to_average, axis=1).T.mean(axis=0)
         return results
+
+    def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
+        """
+        This modifier will remove all rows from the dataset which have
+        identical values for the _inputs_, and set the response value to be
+         the average of all the duplicates. The first instance in the dataset
+        of a given set of values will be the one retained.
+        @param inputs: The inputs of the dataset
+        @param responses: The responses of the dataset
+        """
+        super().__init__(inputs, responses)
 
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
         return self._apply(data, self.duplicate_dict, self.non_duplicate_rows)

@@ -22,14 +22,13 @@ def test_fract_fact():
 
 
 def test_fact_designer():
-    levels = {'Pressure': [550, 850],
-              'Temperature': [325, 450],
-              'Flow': [12000, 16000],
-              }
-    factory_design_full_fact = doenut.designer.fact_designer(levels,
-                                                             do_midpoints=True,
-                                                             shuffle=False,
-                                                             repeats=1,
-                                                             num_midpoints=1)
+    levels = {
+        "Pressure": [550, 850],
+        "Temperature": [325, 450],
+        "Flow": [12000, 16000],
+    }
+    factory_design_full_fact = doenut.designer.fact_designer(
+        levels, do_midpoints=True, shuffle=False, repeats=1, num_midpoints=1
+    )
     assert factory_design_full_fact is not None
     assert factory_design_full_fact.size == 27

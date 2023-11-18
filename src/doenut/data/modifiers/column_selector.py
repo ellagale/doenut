@@ -2,11 +2,6 @@ from typing import List, Tuple
 import pandas as pd
 from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from doenut.data.modifiable_data_set import ModifiableDataSet
-
 
 class ColumnSelector(DataSetModifier):
     """
@@ -44,17 +39,34 @@ class ColumnSelector(DataSetModifier):
         self,
         inputs: pd.DataFrame,
         responses: pd.DataFrame,
-        input_selector: List["str | int"],
+        input_selector: List["str | int"] = None,
         response_selector: List["str | int"] = None,
     ):
+        """
+        Used to filter specific columns from a dataset. Note that at least one
+        of input_selector and response_selector must be specified.
+        The selector should be a list of either column names or column indices
+        @param inputs: The dataset's inputs
+        @param responses: The dataset's responses
+        @param input_selector: A list to filter the inputs by
+        @param response_selector: A list to filter the responses by
+
+        """
         super().__init__(inputs, responses)
+        # Validate inputs
+        if input_selector is None and response_selector is None:
+            raise ValueError(
+                "At least one of input_selector and response_selector is required."
+            )
 
         # Parse / Validate the input selector
-        if input_selector is None:
-            raise ValueError("Input selector must select at least one column!")
-        self.input_selector, self.input_indices = self._parse_selector(
-            inputs, input_selector
-        )
+        if input_selector is not None:
+            (self.input_selector, self.input_indices) = self._parse_selector(
+                inputs, input_selector
+            )
+        else:
+            self.input_selector = None
+            self.input_indices = None
 
         if response_selector is not None:
             (
@@ -67,7 +79,6 @@ class ColumnSelector(DataSetModifier):
 
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
         if not self.input_indices:
-            # Should never happen, but hey
             return data
         return data.iloc[:, self.input_indices]
 

@@ -4,6 +4,12 @@ from doenut.data.data_set import DataSet
 
 
 class Model:
+    """
+    A simple linear regression model.
+
+    This mostly exists as a base - you probably want AveragedModel
+    """
+
     def __init__(self, data: DataSet, fit_intercept: bool) -> None:
         """
         Generate a simple model from the given values
@@ -14,10 +20,7 @@ class Model:
         inputs = self.data.get_inputs()
         responses = self.data.get_responses()
         self.model = LinearRegression(fit_intercept=fit_intercept)
-        try:
-            self.model.fit(inputs, responses)
-        except:
-            pass
+        self.model.fit(inputs, responses)
         self.predictions = self.get_predictions_for(inputs)
         self.r2 = self.get_r2_for(self.data)
 

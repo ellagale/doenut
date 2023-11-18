@@ -181,9 +181,13 @@ def fact_designer(
         midpoints = {}
         for factor in levels.keys():
             if len(levels[factor]) > 2:
-                midpoints[factor] = np.repeat(np.median(levels[factor]), num_midpoints)
+                midpoints[factor] = np.repeat(
+                    np.median(levels[factor]), num_midpoints
+                )
             else:
-                midpoints[factor] = np.repeat(np.mean(levels[factor]), num_midpoints)
+                midpoints[factor] = np.repeat(
+                    np.mean(levels[factor]), num_midpoints
+                )
         midpoint_df = pd.DataFrame.from_dict(midpoints)
         design = pd.concat([design, midpoint_df], ignore_index=True)
 

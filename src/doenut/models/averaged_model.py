@@ -24,6 +24,22 @@ class AveragedModel(Model):
         response_key: str = None,
         drop_duplicates: str = "yes",
     ) -> Tuple["AveragedModel", "AveragedModel"]:
+        """
+        Generate a pair of models from the same set of data. One using scaled
+        data the other unscaled.
+
+        The scaled model can then be used for determining which columns to drop
+        for later models, and the unscaled model for checking the models
+        performance against validation data (or just for using once done).
+
+        @param data: The dataset to test against. This should be unscaled.
+        @param fit_intercept: Whether to fit the intercept or not (usually yes)
+        @param response_key: If there are more than one response columns,
+        which to use.
+        @param drop_duplicates: Whether to apply any duplicate reduction to
+        the data as it is trained. Should be one of 'yes', 'no' or 'average'
+        @return: A tuple of AveragedModels: (scaled, unscaled)
+        """
         scaled_model = AveragedModel(
             data,
             scale_data=True,

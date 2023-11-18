@@ -2,16 +2,15 @@
 DOENUT
 Design of Experiments Numerical Utility Toolkit
 """
-from typing import Tuple
 
 # first we import some useful libraries
 import numpy as np
 import pandas as pd
 import copy
 from sklearn.linear_model import LinearRegression
-
-import doenut
+from typing import Tuple
 from doenut.data import ModifiableDataSet
+from doenut.models import AveragedModel
 
 
 def orthogonal_scaling(inputs, axis=0):
@@ -293,7 +292,7 @@ def autotune_model(
         data = ModifiableDataSet(sat_inputs, responses)
         if selected_input_terms:
             data.filter(selected_input_terms)
-        this_model = doenut.models.AveragedModel(
+        this_model = AveragedModel(
             data, scale_run_data=True, drop_duplicates=drop_duplicates
         )
 

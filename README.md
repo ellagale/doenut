@@ -1,13 +1,6 @@
 <img align="right" src="images/doenut_small.jpg">
 
-_warning: this repository is currently in a state of flux as it is prepared for use as a proper module.
-Expect things to move around without warning for the immediate future!_
-
 # Design of Experiments Numerical Utility Toolkit DoENUT 
-
-
-
-
 
 Package to conveniently combine all necessary functions required to do Design of Experiments.
 
@@ -15,6 +8,8 @@ Code for a forthcoming paper:
 "DoENUT: Design of Experiments Numerical Utility Toolbox, for use in research and teaching," Ella M. Gale
 
 Also has tutorials and examples
+
+## About
 
 A python module to do DoE from start to
 finish for the main methodologies used by chemists and thus
@@ -68,5 +63,30 @@ allowing for easy gathering of data.
 
 [1] Also called ‘experimental design’ and ‘statistical experimental
 design’
+
+## Installation
+The easiest way is via pip `pip install doenut`. 
+
+Alternatively, get the source and use poetry via `poetry install`
+
+## Getting started
+As a very quick start, assuming your data is split into a pair of pandas
+DataFrames, one for the input data and one for the responses, the following
+code will create a standard model and generate some stats on how good it is.
+
+```python
+dataset = doenut.data.ModifiableDataSet(inputs, responses)
+model = doenut.models.AveragedModel(dataset)
+r2, q2 = model.r2, model.q2
+print(f"R2 is {r2}, Q2 is {q2}")
+doenut.plot.plot_summary_of_fit_small(r2, q2)
+doenut.plot.coeff_plot(model.coeffs,
+                       labels=list(dataset.get().inputs.columns),
+                       errors='p95',
+                       normalise=True)
+```
+
+For a more comprehensive look, open up a workbook in Tutorials.
+
 
 
