@@ -54,7 +54,7 @@ def test_filtered_dataset():
 
 
 def test_scaled_dataset():
-    x = ModifiableDataSet(inputs, responses).scale().get()
+    x = ModifiableDataSet(inputs, responses).scale(True).get()
     xi = x.get_inputs()
     xr = x.get_responses()
     assert np.min(xi) >= -1
