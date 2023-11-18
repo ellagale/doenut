@@ -55,14 +55,15 @@ class ColumnSelector(DataSetModifier):
         super().__init__(inputs, responses)
         # Validate inputs
         if input_selector is None and response_selector is None:
-            raise ValueError("At least one of input_selector and response_selector is required.")
+            raise ValueError(
+                "At least one of input_selector and response_selector is required."
+            )
 
         # Parse / Validate the input selector
         if input_selector is not None:
-            (
-                self.input_selector,
-                self.input_indices
-            ) = self._parse_selector(inputs, input_selector)
+            (self.input_selector, self.input_indices) = self._parse_selector(
+                inputs, input_selector
+            )
         else:
             self.input_selector = None
             self.input_indices = None

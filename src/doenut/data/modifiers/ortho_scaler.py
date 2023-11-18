@@ -8,6 +8,7 @@ class OrthoScaler(DataSetModifier):
     """
     Takes a dataset and scales it per column using an ortho scaling to
     the range -1 ... 1
+    By default only inputs are scaled, but this can be overridden.
     """
 
     @classmethod
@@ -24,6 +25,13 @@ class OrthoScaler(DataSetModifier):
         responses: pd.DataFrame,
         scale_responses: bool = False,
     ) -> None:
+        """
+        Use this modifier to add a standard ortho scaling to the dataset, so
+        it has a range of -1..1
+        @param inputs: The inputs of the dataset
+        @param responses: The responses of the dataset
+        @param scale_responses: Whether to also scale the responses
+        """
         super().__init__(inputs, responses)
         self.inputs_mj, self.inputs_rj = self._compute_scaling(inputs)
         self.responses_mj, self.responses_rj = self._compute_scaling(responses)
