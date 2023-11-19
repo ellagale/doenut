@@ -34,12 +34,19 @@ from . import plot
 from . import models
 
 from .doenut import (
-    orthogonal_scaling,
     add_higher_order_terms,
     autotune_model,
-    scale_by,
-    Calculate_Q2,
+    average_replicates,
     calc_ave_coeffs_and_errors,
+    Calculate_Q2,
+    Calculate_R2,
+    dunk,
+    find_replicates,
     map_chemical_space,
+    map_chemical_space_new,
+    orthogonal_scaling,
     predict_from_model,
+    scale_1D_data,
+    scale_by,
+    train_model,
 )
