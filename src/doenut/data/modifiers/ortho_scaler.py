@@ -28,6 +28,7 @@ class OrthoScaler(DataSetModifier):
         """
         Use this modifier to add a standard ortho scaling to the dataset, so
         it has a range of -1..1
+
         @param inputs: The inputs of the dataset
         @param responses: The responses of the dataset
         @param scale_responses: Whether to also scale the responses

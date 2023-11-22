@@ -2,10 +2,10 @@ import logging
 
 import pandas as pd
 
-import doenut
+import doenut.utils
 from doenut.data import ModifiableDataSet
-from doenut.models import ModelSet
-from doenut.models import AveragedModel
+from doenut.models.model_set import ModelSet
+from doenut.models.averaged_model import AveragedModel
 
 logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 

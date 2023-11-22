@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
-import doenut
+import doenut.utils
 import copy
 
 from doenut.data.modifiable_data_set import ModifiableDataSet
@@ -39,9 +39,9 @@ class AveragedModel(Model):
         @param data: The dataset to test against. This should be unscaled.
         @param fit_intercept: Whether to fit the intercept or not (usually yes)
         @param response_key: If there are more than one response columns,
-        which to use.
+            which to use.
         @param drop_duplicates: Whether to apply any duplicate reduction to
-        the data as it is trained. Should be one of 'yes', 'no' or 'average'
+            the data as it is trained. Should be one of 'yes', 'no' or 'average'
         @return: A tuple of AveragedModels: (scaled, unscaled)
         """
         logger.info("Running Tune Model")
@@ -57,7 +57,7 @@ class AveragedModel(Model):
         logger.debug("Generating unscaled model")
         unscaled_model = AveragedModel(
             data,
-            scale_data=False,
+                scale_data=False,
             scale_run_data=False,
             fit_intercept=fit_intercept,
             response_key=response_key,
@@ -76,6 +76,7 @@ class AveragedModel(Model):
     ):
         """
         Constructor
+
         @param data: the data to run / test against.
         @param scale_data: Whether to scale the overall data before running it.
         @param scale_run_data: Whether to normalise the data for each run

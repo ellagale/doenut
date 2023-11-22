@@ -1,11 +1,6 @@
 from abc import abstractmethod, ABC
 import pandas as pd
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from doenut.data.modifiable_data_set import ModifiableDataSet
-
 
 class DataSetModifier(ABC):
     """
@@ -19,6 +14,7 @@ class DataSetModifier(ABC):
     ):
         """
         Does nothing, but defines the constructor for all other DataSets
+
         @param inputs: the processed inputs up till this point
         @param responses: the processed responses up till this point
         Use this to do things like check the size and ranges of the dataset.
@@ -30,6 +26,7 @@ class DataSetModifier(ABC):
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Applies the modifier to the inputs of the dataset.
+
         @param data: The input data
         @return: The data post modification.
         """
@@ -39,6 +36,7 @@ class DataSetModifier(ABC):
     def apply_to_responses(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Applies the modifier to the responses of the dataset.
+
         @param data: The response data
         @return: The data post modification.
         """

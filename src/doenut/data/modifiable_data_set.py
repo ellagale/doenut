@@ -3,7 +3,7 @@ from typing import Type, List
 
 import pandas as pd
 
-import doenut
+import doenut.utils
 from doenut.data.data_set import DataSet
 from doenut.data.modifiers.column_selector import ColumnSelector
 from doenut.data.modifiers.duplicate_averager import DuplicateAverager
@@ -28,9 +28,9 @@ class ModifiableDataSet:
     one for the responses. These should be of the same length.
 
     Once you have built the dataset you can add modifiers to it using
-    add_modifier or (more likely) via the helper functions such as filter and
-    scale. Finally, get() will then give you a DataSet object containing the
-    result of applying all the modifiers.
+    L{add_modifier} or (more likely) via the helper functions such as filter
+    and scale. Finally, L{get()} will then give you a DataSet object
+    containing the result of applying all the modifiers.
 
     Be aware that modifiers are applied in the order they are added, and that
     modifiers cannot be removed once added. ModifiableDataSet makes deep
@@ -38,7 +38,8 @@ class ModifiableDataSet:
 
     All the modifier functions return a link to self, so they can be used as
     per the builder pattern - i.e. so you can write code like:
-      dataset = ModifiableDataset(inputs,responses).filter(list).scale()
+
+    C{dataset = ModifiableDataset(inputs,responses).filter(list).scale()}
     """
 
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
@@ -66,6 +67,7 @@ class ModifiableDataSet:
     ) -> "ModifiableDataSet":
         """
         Adds a new modifier to the stack.
+
         @param modifier: The new modifier to add
         @param kwargs: Any additional arguments the modifier is expecting.
         """
@@ -88,6 +90,7 @@ class ModifiableDataSet:
         You must specify at least one selector.
         Each select selector can be either a list of column names or indices
         that you wish to keep.
+
         @param input_selector: Filter for the input data
         @param response_selector: Filter for the response data
         @return: this dataset
@@ -102,7 +105,8 @@ class ModifiableDataSet:
         """
         Apply an orthographic scaling to the dataset
         i.e. apply a linear scaling so each column is in the range -1...1
-        @param scale_responses: Whether to scale the reponse data as well
+
+        @param scale_responses: Whether to scale the response data as well
         @return: this dataset
         """
         return self.add_modifier(OrthoScaler, scale_responses=scale_responses)
@@ -114,6 +118,7 @@ class ModifiableDataSet:
         NOTE: while only the inputs are considered for whether a row is a
         duplicate or now, duplicates will be removed from both inputs and
         responses.
+
         @return: self
         """
         return self.add_modifier(DuplicateRemover)
@@ -125,6 +130,7 @@ class ModifiableDataSet:
         all the rows that matched it.
         NOTE: only inputs values are considered for whether a row is a
         duplicate or not
+
         @return: self
         """
         return self.add_modifier(DuplicateAverager)

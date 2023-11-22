@@ -15,6 +15,7 @@ class ColumnSelector(DataSetModifier):
         """
         Internal helper function to take either a list of column names or
         column indices and convert it to the other.
+
         @param data: The data set the list applies to
         @param selector: The known selector list
         @return: Tuple of the column names and indices as lists
@@ -46,6 +47,7 @@ class ColumnSelector(DataSetModifier):
         Used to filter specific columns from a dataset. Note that at least one
         of input_selector and response_selector must be specified.
         The selector should be a list of either column names or column indices
+
         @param inputs: The dataset's inputs
         @param responses: The dataset's responses
         @param input_selector: A list to filter the inputs by
