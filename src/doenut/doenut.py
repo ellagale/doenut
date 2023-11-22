@@ -18,6 +18,13 @@ from doenut.models import AveragedModel
 logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
+def set_log_level(level: "str|int") -> None:
+    """
+    Sets the global log level for the module
+    """
+    logger.setLevel(level)
+
+
 def orthogonal_scaling(inputs, axis=0):
     # the scaling thingy that Modde uses
     inputs_max = np.max(inputs, axis)
@@ -133,12 +140,9 @@ def Calculate_Q2(ground_truth, predictions, train_responses, key, word="test"):
     logger.debug(
         f"Sum of squares total (total variance) is {sum_squares_total}"
     )
-    r2 = 1 - (sum_squares_residuals / sum_squares_total)
-    if word == "test":
-        print("{} is {:.3}".format("Q2", r2))
-    else:
-        print("{} is {:.3}".format("R2", r2))
-    return r2
+    result = 1 - (sum_squares_residuals / sum_squares_total)
+    logger.info(f"{'Q2' if word=='test' else 'R2'} is {round(result,3)}")
+    return result
 
 
 def dunk(setting=None):

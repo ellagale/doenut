@@ -84,6 +84,7 @@ class AveragedModel(Model):
         left will have its response value(s) set to the average of all the
         duplicates.
         """
+        logger.info("Constructing AveragedModel")
         proc_data = copy.deepcopy(data)
         if scale_data:
             proc_data.scale(False)
@@ -117,13 +118,16 @@ class AveragedModel(Model):
         final_data = proc_data.get()
         proc_inputs = final_data.get_inputs()
         proc_responses = final_data.get_responses()
-
+        logger.debug(
+            f"Final data sizes: inputs {proc_inputs.shape}, responses {proc_responses.shape}"
+        )
         # Use leave-one-out on the input data rows to generate a set of models
         self.models = ModelSet(None, None, fit_intercept)
         model_predictions = []
         errors = []
         model_responses = []
         for i, row_idx in enumerate(proc_inputs.index):
+            logger.debug(f"Testing against row {row_idx}")
             test_input = proc_inputs.iloc[i].to_numpy().reshape(1, -1)
             test_response = proc_responses.iloc[i]
             train_input = proc_inputs.drop(row_idx).to_numpy()
@@ -169,3 +173,4 @@ class AveragedModel(Model):
         start_data = data.get()
         self.model.fit(start_data.get_inputs(), start_data.get_responses())
         self.predictions = self.get_predictions_for(proc_inputs)
+        logger.info("Constructed AveragedModel")
