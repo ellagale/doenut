@@ -6,9 +6,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u"doenut"
-copyright = u"2023, Ella Gale"
-author = u"Ella Gale"
+project = "doenut"
+copyright = "2023, Ella Gale"
+author = "Ella Gale"
 
 # -- General configuration ---------------------------------------------------
 
@@ -18,7 +18,8 @@ author = u"Ella Gale"
 extensions = [
     "myst_nb",
     "autoapi.extension",
-    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "sphinx_epytext",
     "sphinx.ext.viewcode",
 ]
 autoapi_dirs = ["../src"]

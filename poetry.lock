@@ -2670,6 +2670,19 @@ sphinx = ">=6.1.0"
 docs = ["furo", "sphinx", "sphinx-design"]
 
 [[package]]
+name = "sphinx-epytext"
+version = "0.0.4"
+description = "Sphinx \"epytext\" extension."
+optional = false
+python-versions = "*"
+files = [
+    {file = "sphinx-epytext-0.0.4.tar.gz", hash = "sha256:4cc5ba92693ee8853d841c03db434606275506bb418da5bb7538766c696d5e30"},
+]
+
+[package.dependencies]
+sphinx = ">=0.4"
+
+[[package]]
 name = "sphinx-rtd-theme"
 version = "1.3.0"
 description = "Read the Docs theme for Sphinx"
@@ -3061,4 +3074,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "c02d84a4dffdc31dd32488b0f86815bb793b4fc4be6ab33ac5ddbcf5c5b5d5a1"
+content-hash = "673d20050389e823902b622817bc11e35b6ce8a51116522d606ae6f68fac8c0f"
