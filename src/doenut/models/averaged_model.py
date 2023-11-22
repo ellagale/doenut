@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 import numpy as np
@@ -8,6 +9,9 @@ import copy
 from doenut.data.modifiable_data_set import ModifiableDataSet
 from doenut.models.model_set import ModelSet
 from doenut.models.model import Model
+
+
+logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class AveragedModel(Model):
@@ -40,6 +44,8 @@ class AveragedModel(Model):
         the data as it is trained. Should be one of 'yes', 'no' or 'average'
         @return: A tuple of AveragedModels: (scaled, unscaled)
         """
+        logger.info("Running Tune Model")
+        logger.debug("Generating scaled model")
         scaled_model = AveragedModel(
             data,
             scale_data=True,
@@ -48,6 +54,7 @@ class AveragedModel(Model):
             response_key=response_key,
             drop_duplicates=drop_duplicates,
         )
+        logger.debug("Generating unscaled model")
         unscaled_model = AveragedModel(
             data,
             scale_data=False,
@@ -79,6 +86,7 @@ class AveragedModel(Model):
         left will have its response value(s) set to the average of all the
         duplicates.
         """
+        logger.info("Constructing AveragedModel")
         proc_data = copy.deepcopy(data)
         if scale_data:
             proc_data.scale(False)
@@ -93,7 +101,7 @@ class AveragedModel(Model):
                     "No response key specified and multiple response columns"
                 )
             response_key = responses.columns[0]
-
+            logger.info(f"Setting response_key to {response_key}")
         # Get the processed inputs + responses (after filtering + dedupe
         proc_inputs, proc_responses = None, None
         if isinstance(drop_duplicates, str):
@@ -112,13 +120,16 @@ class AveragedModel(Model):
         final_data = proc_data.get()
         proc_inputs = final_data.get_inputs()
         proc_responses = final_data.get_responses()
-
+        logger.debug(
+            f"Final data sizes: inputs {proc_inputs.shape}, responses {proc_responses.shape}"
+        )
         # Use leave-one-out on the input data rows to generate a set of models
         self.models = ModelSet(None, None, fit_intercept)
         model_predictions = []
         errors = []
         model_responses = []
         for i, row_idx in enumerate(proc_inputs.index):
+            logger.debug(f"Testing against row {row_idx}")
             test_input = proc_inputs.iloc[i].to_numpy().reshape(1, -1)
             test_response = proc_responses.iloc[i]
             train_input = proc_inputs.drop(row_idx).to_numpy()
@@ -164,3 +175,4 @@ class AveragedModel(Model):
         start_data = data.get()
         self.model.fit(start_data.get_inputs(), start_data.get_responses())
         self.predictions = self.get_predictions_for(proc_inputs)
+        logger.info("Constructed AveragedModel")

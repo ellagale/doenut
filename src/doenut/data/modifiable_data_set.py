@@ -3,15 +3,19 @@ from typing import Type, List
 
 import pandas as pd
 
+import doenut
 from doenut.data.data_set import DataSet
 from doenut.data.modifiers.column_selector import ColumnSelector
 from doenut.data.modifiers.duplicate_averager import DuplicateAverager
 from doenut.data.modifiers.duplicate_remover import DuplicateRemover
 from doenut.data.modifiers.ortho_scaler import OrthoScaler
 from typing import TYPE_CHECKING
+import logging
 
 if TYPE_CHECKING:
     from doenut.data.modifiers.data_set_modifier import DataSetModifier
+
+logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class ModifiableDataSet:
@@ -54,6 +58,7 @@ class ModifiableDataSet:
         self.modifiers = []
 
     def get(self) -> DataSet:
+        logger.debug("Generating frozen dataset")
         return DataSet(self._proc_inputs, self._proc_responses)
 
     def add_modifier(
@@ -64,6 +69,7 @@ class ModifiableDataSet:
         @param modifier: The new modifier to add
         @param kwargs: Any additional arguments the modifier is expecting.
         """
+        logger.info(f"Applying {modifier} to dataset")
         modifier = modifier(self._proc_inputs, self._proc_responses, **kwargs)
         self.modifiers.append(modifier)
         self._proc_inputs = modifier.apply_to_inputs(self._proc_inputs)

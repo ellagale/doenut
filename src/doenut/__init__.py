@@ -28,10 +28,12 @@ from importlib.metadata import version
 
 __version__ = version("doenut")
 
+
 from . import doenut
 from . import designer
 from . import plot
 from . import models
+from . import utils
 
 from .doenut import (
     add_higher_order_terms,

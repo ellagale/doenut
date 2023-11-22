@@ -11,6 +11,11 @@ import doepy.build
 import pandas as pd
 import numpy as np
 import copy
+import doenut
+import logging
+
+
+logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 def _check_is_input_dict(data):
@@ -39,6 +44,7 @@ def get_ranges(data):
     result = {}
     for key, value in data.items():
         result[key] = [min(value), max(value)]
+        logger.debug(f"Result range for {key}: {result[key]}")
     return result
 
 
@@ -58,6 +64,9 @@ def full_fact(data):
             print(f"Parameter {key} is not iterable")
             raise e
         row_count = row_count * len(value)
+    logger.info(
+        f"Creating full factoral model of shape {row_count}x{len(data.keys())}"
+    )
     result = np.zeros((row_count, len(data.keys())), dtype="O")
 
     # Now build up the data column by column
@@ -70,6 +79,7 @@ def full_fact(data):
     # but these should always be valid as we are dividing ints by other ints
     # that are divisors of it.
     for column_idx, (column, values) in enumerate(data.items()):
+        logger.debug(f"Generating for column {column}")
         value_count = len(values)
         # how many times do we need to write this value in a row?
         rows_per_value = int(right_data / value_count)

@@ -7,6 +7,9 @@ Provides graph plotting functions for DoeNut
 from matplotlib import pyplot as plt
 import numpy as np
 import doenut
+import logging
+
+logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 def clear_figure():

@@ -183,7 +183,6 @@ def test_run_model():
         add_squares=True,
         add_interactions=True,
         column_list=[],
-        verbose=False,
     )
     expected_results = [2.10, 6.11, 7.61, 4.65, 3.97]
     input_selector = [0, 1, 2, 3, 4, 5]
@@ -207,7 +206,6 @@ def test_autotune():
         pytest.sat_inputs_2,
         new_responses,
         pytest.sat_inputs_2_source_list,
-        verbose=True,
     )
 
     assert round(new_model.r2, 3) == 0.886
