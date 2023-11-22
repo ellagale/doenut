@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 import numpy as np
@@ -8,6 +9,9 @@ import copy
 from doenut.data.modifiable_data_set import ModifiableDataSet
 from doenut.models.model_set import ModelSet
 from doenut.models.model import Model
+
+
+logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class AveragedModel(Model):
@@ -40,6 +44,7 @@ class AveragedModel(Model):
         the data as it is trained. Should be one of 'yes', 'no' or 'average'
         @return: A tuple of AveragedModels: (scaled, unscaled)
         """
+        logger.info("Running Tune Model")
         scaled_model = AveragedModel(
             data,
             scale_data=True,

@@ -4,13 +4,18 @@ Design of Experiments Numerical Utility Toolkit
 """
 
 # first we import some useful libraries
+import logging
 import numpy as np
 import pandas as pd
 import copy
 from sklearn.linear_model import LinearRegression
 from typing import Tuple
+import doenut.utils
 from doenut.data import ModifiableDataSet
 from doenut.models import AveragedModel
+
+
+logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 def orthogonal_scaling(inputs, axis=0):
@@ -53,7 +58,6 @@ def train_model(
     test_responses,
     do_scaling_here=False,
     fit_intercept=False,
-    verbose=True,
 ):
     """A simple function to train a model
     :param inputs: full set of terms for the model (x_n)
@@ -61,7 +65,6 @@ def train_model(
     :param test_responses: expected responses for seperate test data (if used)
     :param do_scaling_here: whether to scale the data
     :param fit_intercept: whether to fit the intercept
-    :param verbose: whether to perform additional logging.
     :return: A tuple of:
         A model fitted to the data,
         the inputs used
@@ -76,12 +79,11 @@ def train_model(
     model.fit(inputs, responses)
     predictions = model.predict(inputs)
     R2 = model.score(inputs, test_responses)
-    if verbose:
-        print("R squared for this model is {:.3}".format(R2))
+    logger.debug("R squared for this model is {:.3}".format(R2))
     return model, inputs, R2, predictions
 
 
-def Calculate_R2(ground_truth, predictions, key, word="test", verbose=True):
+def Calculate_R2(ground_truth, predictions, key, word="test"):
     """Calculates R2 from input data
     You can use this to calculate q2 if you're
     using the test ground truth as the mean
@@ -89,57 +91,54 @@ def Calculate_R2(ground_truth, predictions, key, word="test", verbose=True):
     I think this is what Modde uses for PLS fitting"""
     errors = ground_truth[[key]] - predictions[[key]]
     test_mean = np.mean(ground_truth[[key]], axis=0)
-    if verbose:
-        print(f"Mean of {word} set: {test_mean[0]}")
+    logger.warn("Heell")
+    logger.debug(f"Mean of {word} set: {test_mean[0]}")
     errors["squared"] = errors[key] * errors[key]
     sum_squares_residuals = sum(errors["squared"])
-    if verbose:
-        print(
-            "Sum of squares of the residuals (explained variance) is"
-            f"{sum_squares_residuals}"
-        )
+    logger.debug(
+        "Sum of squares of the residuals (explained variance) is"
+        f"{sum_squares_residuals}"
+    )
     sum_squares_total = sum((ground_truth[key] - test_mean[0]) ** 2)
-    if verbose:
-        print(f"Sum of squares total (total variance) is {sum_squares_total}")
-    R2 = 1 - (sum_squares_residuals / sum_squares_total)
+    logger.debug(
+        f"Sum of squares total (total variance) is {sum_squares_total}"
+    )
+    r2 = 1 - (sum_squares_residuals / sum_squares_total)
     if word == "test":
-        print("{} is {:.3}".format("Q2", R2))
+        logger.debug("{} is {:.3}".format("Q2", r2))
     else:
-        print("{} is {:.3}".format("R2", R2))
-    return R2
+        logger.debug("{} is {:.3}".format("R2", r2))
+    return r2
 
 
-def Calculate_Q2(
-    ground_truth, predictions, train_responses, key, word="test", verbose=True
-):
+def Calculate_Q2(ground_truth, predictions, train_responses, key, word="test"):
     """A different way of calculating Q2
     this uses the mean from the training data, not the
     test ground truth"""
     errors = ground_truth[[key]] - predictions[[key]]
     train_mean = np.mean(train_responses[[key]], axis=0)
     test_mean = np.mean(ground_truth[[key]], axis=0)
-    if verbose:
-        print(f"Mean of {word} set: {test_mean.iloc[0]}")
-        print(f"Mean being used: {train_mean.iloc[0]}")
+    logger.debug(f"Mean of {word} set: {test_mean.iloc[0]}")
+    logger.debug(f"Mean being used: {train_mean.iloc[0]}")
     errors["squared"] = errors[key] * errors[key]
     sum_squares_residuals = sum(errors["squared"])
-    if verbose:
-        print(
-            "Sum of squares of the residuals (explained variance) is"
-            f"{sum_squares_residuals}"
-        )
+    logger.debug(
+        "Sum of squares of the residuals (explained variance) is"
+        f"{sum_squares_residuals}"
+    )
     sum_squares_total = sum((ground_truth[key] - train_mean.iloc[0]) ** 2)
     # stuff from Modde
     # errors/1
 
-    if verbose:
-        print(f"Sum of squares total (total variance) is {sum_squares_total}")
-    R2 = 1 - (sum_squares_residuals / sum_squares_total)
+    logger.debug(
+        f"Sum of squares total (total variance) is {sum_squares_total}"
+    )
+    r2 = 1 - (sum_squares_residuals / sum_squares_total)
     if word == "test":
-        print("{} is {:.3}".format("Q2", R2))
+        print("{} is {:.3}".format("Q2", r2))
     else:
-        print("{} is {:.3}".format("R2", R2))
-    return R2
+        print("{} is {:.3}".format("R2", r2))
+    return r2
 
 
 def dunk(setting=None):
@@ -151,7 +150,7 @@ def dunk(setting=None):
 
 
 def average_replicates(
-    inputs: pd.DataFrame, responses: pd.DataFrame, verbose: bool = False
+    inputs: pd.DataFrame, responses: pd.DataFrame
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """averages inputs that are the same
     TO-DO - you can make it pick nearly teh same inputs if
@@ -172,10 +171,9 @@ def average_replicates(
             duplicate_row = whole_inputs.loc[[duplicate]]
             if non_duplicate_row.equals(duplicate_row):
                 this_duplicate_list.append(duplicate)
-                if verbose:
-                    print(
-                        f"found duplicate pairs: {non_duplicate}, {duplicate}"
-                    )
+                logger.debug(
+                    f"found duplicate pairs: {non_duplicate}, {duplicate}"
+                )
         if len(this_duplicate_list) > 0:
             duplicates_for_averaging[non_duplicate] = this_duplicate_list
         else:
@@ -250,7 +248,6 @@ def autotune_model(
     normalise=True,
     do_hierarchical=True,
     remove_significant=False,
-    verbose=False,
 ):
     """
     inputs: the input matrix
@@ -265,17 +262,15 @@ def autotune_model(
     """
     sat_inputs = inputs
 
-    if verbose:
-        print(f"Source list is {source_list}")
+    logger.debug(f"Source list is {source_list}")
     input_selector = [i for i in range(len(sat_inputs.columns))]
     output_indices = input_selector
     # global list of all column names.
     input_terms = list(sat_inputs.columns)
     output_terms = input_terms
-    if verbose:
-        print("numbers\tnames")
-        for i, v in enumerate(input_terms):
-            print(f"{i}\t{v}")
+    logger.debug("numbers\tnames")
+    for i, v in enumerate(input_terms):
+        logger.debug(f"{i}\t{v}")
     this_model = None
     have_removed = True
     R2_over_opt = []
@@ -284,7 +279,7 @@ def autotune_model(
     terms = []
 
     while have_removed:
-        print("Beginning loop")
+        logger.info("Beginning loop")
         selected_input_indices = output_indices
         selected_input_terms = output_terms
         if len(selected_input_indices) == 0:
@@ -303,8 +298,8 @@ def autotune_model(
 
         # cell 2
         # print("Cell 2:")
-        print(f"Selected terms {selected_input_terms}")
-        print(f"Source List: {source_list}")
+        logger.info(f"Selected terms {selected_input_terms}")
+        logger.info(f"Source List: {source_list}")
         # build a dictionary mapping from input term to the
         # set of derived term's indices.
         # Note that we are only caring about indices still in
@@ -330,7 +325,7 @@ def autotune_model(
                                 print(
                                     "Error: Heirarchical model missing lower level terms!!!!"
                                 )
-        print(dependency_dict)
+        logger.info(f"Dependencies: {dependency_dict}")
         # Handy shortcut - since the empty set is considered false,
         # we can just test dependency_dict[some_term] to see if there
         # are still dependents.
@@ -357,8 +352,7 @@ def autotune_model(
         for i in range(len(ave_coeffs)):
             if abs(ave_coeffs[i]) < abs(error_bars[i]):
                 # print("{:.2}- {:.2}", ave_coeffs[i], error_bars[i])
-                if verbose:
-                    print(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
+                logger.debug(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
                 insignificant_terms.append(
                     (selected_input_indices[i], abs(ave_coeffs[i]))
                 )  # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
@@ -367,14 +361,14 @@ def autotune_model(
         if insignificant_terms == [] and remove_significant:
             for i in range(len(ave_coeffs)):
                 # print("{:.2}- {:.2}", ave_coeffs[i], error_bars[i])
-                print(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
+                logger.info(f"{i}:\t{input_terms[i]}\t{source_list[i]}")
                 insignificant_terms.append(
                     (selected_input_indices[i], abs(ave_coeffs[i]))
                 )  # diffs.append(abs(ave_coeffs[i]) - abs(error_bars[i]))
 
         # Now sort in order of ave_coeff
         insignificant_terms = sorted(insignificant_terms, key=lambda x: x[1])
-        print(f"Insignificant Terms: {insignificant_terms}")
+        logger.info(f"Insignificant Terms: {insignificant_terms}")
 
         # Now find the first term we can remove (if any)
         have_removed = False
@@ -384,7 +378,7 @@ def autotune_model(
             if do_hierarchical:
                 if dependency_dict[idx]:
                     continue
-            print(
+            logger.info(
                 f"removing term {input_terms[idx]} ({idx}) with error {error_value}"
             )
             output_indices.remove(idx)
@@ -392,7 +386,7 @@ def autotune_model(
             have_removed = True
             break
 
-        print(f"output_indices are {output_indices}")
+        logger.info(f"output_indices are {output_indices}")
         terms.append(output_indices)
     return (
         output_indices,
@@ -477,7 +471,6 @@ def add_higher_order_terms(
     add_squares: bool = True,
     add_interactions: bool = True,
     column_list: list = [],
-    verbose: bool = True,
 ):
     """Adds in squares and interactions terms
     inputs: the input/feature/variable array with data
@@ -492,33 +485,28 @@ def add_higher_order_terms(
     if not column_list:
         # do all columns
         column_list = [x for x in inputs.columns]
-    if verbose:
-        print(f"Input array has columns {column_list}")
+    logger.debug(f"Input array has columns {column_list}")
 
     source_list = [x for x in column_list]
 
     if add_squares:
-        if verbose:
-            print("Adding square terms:")
+        logger.debug("Adding square terms:")
         for i in range(len(column_list)):
             source_list.append(i)
             input_name = column_list[i]
             new_name = input_name + "**2"
-            if verbose:
-                print(new_name)
+            logger.debug(new_name)
             sat_inputs[new_name] = inputs[input_name] * inputs[input_name]
 
     if add_interactions:
-        if verbose:
-            print("Adding interaction terms:")
+        logger.debug("Adding interaction terms:")
         for i in range(len(column_list)):
             for j in range(i + 1, len(column_list)):
                 source_list.append([i, j])
                 input_name_1 = column_list[i]
                 input_name_2 = column_list[j]
                 new_name = input_name_1 + "*" + input_name_2
-                if verbose:
-                    print(new_name)
+                logger.debug(new_name)
                 sat_inputs[new_name] = (
                     inputs[input_name_1] * inputs[input_name_2]
                 )
