@@ -45,6 +45,7 @@ class AveragedModel(Model):
         @return: A tuple of AveragedModels: (scaled, unscaled)
         """
         logger.info("Running Tune Model")
+        logger.debug("Generating scaled model")
         scaled_model = AveragedModel(
             data,
             scale_data=True,
@@ -53,6 +54,7 @@ class AveragedModel(Model):
             response_key=response_key,
             drop_duplicates=drop_duplicates,
         )
+        logger.debug("Generating unscaled model")
         unscaled_model = AveragedModel(
             data,
             scale_data=False,
@@ -99,7 +101,7 @@ class AveragedModel(Model):
                     "No response key specified and multiple response columns"
                 )
             response_key = responses.columns[0]
-
+            logger.info(f"Setting response_key to {response_key}")
         # Get the processed inputs + responses (after filtering + dedupe
         proc_inputs, proc_responses = None, None
         if isinstance(drop_duplicates, str):

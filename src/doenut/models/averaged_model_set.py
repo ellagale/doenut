@@ -1,8 +1,13 @@
+import logging
+
 import pandas as pd
 
+import doenut
 from doenut.data import ModifiableDataSet
 from doenut.models import ModelSet
 from doenut.models import AveragedModel
+
+logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class AveragedModelSet(ModelSet):
@@ -17,6 +22,7 @@ class AveragedModelSet(ModelSet):
         drop_duplicates: str = "yes",
         input_selector: list = [],
     ) -> "AveragedModelSet":
+        logger.info("Generating AveragedModelSet")
         result = AveragedModelSet(
             inputs,
             responses,
@@ -28,6 +34,7 @@ class AveragedModelSet(ModelSet):
             input_selector,
         )
         for column in responses.columns:
+            logger.debug(f"Adding model for response key {column}")
             result.add_model(response_key=column)
         return result
 
