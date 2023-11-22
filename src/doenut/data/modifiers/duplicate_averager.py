@@ -33,6 +33,7 @@ class DuplicateAverager(DuplicateRemover):
         identical values for the _inputs_, and set the response value to be
          the average of all the duplicates. The first instance in the dataset
         of a given set of values will be the one retained.
+
         @param inputs: The inputs of the dataset
         @param responses: The responses of the dataset
         """

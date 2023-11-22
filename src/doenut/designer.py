@@ -11,7 +11,7 @@ import doepy.build
 import pandas as pd
 import numpy as np
 import copy
-import doenut
+import doenut.utils
 import logging
 
 
@@ -136,7 +136,7 @@ def experiment_designer(
 
     # deepcopy as their code overwrites the levels >:(
     levels_in = copy.deepcopy(levels)
-    design = frac_fact_res(levels_in, res=res)
+    design = doepy.frac_fact_res(levels_in, res=res)
     factor_names = [x for x in levels.keys()]
     if repeats > 1:
         for i in range(repeats):
@@ -162,7 +162,7 @@ def frac_fact_res_designer(
     levels, res, do_midpoints=True, shuffle=True, repeats=1, num_midpoints=3
 ):
     levels_in = copy.deepcopy(levels)
-    design = frac_fact_res(levels_in, res=res)
+    design = doepy.frac_fact_res(levels_in, res=res)
     factor_names = [x for x in levels.keys()]
     if do_midpoints:
         midpoints = {}

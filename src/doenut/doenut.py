@@ -10,12 +10,12 @@ import pandas as pd
 import copy
 from sklearn.linear_model import LinearRegression
 from typing import Tuple
-import doenut.utils
+from doenut.utils import initialise_log
 from doenut.data import ModifiableDataSet
 from doenut.models import AveragedModel
 
 
-logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
+logger = initialise_log(__name__, logging.DEBUG)
 
 
 def set_log_level(level: "str|int") -> None:
@@ -51,7 +51,8 @@ def scale_by(new_data, Mj, Rj):
 
 
 def find_replicates(inputs):
-    """Find experimental settings that are replicates"""
+    """Find experimental settings that are replicates
+    """
     # list comps ftw!
     a = [x for x in inputs[inputs.duplicated()].index]
     b = [x for x in inputs[inputs.duplicated(keep="last")].index]
@@ -67,9 +68,10 @@ def train_model(
     fit_intercept=False,
 ):
     """A simple function to train a model
+
     :param inputs: full set of terms for the model (x_n)
     :param responses: expected responses for the inputs (ground truth, y)
-    :param test_responses: expected responses for seperate test data (if used)
+    :param test_responses: expected responses for separate test data (if used)
     :param do_scaling_here: whether to scale the data
     :param fit_intercept: whether to fit the intercept
     :return: A tuple of:
@@ -95,10 +97,10 @@ def Calculate_R2(ground_truth, predictions, key, word="test"):
     You can use this to calculate q2 if you're
     using the test ground truth as the mean
     else use calculate Q2
-    I think this is what Modde uses for PLS fitting"""
+    I think this is what Modde uses for PLS fitting
+    """
     errors = ground_truth[[key]] - predictions[[key]]
     test_mean = np.mean(ground_truth[[key]], axis=0)
-    logger.warn("Heell")
     logger.debug(f"Mean of {word} set: {test_mean[0]}")
     errors["squared"] = errors[key] * errors[key]
     sum_squares_residuals = sum(errors["squared"])
@@ -121,7 +123,8 @@ def Calculate_R2(ground_truth, predictions, key, word="test"):
 def Calculate_Q2(ground_truth, predictions, train_responses, key, word="test"):
     """A different way of calculating Q2
     this uses the mean from the training data, not the
-    test ground truth"""
+    test ground truth
+    """
     errors = ground_truth[[key]] - predictions[[key]]
     train_mean = np.mean(train_responses[[key]], axis=0)
     test_mean = np.mean(ground_truth[[key]], axis=0)
@@ -220,7 +223,8 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     """Coefficient plot
     set error to 'std' for standard deviation
     set error to 'p95' for 95th percentile (
-    approximated by 2*std)"""
+    approximated by 2*std)
+    """
 
     ave_coeffs = np.mean(coeffs, axis=0)[0]
     stds = np.std(coeffs, axis=0)[0]
@@ -483,7 +487,8 @@ def add_higher_order_terms(
     column_list=[]: to select only a subset of columns, input a column list here
     Currently does not go above power of 2
 
-    returns saturated array and a list of which inputs created which column"""
+    returns saturated array and a list of which inputs created which column
+    """
 
     sat_inputs = copy.deepcopy(inputs)
     if not column_list:

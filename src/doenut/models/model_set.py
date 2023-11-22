@@ -1,7 +1,7 @@
 from typing import List, Any
 
 from doenut.data import ModifiableDataSet
-from doenut.models import Model
+from doenut.models.model import Model
 
 
 class ModelSet:
