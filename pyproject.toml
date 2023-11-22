@@ -20,6 +20,9 @@ doepy = "^0.0.1"
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 python-semantic-release = "^8.3.0"
+myst-nb = "^1.0.0"
+sphinx-autoapi = "^3.0.0"
+sphinx-rtd-theme = "^1.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
