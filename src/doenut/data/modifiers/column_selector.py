@@ -6,19 +6,46 @@ from doenut.data.modifiers.data_set_modifier import DataSetModifier
 class ColumnSelector(DataSetModifier):
     """
     DataSet Modifier to remove columns from the dataset
+
+    Parameters
+    ----------
+    inputs : pd.DataFrame
+        The dataset's inputs
+    responses : pd.DataFrame
+        The dataset's responses
+    input_selector : List["str | int"], optional
+        A list to filter the inputs by
+    response_selector : List["str | int"], optional
+        A list to filter the responses by
+
+    Warnings
+    --------
+        At least one of ``input_selector`` and ``response_selector`` must be specified.
+
     """
+
 
     @classmethod
     def _parse_selector(
         cls, data: pd.DataFrame, selector: List["str | int"]
     ) -> Tuple[List[str], List[int]]:
-        """
-        Internal helper function to take either a list of column names or
+        """Internal helper function to take either a list of column names or
         column indices and convert it to the other.
 
-        @param data: The data set the list applies to
-        @param selector: The known selector list
-        @return: Tuple of the column names and indices as lists
+        Parameters
+        ----------
+        data : pd.DataFrame
+            The data set the list applies to
+        selector : List["str | int"]
+            The known selector list
+
+        Returns
+        -------
+        List[str]:
+            The list of column names selected
+        List[int]:
+            The list of column indices selected
+
         """
         if isinstance(selector[0], str):  # columns provided
             # First validate it
@@ -43,17 +70,6 @@ class ColumnSelector(DataSetModifier):
         input_selector: List["str | int"] = None,
         response_selector: List["str | int"] = None,
     ):
-        """
-        Used to filter specific columns from a dataset. Note that at least one
-        of input_selector and response_selector must be specified.
-        The selector should be a list of either column names or column indices
-
-        @param inputs: The dataset's inputs
-        @param responses: The dataset's responses
-        @param input_selector: A list to filter the inputs by
-        @param response_selector: A list to filter the responses by
-
-        """
         super().__init__(inputs, responses)
         # Validate inputs
         if input_selector is None and response_selector is None:

@@ -15,9 +15,15 @@ logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class AveragedModel(Model):
-    """
-    Model scored as the average of multiple models generated from a single
+    """Model scored as the average of multiple models generated from a single
     set of inputs via a leave-one-out approach.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     @classmethod
@@ -28,21 +34,39 @@ class AveragedModel(Model):
         response_key: str = None,
         drop_duplicates: str = "yes",
     ) -> Tuple["AveragedModel", "AveragedModel"]:
-        """
-        Generate a pair of models from the same set of data. One using scaled
+        """Generate a pair of models from the same set of data. One using scaled
         data the other unscaled.
 
         The scaled model can then be used for determining which columns to drop
         for later models, and the unscaled model for checking the models
         performance against validation data (or just for using once done).
 
-        @param data: The dataset to test against. This should be unscaled.
-        @param fit_intercept: Whether to fit the intercept or not (usually yes)
-        @param response_key: If there are more than one response columns,
+        Parameters
+        ----------
+        data :
+            The dataset to test against. This should be unscaled.
+        fit_intercept :
+            Whether to fit the intercept or not (usually yes)
+        response_key :
+            If there are more than one response columns,
             which to use.
-        @param drop_duplicates: Whether to apply any duplicate reduction to
+        drop_duplicates :
+            Whether to apply any duplicate reduction to
             the data as it is trained. Should be one of 'yes', 'no' or 'average'
-        @return: A tuple of AveragedModels: (scaled, unscaled)
+        data: ModifiableDataSet :
+
+        fit_intercept: bool :
+             (Default value = True)
+        response_key: str :
+             (Default value = None)
+        drop_duplicates: str :
+             (Default value = "yes")
+
+        Returns
+        -------
+        type
+            A tuple of AveragedModels: (scaled, unscaled)
+
         """
         logger.info("Running Tune Model")
         logger.debug("Generating scaled model")

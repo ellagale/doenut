@@ -4,11 +4,17 @@ from doenut.data.modifiers.duplicate_remover import DuplicateRemover
 
 
 class DuplicateAverager(DuplicateRemover):
-    """
-    Parses a dataset and removes all but the _first_ instance of any row that
-    has duplicate values for the _inputs_. Will also remove the corresponding
+    """Parses a dataset and removes all but the *first* instance of any row that
+    has duplicate values for the *inputs*. Will also remove the corresponding
     row in the responses, replacing the remaining response with the averages
     of the duplicates' values.
+
+    Parameters
+    ----------
+    inputs : pd.DataFrame
+        The dataset's inputs
+    responses : pd.DataFrame
+        The dataset's responses
     """
 
     @classmethod
@@ -28,15 +34,6 @@ class DuplicateAverager(DuplicateRemover):
         return results
 
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
-        """
-        This modifier will remove all rows from the dataset which have
-        identical values for the I{inputs}, and set the response value to be
-         the average of all the duplicates. The first instance in the dataset
-        of a given set of values will be the one retained.
-
-        @param inputs: The inputs of the dataset
-        @param responses: The responses of the dataset
-        """
         super().__init__(inputs, responses)
 
     def apply_to_inputs(self, data: pd.DataFrame) -> pd.DataFrame:

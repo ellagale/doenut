@@ -19,10 +19,12 @@ logger = initialise_log(__name__, logging.DEBUG)
 
 
 def set_log_level(level: "str|int") -> None:
-    """
-    Sets the global log level for the module
+    """Sets the global log level for the module
 
-    @param level: logging module value representing the desired log level
+    Parameters
+    ----------
+    level : "str|int"
+        logging module value representing the desired log level
     """
     logger.setLevel(level)
 
@@ -30,12 +32,23 @@ def set_log_level(level: "str|int") -> None:
 def orthogonal_scaling(
     inputs: pd.DataFrame, axis: int = 0
 ) -> Tuple[pd.DataFrame, float, float]:
-    """
-    Calculates the orthoganal scaling of an array along an axis
+    """Calculates the orthoganal scaling of an array along an axis
 
-    @param inputs: the dataframe to scale
-    @param axis: the axis to scale around (defaults to 0)
-    @return: A tuple of: The scaled inputs, the Mj scaling parameter, the Rj scaling parameter,
+    Parameters
+    ----------
+    inputs : pd.DataFrame
+        the dataframe to scale
+    axis : int, default 0
+        the axis to scale around (defaults to 0)
+
+    Returns
+    -------
+    pd.DataFrame:
+        The scaled inputs
+    float:
+        the Mj scaling parameter
+    float:
+        the Rj scaling parameter
     """
     # the scaling thingy that Modde uses
     inputs_max = np.max(inputs, axis)
@@ -47,13 +60,23 @@ def orthogonal_scaling(
 
 
 def scale_1D_data(scaler, data, do_fit=True):
-    """
-    ELLATODO: What does this do what it does?
+    """ELLA TODO: What does this do what it does?
 
-    @param scaler: the scaler to transform the data with
-    @param data: the data to scale
-    @param do_fit: whether to fit the data first (default true)
-    @return: A tuple of: The scaled data, The scaler object
+    Parameters
+    ----------
+    scaler :
+        the scaler to transform the data with
+    data :
+        the data to scale
+    do_fit :
+        whether to fit the data first (default true)
+
+    Returns
+    -------
+    pd.DataFrame:
+        The scaled data
+    sklearn.scalar?
+        The scaler object
     """
     if do_fit:
         scaler.fit(data.reshape(-1, 1))
@@ -63,14 +86,24 @@ def scale_1D_data(scaler, data, do_fit=True):
 
 
 def scale_by(new_data: pd.DataFrame, mj: float, rj: float) -> pd.DataFrame:
-    """
-    Scales a dataframe orthogonally using the supplied parameters according to
-    the equation: C{result = (data-Mj)/Rj}
+    """Scales a dataframe orthogonally using the supplied parameters according to
+    the equation::
 
-    @param new_data: the data to scale
-    @param mj: the Mj parameter
-    @param rj: the Rj parameter
-    @return: the scaled data
+        result = (data - Mj) / Rj
+
+    Parameters
+    ----------
+    new_data : pd.DataFrame
+        the data to scale
+    mj : float
+        the Mj parameter
+    rj : float
+        the Rj parameter
+
+    Returns
+    -------
+    pd.DataFrame
+        the scaled data
     """
     # the scaling thingy that Modde uses
     # TODO:: Any form of sanity checking whatsoever.
@@ -81,8 +114,16 @@ def scale_by(new_data: pd.DataFrame, mj: float, rj: float) -> pd.DataFrame:
 def find_replicates(inputs: pd.DataFrame) -> np.array:
     """Find experimental settings that are replicates
 
-    @param inputs: The dataframe to pass
-    @return: A series of indices of all the rows which are replicates
+    Parameters
+    ----------
+    inputs : pd.DataFrame
+        The dataframe to parse
+
+    Returns
+    -------
+    np.array:
+        A series of indices of all the rows which are replicates
+
     """
     # list comps ftw!
     a = [x for x in inputs[inputs.duplicated()].index]
@@ -92,24 +133,36 @@ def find_replicates(inputs: pd.DataFrame) -> np.array:
 
 
 def train_model(
-    inputs,
-    responses,
-    test_responses,
-    do_scaling_here=False,
-    fit_intercept=False,
-):
+    inputs: pd.DataFrame,
+    responses: pd.DataFrame,
+    test_responses: pd.DataFrame,
+    do_scaling_here: bool = False,
+    fit_intercept: bool = False,
+) -> Tuple["sklearn.linear_model",]:
     """A simple function to train a model
 
-    :param inputs: full set of terms for the model (x_n)
-    :param responses: expected responses for the inputs (ground truth, y)
-    :param test_responses: expected responses for separate test data (if used)
-    :param do_scaling_here: whether to scale the data
-    :param fit_intercept: whether to fit the intercept
-    :return: A tuple of:
+    Parameters
+    ----------
+    inputs :
+        full set of terms for the model (x_n)
+    responses :
+        expected responses for the inputs (ground truth, y)
+    test_responses :
+        expected responses for separate test data (if used)
+    do_scaling_here :
+        whether to scale the data (Default value = False)
+    fit_intercept :
+        whether to fit the intercept (Default value = False)
+
+    Returns
+    -------
+    type
+        A tuple of:
         - A model fitted to the data,
         - the inputs used
         - the R2 of that model
         - the predictions that model makes for the original inputs
+
     """
     if do_scaling_here:
         inputs, _, _ = orthogonal_scaling(inputs, axis=0)
@@ -135,11 +188,29 @@ def Calculate_R2(
     else use calculate Q2
     I think this is what Modde uses for PLS fitting
 
-    @param ground_truth: The actual response values
-    @param predictions: What the model guessed as the response values
-    @param key: the column name into ground_truth that we predicted
-    @param word: What mode we were working on
-    @return: the R2 of the model on this data, or the Q2 if in test mode.
+    Parameters
+    ----------
+    ground_truth :
+        The actual response values
+    predictions :
+        What the model guessed as the response values
+    key :
+        the column name into ground_truth that we predicted
+    word :
+        What mode we were working on
+    ground_truth: pd.DataFrame :
+
+    predictions: pd.DataFrame :
+
+    key: str :
+
+    word: str :
+         (Default value = "test")
+
+    Returns
+    -------
+    type
+        the R2 of the model on this data, or the Q2 if in test mode.
 
     """
     errors = ground_truth[[key]] - predictions[[key]]
@@ -174,12 +245,34 @@ def Calculate_Q2(
     this uses the mean from the training data, not the
     test ground truth
 
-    @param ground_truth: The actual response values of the test set
-    @param predictions: The predictions of the model for the test set
-    @param train_responses: The response values of the training set
-    @param key: Which column in the ground_truth we are predicting
-    @param word: The mode to run in
-    @return: The calculated Coefficient (R2/Q1)
+    Parameters
+    ----------
+    ground_truth :
+        The actual response values of the test set
+    predictions :
+        The predictions of the model for the test set
+    train_responses :
+        The response values of the training set
+    key :
+        Which column in the ground_truth we are predicting
+    word :
+        The mode to run in
+    ground_truth: pd.DataFrame :
+
+    predictions: pd.DataFrame :
+
+    train_responses: pd.DataFrame :
+
+    key: str :
+
+    word: str :
+         (Default value = "test")
+
+    Returns
+    -------
+    type
+        The calculated Coefficient (R2/Q1)
+
     """
     errors = ground_truth[[key]] - predictions[[key]]
     train_mean = np.mean(train_responses[[key]], axis=0)
@@ -205,11 +298,13 @@ def Calculate_Q2(
 
 
 def dunk(setting: "str|None" = None) -> None:
-    """
-    dunk your doenut
+    """dunk your doenut
 
-    @param setting: (optional) what you are dunking it into
-    @return: None.
+    Parameters
+    ----------
+    setting : str, default None
+        what you are dunking it into
+
     """
     if setting == "coffee":
         print("Splash!")
@@ -223,9 +318,22 @@ def average_replicates(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """averages inputs that are the same
 
-    @param inputs: The input data to average
-    @param responses: The responses to averaged
-    @return: A tuple of the averaged inputs and responses
+    Parameters
+    ----------
+    inputs :
+        The input data to average
+    responses :
+        The responses to averaged
+    inputs: pd.DataFrame :
+
+    responses: pd.DataFrame :
+
+
+    Returns
+    -------
+    type
+        A tuple of the averaged inputs and responses
+
     """
     whole_inputs = inputs
     averaged_responses = pd.DataFrame()
@@ -288,11 +396,22 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     set error to 'p95' for 95th percentile (
     approximated by 2*std)
 
-    @param coeffs: The coefficents to calculate from
-    @param labels: No longer used?
-    @param errors: The type of error to calculate, C{std} or C{p95}
-    @param normalise: Whether to normalise the data prior to calculation
-    @return: A tuple of the averaged coefficients and their error bars
+    Parameters
+    ----------
+    coeffs :
+        The coefficents to calculate from
+    labels :
+        No longer used?
+    errors :
+        The type of error to calculate, C{std} or C{p95} (Default value = "std")
+    normalise :
+        Whether to normalise the data prior to calculation (Default value = False)
+
+    Returns
+    -------
+    type
+        A tuple of the averaged coefficients and their error bars
+
     """
 
     ave_coeffs = np.mean(coeffs, axis=0)[0]
@@ -326,23 +445,40 @@ def autotune_model(
     do_hierarchical=True,
     remove_significant=False,
 ):
-    """
-    Attempts to automatically tune a parsimonious model
+    """Attempts to automatically tune a parsimonious model
 
     TODO:: update to new code and remove redundant parameters
 
-    @param inputs: The input data to train on
-    @param responses: The response values for the input data
-    @param source_list:
-    @param response_selector: (Optional) Which columns in responses to use
-    @param use_scaled_inputs: (Optional) Whether to scale the inputs before calculations
-    @param do_scaling_here: (Optional) Whether to scale each set of train/test data
-    @param drop_duplicates: (Optional) Do we ingnore (C{'no'}), C{'average'}, C{'Drop'} duplicate input values
-    @param errors: (Optional) C{'p95'} for 95th percentile or C{'std'} for standard deviation for error calculation
-    @param normalise: (Optional) Whether to normalise the coefficents for error calculation
-    @param do_hierarchical: (Optional) Do we maintain a hierarchical model?
-    @param remove_significant: (Optional) Model will continue removing terms until only one is left
-    @return: A tuple of the terms used in the final model and the final model.
+    Parameters
+    ----------
+    inputs :
+        The input data to train on
+    responses :
+        The response values for the input data
+    source_list :
+        param response_selector: (Optional) Which columns in responses to use
+    use_scaled_inputs :
+        Optional) Whether to scale the inputs before calculations (Default value = True)
+    do_scaling_here :
+        Optional) Whether to scale each set of train/test data (Default value = True)
+    drop_duplicates :
+        Optional) Do we ingnore (C{'no'}), C{'average'}, C{'Drop'} duplicate input values (Default value = "average")
+    errors :
+        Optional) C{'p95'} for 95th percentile or C{'std'} for standard deviation for error calculation (Default value = "p95")
+    normalise :
+        Optional) Whether to normalise the coefficents for error calculation (Default value = True)
+    do_hierarchical :
+        Optional) Do we maintain a hierarchical model? (Default value = True)
+    remove_significant :
+        Optional) Model will continue removing terms until only one is left (Default value = False)
+    response_selector :
+         (Default value = [0])
+
+    Returns
+    -------
+    type
+        A tuple of the terms used in the final model and the final model.
+
     """
     sat_inputs = inputs
 
@@ -489,21 +625,36 @@ def map_chemical_space(
     n_points,
     hook_function,
 ):
-    """
-    Calculates a three way map of chemical space for plotting
+    """Calculates a three way map of chemical space for plotting
 
     #TODO:: Should move this to doenut.plot
 
-    @param unscaled_model: The model to plot
-    @param x_key: What key to use for the X axis
-    @param y_key: What key to use for the Y axis
-    @param c_key: What key to use for the C axis
-    @param x_limits: Tuple of min/max range of X to plot
-    @param y_limits: Tuple of min/max range of y to plot
-    @param constant: The value for C
-    @param n_points: How many marks along each axis to generate
-    @param hook_function: A custom data processing function for post processing the data
-    @return: Three meshes of the model's predictions for the keys/ranges predicted.
+    Parameters
+    ----------
+    unscaled_model :
+        The model to plot
+    x_key :
+        What key to use for the X axis
+    y_key :
+        What key to use for the Y axis
+    c_key :
+        What key to use for the C axis
+    x_limits :
+        Tuple of min/max range of X to plot
+    y_limits :
+        Tuple of min/max range of y to plot
+    constant :
+        The value for C
+    n_points :
+        How many marks along each axis to generate
+    hook_function :
+        A custom data processing function for post processing the data
+
+    Returns
+    -------
+    type
+        Three meshes of the model's predictions for the keys/ranges predicted.
+
     """
     min_x = x_limits[0]
     max_x = x_limits[1]
@@ -533,16 +684,34 @@ def add_higher_order_terms(
     add_interactions: bool = True,
     column_list: list = [],
 ) -> Tuple[pd.DataFrame, List]:
-    """
-    Generate a saturated set of inputs by adding the power and interaction terms
+    """Generate a saturated set of inputs by adding the power and interaction terms
     Currently does not go above power of 2
 
-    @param inputs: The data to generate from
-    @param add_squares: (Optional) Whether to add square terms, e.g. x_1*2
-    @param add_interactions: (Optional) Whether to add interaction terms, e.g. x_1*x_2
-    @param column_list: (Optional) Which columns to generate from
-    @return: Tuple of the saturated inputs, and a list of which inputs created
+    Parameters
+    ----------
+    inputs :
+        The data to generate from
+    add_squares :
+        Optional) Whether to add square terms, e.g. x_1*2
+    add_interactions :
+        Optional) Whether to add interaction terms, e.g. x_1*x_2
+    column_list :
+        Optional) Which columns to generate from
+    inputs: pd.DataFrame :
+
+    add_squares: bool :
+         (Default value = True)
+    add_interactions: bool :
+         (Default value = True)
+    column_list: list :
+         (Default value = [])
+
+    Returns
+    -------
+    type
+        Tuple of the saturated inputs, and a list of which inputs created
         which input column.
+
     """
 
     sat_inputs = copy.deepcopy(inputs)
@@ -581,10 +750,20 @@ def add_higher_order_terms(
 def predict_from_model(model, inputs, input_selector):
     """Reorgs the inputs and does a prediction
 
-    @param model: the model to use
-    @param inputs: the saturated inputs
-    @param input_selector: the subset of inputs the model is using
-    @return: Tuple of the predictions and the terms used to generate them
+    Parameters
+    ----------
+    model :
+        the model to use
+    inputs :
+        the saturated inputs
+    input_selector :
+        the subset of inputs the model is using
+
+    Returns
+    -------
+    type
+        Tuple of the predictions and the terms used to generate them
+
     """
     list_of_terms = [inputs.columns[x] for x in input_selector]
     model_inputs = inputs[list_of_terms]
