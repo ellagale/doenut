@@ -19,9 +19,17 @@ logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 def _check_is_input_dict(data):
-    """
-    Most of these functions require a dictionary of lists as their input data
+    """Most of these functions require a dictionary of lists as their input data
     This is a helper function that will throw an appropriate assert if needed.
+
+    Parameters
+    ----------
+    data :
+
+
+    Returns
+    -------
+
     """
     if not isinstance(data, dict):
         raise TypeError("Input data must be a dictionary")
@@ -34,9 +42,17 @@ def _check_is_input_dict(data):
 
 
 def get_ranges(data):
-    """
-    Go through a dictionary of value lists, and return the same, but with
+    """Go through a dictionary of value lists, and return the same, but with
     only the min / max value from each in each.
+
+    Parameters
+    ----------
+    data :
+
+
+    Returns
+    -------
+
     """
     # first check we are being passed something sane
     _check_is_input_dict(data)
@@ -49,10 +65,18 @@ def get_ranges(data):
 
 
 def full_fact(data):
-    """
-    Generate a full factorial model from the supplied parameters
-    :param data: dict of lists of allowed values for each parameter
-    :return: a panda dataframe of the all the experiments
+    """Generate a full factorial model from the supplied parameters
+
+    Parameters
+    ----------
+    data :
+        dict of lists of allowed values for each parameter
+
+    Returns
+    -------
+    type
+        a panda dataframe of the all the experiments
+
     """
     # first validate the inputs are all lists or list like
     # while we are here, work out how bit this is.
@@ -99,10 +123,18 @@ def full_fact(data):
 
 
 def frac_fact(data, resolution=None):
-    """
-    build a 2-level fractional factorial design
-    :param data dictionary to design from
-    :param resolution what resolution model to build. Default is param_count/2
+    """build a 2-level fractional factorial design
+
+    Parameters
+    ----------
+    data :
+        dictionary to design from
+    resolution :
+        what resolution model to build. Default is param_count/2
+
+    Returns
+    -------
+
     """
     _check_is_input_dict(data)
     if resolution is None:
@@ -125,13 +157,31 @@ def frac_fact(data, resolution=None):
 def experiment_designer(
     levels, res, do_midpoints=True, shuffle=True, repeats=1, num_midpoints=3
 ):
-    """
-    levels is a dictionary of factor name and levels
+    """levels is a dictionary of factor name and levels
     res is the resolution (for frac fact) - shouldn't be in class
     do_midpoints whether to add in the mid points
     shuffle whether to shuffle
     repeats how many repeats you're doing of the NON-MIDPOINTS
     num_midpoints, how many midpoints to do
+
+    Parameters
+    ----------
+    levels :
+
+    res :
+
+    do_midpoints :
+         (Default value = True)
+    shuffle :
+         (Default value = True)
+    repeats :
+         (Default value = 1)
+    num_midpoints :
+         (Default value = 3)
+
+    Returns
+    -------
+
     """
 
     # deepcopy as their code overwrites the levels >:(

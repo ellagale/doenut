@@ -13,9 +13,7 @@ logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 def clear_figure():
-    """
-    Wrapper for matplotlib clear figure to avoid imports elsewhere
-    """
+    """Wrapper for matplotlib clear figure to avoid imports elsewhere"""
     plt.clf()
 
 
@@ -24,7 +22,21 @@ def replicate_plot(inputs, responses, key):
     and identifies the replicates
     inputs:
     responses:
-    key: column in responses that you wish to plot"""
+    key: column in responses that you wish to plot
+
+    Parameters
+    ----------
+    inputs :
+
+    responses :
+
+    key :
+
+
+    Returns
+    -------
+
+    """
     plt.title(key)
     replicate_row_list = doenut.find_replicates(inputs)
     non_replicate_row_list = [
@@ -53,7 +65,25 @@ def plot_observed_vs_predicted(
 ):
     """plots a graph duh
     range should be in the form [min_x, max_x]
-    else it will take from responses"""
+    else it will take from responses
+
+    Parameters
+    ----------
+    responses :
+
+    predictions :
+
+    range_x :
+         (Default value = None)
+    label :
+         (Default value = "")
+    do_axes_equal :
+         (Default value = True)
+
+    Returns
+    -------
+
+    """
     if range_x is None:
         range_x = []
     plt.plot(responses, predictions, "o")
@@ -72,7 +102,19 @@ def plot_observed_vs_predicted(
 
 
 def plot_summary_of_fit_small(R2, Q2):
-    """Plots a nice graph of R2 and Q2"""
+    """Plots a nice graph of R2 and Q2
+
+    Parameters
+    ----------
+    R2 :
+
+    Q2 :
+
+
+    Returns
+    -------
+
+    """
     my_colors = [
         "green",
         "blue",
@@ -99,7 +141,23 @@ def coeff_plot(coeffs, labels, errors="std", normalise=False):
     """Coefficient plot
     set error to 'std' for standard deviation
     set error to 'p95' for 95th percentile (
-    approximated by 2*std)"""
+    approximated by 2*std)
+
+    Parameters
+    ----------
+    coeffs :
+
+    labels :
+
+    errors :
+         (Default value = "std")
+    normalise :
+         (Default value = False)
+
+    Returns
+    -------
+
+    """
     # get values
     ave_coeffs, error_bars = doenut.calc_ave_coeffs_and_errors(
         coeffs, labels, errors=errors, normalise=normalise
@@ -157,7 +215,53 @@ def four_D_contour_plot(
     14: z_label: label for the heatbar
     15: cmap: colourmap for the plot (yes you can change it, do not spend hours playing around with the colourscheme!)
     16: num_of_z_levels: number of levels for the contours. You will want one more than you think you do
-    17: z_limits: limits for the yield, i.e. minimum and maximum."""
+    17: z_limits: limits for the yield, i.e. minimum and maximum.
+
+    Parameters
+    ----------
+    unscaled_model :
+
+    x_key :
+
+    y_key :
+
+    c_key :
+
+    x_limits :
+
+    y_limits :
+
+    constants :
+
+    n_points :
+
+    my_function :
+
+    fig_label :
+         (Default value = "")
+    input_selector :
+         (Default value = None)
+    x_label :
+         (Default value = "")
+    y_label :
+         (Default value = "")
+    constant_label :
+         (Default value = "")
+    z_label :
+         (Default value = "")
+    cmap :
+         (Default value = "jet")
+    num_of_z_levels :
+         (Default value = 9)
+    z_limits :
+         (Default value = None)
+    tidy_subfig_axes :
+         (Default value = False)
+
+    Returns
+    -------
+
+    """
 
     if input_selector is None:
         input_selector = []
@@ -277,6 +381,18 @@ def plot_training(R2_over_opt, Q2_over_opt, n_terms_over_opt):
     R2_over_opt: list of R2 over optimisation
     Q2_over_opt: list of Q2 over optimisation
     n_terms_over_opt: running number of terms
+
+    Parameters
+    ----------
+    R2_over_opt :
+
+    Q2_over_opt :
+
+    n_terms_over_opt :
+
+
+    Returns
+    -------
 
     """
     ax = plt.axes()

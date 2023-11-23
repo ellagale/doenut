@@ -5,10 +5,22 @@ from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
 
 class OrthoScaler(DataSetModifier):
-    """
-    Takes a dataset and scales it per column using an ortho scaling to
+    """Takes a dataset and scales it per column using an ortho scaling to
     the range -1 ... 1
-    By default only inputs are scaled, but this can be overridden.
+
+
+    Parameters
+    ----------
+    inputs : pd.DataFrame
+        The dataset's inputs
+    responses : pd.DataFrame
+        The dataset's responses
+    scale_responses : bool, default False
+        Whether to also scale the responses.
+    Returns
+    -------
+
+
     """
 
     @classmethod
@@ -25,14 +37,6 @@ class OrthoScaler(DataSetModifier):
         responses: pd.DataFrame,
         scale_responses: bool = False,
     ) -> None:
-        """
-        Use this modifier to add a standard ortho scaling to the dataset, so
-        it has a range of -1..1
-
-        @param inputs: The inputs of the dataset
-        @param responses: The responses of the dataset
-        @param scale_responses: Whether to also scale the responses
-        """
         super().__init__(inputs, responses)
         self.inputs_mj, self.inputs_rj = self._compute_scaling(inputs)
         self.responses_mj, self.responses_rj = self._compute_scaling(responses)

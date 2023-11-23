@@ -19,8 +19,7 @@ logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class ModifiableDataSet:
-    """
-    Typically when doing DoE you will want to apply various modifiers such as
+    """Typically when doing DoE you will want to apply various modifiers such as
     scaling or filtering of columns to your dataset. ModifiableDataSet is
     DoENUT's mechanism to provide this.
 
@@ -40,6 +39,13 @@ class ModifiableDataSet:
     per the builder pattern - i.e. so you can write code like:
 
     C{dataset = ModifiableDataset(inputs,responses).filter(list).scale()}
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
@@ -65,11 +71,22 @@ class ModifiableDataSet:
     def add_modifier(
         self, modifier: Type["DataSetModifier"], **kwargs
     ) -> "ModifiableDataSet":
-        """
-        Adds a new modifier to the stack.
+        """Adds a new modifier to the stack.
 
-        @param modifier: The new modifier to add
-        @param kwargs: Any additional arguments the modifier is expecting.
+        Parameters
+        ----------
+        modifier :
+            The new modifier to add
+        kwargs :
+            Any additional arguments the modifier is expecting.
+        modifier: Type["DataSetModifier"] :
+
+        **kwargs :
+
+
+        Returns
+        -------
+
         """
         logger.info(f"Applying {modifier} to dataset")
         modifier = modifier(self._proc_inputs, self._proc_responses, **kwargs)
@@ -85,15 +102,27 @@ class ModifiableDataSet:
         input_selector: List["str | int"] = None,
         response_selector: List["str | int"] = None,
     ) -> "ModifiableDataSet":
-        """
-        Select a subset of the columns in this dataset.
+        """Select a subset of the columns in this dataset.
         You must specify at least one selector.
         Each select selector can be either a list of column names or indices
         that you wish to keep.
 
-        @param input_selector: Filter for the input data
-        @param response_selector: Filter for the response data
-        @return: this dataset
+        Parameters
+        ----------
+        input_selector :
+            Filter for the input data
+        response_selector :
+            Filter for the response data
+        input_selector: List["str | int"] :
+             (Default value = None)
+        response_selector: List["str | int"] :
+             (Default value = None)
+
+        Returns
+        -------
+        type
+            this dataset
+
         """
         return self.add_modifier(
             ColumnSelector,
@@ -102,35 +131,56 @@ class ModifiableDataSet:
         )
 
     def scale(self, scale_responses: bool = False) -> "ModifiableDataSet":
-        """
-        Apply an orthographic scaling to the dataset
+        """Apply an orthographic scaling to the dataset
         i.e. apply a linear scaling so each column is in the range -1...1
 
-        @param scale_responses: Whether to scale the response data as well
-        @return: this dataset
+        Parameters
+        ----------
+        scale_responses :
+            Whether to scale the response data as well
+        scale_responses: bool :
+             (Default value = False)
+
+        Returns
+        -------
+        type
+            this dataset
+
         """
         return self.add_modifier(OrthoScaler, scale_responses=scale_responses)
 
     def drop_duplicates(self) -> "ModifiableDataSet":
-        """
-        Removes all duplicate rows from the dataset. The first instance of
+        """Removes all duplicate rows from the dataset. The first instance of
         each duplicate will be kept.
         NOTE: while only the inputs are considered for whether a row is a
         duplicate or now, duplicates will be removed from both inputs and
         responses.
 
-        @return: self
+        Parameters
+        ----------
+
+        Returns
+        -------
+        type
+            self
+
         """
         return self.add_modifier(DuplicateRemover)
 
     def average_duplicates(self) -> "ModifiableDataSet":
-        """
-        Removes all duplicate rows from the dataset. The first instance of
+        """Removes all duplicate rows from the dataset. The first instance of
         each duplicate will be kept, and it's responses set to the average of
         all the rows that matched it.
         NOTE: only inputs values are considered for whether a row is a
         duplicate or not
 
-        @return: self
+        Parameters
+        ----------
+
+        Returns
+        -------
+        type
+            self
+
         """
         return self.add_modifier(DuplicateAverager)

@@ -4,10 +4,16 @@ from doenut.data.modifiers.data_set_modifier import DataSetModifier
 
 
 class DuplicateRemover(DataSetModifier):
-    """
-    Parses a dataset and removes all but the _first_ instance of any row that
-    has duplicate values for the _inputs_. Will also remove the corresponding
+    """Parses a dataset and removes all but the *first* instance of any row that
+    has duplicate values for the *inputs*. Will also remove the corresponding
     row in the responses.
+
+    Parameters
+    ----------
+    inputs : pd.DataFrame
+        The dataset's inputs
+    responses : pd.DataFrame
+        The dataset's responses
     """
 
     @classmethod
@@ -50,14 +56,6 @@ class DuplicateRemover(DataSetModifier):
         return non_duplicates
 
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
-        """
-        This modifier will remove all rows from the dataset which have
-        identical values for the _inputs_. The first instance in the dataset
-        of a given set of values will be the one retained.
-
-        @param inputs: The inputs of the dataset
-        @param responses: The responses of the dataset
-        """
         super().__init__(inputs, responses)
         # use input data to determine which rows are duplicates
 

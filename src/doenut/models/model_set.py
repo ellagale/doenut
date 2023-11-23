@@ -5,9 +5,7 @@ from doenut.models.model import Model
 
 
 class ModelSet:
-    """
-    Class to train and hold a group of related models.
-    """
+    """Class to train and hold a group of related models."""
 
     def __init__(
         self,
@@ -49,11 +47,19 @@ class ModelSet:
         return self.get_attributes("r2")
 
     def get_attributes(self, attribute: str) -> List:
-        """
-        Get a specified attribute from each model.
+        """Get a specified attribute from each model.
         Frustratingly, some are in the model, others in the model object.
-        @param attribute:
-        @return:
+
+        Parameters
+        ----------
+        attribute :
+            return:
+        attribute: str :
+
+
+        Returns
+        -------
+
         """
         if hasattr(self.models[0], attribute):
             return [getattr(x, attribute) for x in self.models]
