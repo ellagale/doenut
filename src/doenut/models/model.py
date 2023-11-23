@@ -6,14 +6,16 @@ from doenut.data.data_set import DataSet
 class Model:
     """A simple linear regression model.
 
-    This mostly exists as a base - you probably want AveragedModel
+    Note
+    ----
+    This class mostly exists as a base - you probably want :py:class:`~doenut.models.AveragedModel`
 
     Parameters
     ----------
-
-    Returns
-    -------
-
+    data: doenut.data.DataSet
+        The inputs and responses for this model
+    fit_intercept: bool
+        Whether to fit the intercept of the model to the axis
     """
 
     def __init__(self, data: DataSet, fit_intercept: bool) -> None:
@@ -35,16 +37,13 @@ class Model:
 
         Parameters
         ----------
-        inputs :
-            The inputs to test against
-        inputs: pd.DataFrame :
-
+        inputs : pd.DataFrame
+            The inputs to test against.
 
         Returns
         -------
-        type
+        pd.DataFrame
             the predictions from the model
-
         """
         return self.model.predict(inputs)
 
@@ -54,15 +53,13 @@ class Model:
 
         Parameters
         ----------
-        data :
+        data : doenut.data.DataSet
             The data to test.
-        data: DataSet :
-
 
         Returns
         -------
-        type
-            the calculated R2 value as a float
+        float:
+            The calculated R2 value as a float
 
         """
         return self.model.score(data.get_inputs(), data.get_responses())

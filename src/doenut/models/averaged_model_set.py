@@ -11,6 +11,33 @@ logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class AveragedModelSet(ModelSet):
+    """Class to train and hold a group of related (averaged) models.
+    When constructing the AveragedModelSet, you can define default values.
+    Then when adding a new model to the set you only have to specify the
+    parameters which differ from the default.
+
+
+    Parameters
+    ----------
+    default_inputs: pd.DataFrame, optional
+        The default inputs to the model
+    default_responses: pd.DataFrame, optional
+        The default responses for the model
+    default_scale_data: bool, optional
+        Whether to scale the data before adding to the model by default
+    default_scale_run_data: bool, optional
+        Whether to scale the data for each train/test set by default
+    default_fit_intercept: bool, optional
+        Whether to fit the model's intercept to the axis by default
+    default_response_key: str, optional
+        The default column to pick from the responses
+    default_drop_duplicates: {'no', 'yes', 'averages'}, optional
+        What to do with duplicates in the inputs, by default
+    default_input_selector: List, optional
+        What columns from the input data to select by default
+
+    """
+
     @classmethod
     def multiple_response_columns(
         cls,
@@ -71,6 +98,33 @@ class AveragedModelSet(ModelSet):
         drop_duplicates=None,
         input_selector=None,
     ):
+        """Add a new AveragedModel to the set
+
+        Parameters
+        ----------
+        inputs: pd.DataFrame, optional
+            The inputs to the model
+        responses: pd.DataFrame, optional
+            The responses for the model
+        scale_data: bool, optional
+            Whether to scale the data before adding to the model
+        scale_run_data: bool, optional
+            Whether to scale the data for each train/test set
+        fit_intercept: bool, optional
+            Whether to fit the model's intercept to the axis
+        response_key: str, optional
+            The column to pick from the responses
+        drop_duplicates: {'no', 'yes', 'averages'}, optional
+            What to do with duplicates in the inputs
+        input_selector: List, optional
+            What columns from the input data to select
+
+        Returns
+        -------
+        doenut.models.AveragedModel
+            The generated model
+
+        """
         inputs = self._validate_value("inputs", inputs)
         responses = self._validate_value("responses", responses)
         scale_data = self._validate_value("scale_data", scale_data)

@@ -24,7 +24,6 @@ class ColumnSelector(DataSetModifier):
 
     """
 
-
     @classmethod
     def _parse_selector(
         cls, data: pd.DataFrame, selector: List["str | int"]

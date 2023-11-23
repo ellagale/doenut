@@ -20,10 +20,21 @@ class AveragedModel(Model):
 
     Parameters
     ----------
-
-    Returns
-    -------
-
+    data: doenut.data.ModifiableDataSet
+        the data to run / test against.
+    scale_data: bool, default True
+        Whether to scale the overall data before running it.
+    scale_run_data: bool, default True
+        Whether to normalise the data for each run
+    fit_intercept: bool, default True
+        Whether to fit the intercept to zero
+    response_key: str, optional
+        for multi-column responses, which one to test on
+    drop_duplicates: {'yes', 'drop', 'average'}
+        whether to drop duplicate values or not.
+        May also be 'average' which will cause them to be dropped, but the one
+        left will have its response value(s) set to the average of all the
+        duplicates.
     """
 
     @classmethod
@@ -43,29 +54,25 @@ class AveragedModel(Model):
 
         Parameters
         ----------
-        data :
+        data : doenut.data.ModifiableDataSet
             The dataset to test against. This should be unscaled.
-        fit_intercept :
+        fit_intercept : bool, default True
             Whether to fit the intercept or not (usually yes)
-        response_key :
+        response_key : str, optional
             If there are more than one response columns,
             which to use.
-        drop_duplicates :
-            Whether to apply any duplicate reduction to
-            the data as it is trained. Should be one of 'yes', 'no' or 'average'
-        data: ModifiableDataSet :
-
-        fit_intercept: bool :
-             (Default value = True)
-        response_key: str :
-             (Default value = None)
-        drop_duplicates: str :
-             (Default value = "yes")
+        drop_duplicates: {'yes', 'drop', 'average'}
+            whether to drop duplicate values or not.
+            May also be 'average' which will cause them to be dropped, but the one
+            left will have its response value(s) set to the average of all the
+            duplicates.
 
         Returns
         -------
-        type
-            A tuple of AveragedModels: (scaled, unscaled)
+        AveragedModel:
+            The generated scaled model
+        AveragedModel:
+            The generated unscaled model
 
         """
         logger.info("Running Tune Model")
@@ -98,19 +105,6 @@ class AveragedModel(Model):
         response_key: str = None,
         drop_duplicates: str = "yes",
     ):
-        """
-        Constructor
-
-        @param data: the data to run / test against.
-        @param scale_data: Whether to scale the overall data before running it.
-        @param scale_run_data: Whether to normalise the data for each run
-        @param fit_intercept: Whether to fit the intercept to zero
-        @param response_key: for multi-column responses, which one to test on
-        @param drop_duplicates: whether to drop duplicate values or not.
-        May also be 'average' which will cause them to be dropped, but the one
-        left will have its response value(s) set to the average of all the
-        duplicates.
-        """
         logger.info("Constructing AveragedModel")
         proc_data = copy.deepcopy(data)
         if scale_data:
