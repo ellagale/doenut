@@ -2,9 +2,18 @@ import pandas as pd
 
 
 class DataSet:
-    """A dataset that has had all it's modifiers applied."""
+    """A dataset that has had all it's modifiers applied.
 
-    def __init__(self, inputs, responses):
+    Parameters
+    ----------
+    inputs : pd.DataFrame
+        The dataset's inputs
+    responses: pd.DataFrame
+        The dataset's responses
+
+    """
+
+    def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame):
         self.inputs = inputs
         self.responses = responses
 

@@ -9,10 +9,13 @@ import numpy as np
 import pandas as pd
 import copy
 from sklearn.linear_model import LinearRegression
-from typing import Tuple, List
+from typing import Tuple, List, TYPE_CHECKING, Any
 from doenut.utils import initialise_log
 from doenut.data import ModifiableDataSet
 from doenut.models import AveragedModel
+
+if TYPE_CHECKING:
+    import sklearn
 
 
 logger = initialise_log(__name__, logging.DEBUG)
@@ -138,7 +141,7 @@ def train_model(
     test_responses: pd.DataFrame,
     do_scaling_here: bool = False,
     fit_intercept: bool = False,
-) -> Tuple["sklearn.linear_model",]:
+) -> Tuple["sklearn.linear_model", pd.DataFrame, float, List[Any]]:
     """A simple function to train a model
 
     Parameters
