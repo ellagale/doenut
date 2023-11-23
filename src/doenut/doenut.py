@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import copy
 from sklearn.linear_model import LinearRegression
-from typing import Tuple
+from typing import Tuple, List
 from doenut.utils import initialise_log
 from doenut.data import ModifiableDataSet
 from doenut.models import AveragedModel
@@ -21,11 +21,22 @@ logger = initialise_log(__name__, logging.DEBUG)
 def set_log_level(level: "str|int") -> None:
     """
     Sets the global log level for the module
+
+    @param level: logging module value representing the desired log level
     """
     logger.setLevel(level)
 
 
-def orthogonal_scaling(inputs, axis=0):
+def orthogonal_scaling(
+    inputs: pd.DataFrame, axis: int = 0
+) -> Tuple[pd.DataFrame, float, float]:
+    """
+    Calculates the orthoganal scaling of an array along an axis
+
+    @param inputs: the dataframe to scale
+    @param axis: the axis to scale around (defaults to 0)
+    @return: A tuple of: The scaled inputs, the Mj scaling parameter, the Rj scaling parameter,
+    """
     # the scaling thingy that Modde uses
     inputs_max = np.max(inputs, axis)
     inputs_min = np.min(inputs, axis)
@@ -36,6 +47,14 @@ def orthogonal_scaling(inputs, axis=0):
 
 
 def scale_1D_data(scaler, data, do_fit=True):
+    """
+    ELLATODO: What does this do what it does?
+
+    @param scaler: the scaler to transform the data with
+    @param data: the data to scale
+    @param do_fit: whether to fit the data first (default true)
+    @return: A tuple of: The scaled data, The scaler object
+    """
     if do_fit:
         scaler.fit(data.reshape(-1, 1))
     data_scaled = scaler.transform(data.reshape(-1, 1))
@@ -43,15 +62,27 @@ def scale_1D_data(scaler, data, do_fit=True):
     return data_scaled, scaler
 
 
-def scale_by(new_data, Mj, Rj):
+def scale_by(new_data: pd.DataFrame, mj: float, rj: float) -> pd.DataFrame:
+    """
+    Scales a dataframe orthogonally using the supplied parameters according to
+    the equation: C{result = (data-Mj)/Rj}
+
+    @param new_data: the data to scale
+    @param mj: the Mj parameter
+    @param rj: the Rj parameter
+    @return: the scaled data
+    """
     # the scaling thingy that Modde uses
     # TODO:: Any form of sanity checking whatsoever.
-    new_data = (new_data - Mj) / Rj
+    new_data = (new_data - mj) / rj
     return new_data
 
 
-def find_replicates(inputs):
+def find_replicates(inputs: pd.DataFrame) -> np.array:
     """Find experimental settings that are replicates
+
+    @param inputs: The dataframe to pass
+    @return: A series of indices of all the rows which are replicates
     """
     # list comps ftw!
     a = [x for x in inputs[inputs.duplicated()].index]
@@ -75,10 +106,10 @@ def train_model(
     :param do_scaling_here: whether to scale the data
     :param fit_intercept: whether to fit the intercept
     :return: A tuple of:
-        A model fitted to the data,
-        the inputs used
-        the R2 of that model
-        the predictions that model makes for the original inputs
+        - A model fitted to the data,
+        - the inputs used
+        - the R2 of that model
+        - the predictions that model makes for the original inputs
     """
     if do_scaling_here:
         inputs, _, _ = orthogonal_scaling(inputs, axis=0)
@@ -92,12 +123,24 @@ def train_model(
     return model, inputs, R2, predictions
 
 
-def Calculate_R2(ground_truth, predictions, key, word="test"):
+def Calculate_R2(
+    ground_truth: pd.DataFrame,
+    predictions: pd.DataFrame,
+    key: str,
+    word: str = "test",
+) -> float:
     """Calculates R2 from input data
     You can use this to calculate q2 if you're
     using the test ground truth as the mean
     else use calculate Q2
     I think this is what Modde uses for PLS fitting
+
+    @param ground_truth: The actual response values
+    @param predictions: What the model guessed as the response values
+    @param key: the column name into ground_truth that we predicted
+    @param word: What mode we were working on
+    @return: the R2 of the model on this data, or the Q2 if in test mode.
+
     """
     errors = ground_truth[[key]] - predictions[[key]]
     test_mean = np.mean(ground_truth[[key]], axis=0)
@@ -120,10 +163,23 @@ def Calculate_R2(ground_truth, predictions, key, word="test"):
     return r2
 
 
-def Calculate_Q2(ground_truth, predictions, train_responses, key, word="test"):
+def Calculate_Q2(
+    ground_truth: pd.DataFrame,
+    predictions: pd.DataFrame,
+    train_responses: pd.DataFrame,
+    key: str,
+    word: str = "test",
+) -> float:
     """A different way of calculating Q2
     this uses the mean from the training data, not the
     test ground truth
+
+    @param ground_truth: The actual response values of the test set
+    @param predictions: The predictions of the model for the test set
+    @param train_responses: The response values of the training set
+    @param key: Which column in the ground_truth we are predicting
+    @param word: The mode to run in
+    @return: The calculated Coefficient (R2/Q1)
     """
     errors = ground_truth[[key]] - predictions[[key]]
     train_mean = np.mean(train_responses[[key]], axis=0)
@@ -148,7 +204,13 @@ def Calculate_Q2(ground_truth, predictions, train_responses, key, word="test"):
     return result
 
 
-def dunk(setting=None):
+def dunk(setting: "str|None" = None) -> None:
+    """
+    dunk your doenut
+
+    @param setting: (optional) what you are dunking it into
+    @return: None.
+    """
     if setting == "coffee":
         print("Splash!")
     else:
@@ -160,10 +222,11 @@ def average_replicates(
     inputs: pd.DataFrame, responses: pd.DataFrame
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """averages inputs that are the same
-    TO-DO - you can make it pick nearly teh same inputs if
-    if you add the actual values which are not always the expected values
-    inputs = inputs
-    responses = responses"""
+
+    @param inputs: The input data to average
+    @param responses: The responses to averaged
+    @return: A tuple of the averaged inputs and responses
+    """
     whole_inputs = inputs
     averaged_responses = pd.DataFrame()
     averaged_inputs = pd.DataFrame()
@@ -224,6 +287,12 @@ def calc_ave_coeffs_and_errors(coeffs, labels, errors="std", normalise=False):
     set error to 'std' for standard deviation
     set error to 'p95' for 95th percentile (
     approximated by 2*std)
+
+    @param coeffs: The coefficents to calculate from
+    @param labels: No longer used?
+    @param errors: The type of error to calculate, C{std} or C{p95}
+    @param normalise: Whether to normalise the data prior to calculation
+    @return: A tuple of the averaged coefficients and their error bars
     """
 
     ave_coeffs = np.mean(coeffs, axis=0)[0]
@@ -258,15 +327,22 @@ def autotune_model(
     remove_significant=False,
 ):
     """
-    inputs: the input matrix
-    responses: the results
-    response_selector=[0]: which column of results to use, or all of it
-    use_scaled_inputs=True: scale model to remove columns baseed on stds
-    do_scaling_here=True: if you want scaled inputs and haven't input them
-    errors='p95': 95th percentile or 'std' for standard deviation
-    normalise=True: setting for coefficient calculation - wants to match scaled inputs
-    remove_significant: model will continue removing terms until only one is left
-        verbose=False
+    Attempts to automatically tune a parsimonious model
+
+    TODO:: update to new code and remove redundant parameters
+
+    @param inputs: The input data to train on
+    @param responses: The response values for the input data
+    @param source_list:
+    @param response_selector: (Optional) Which columns in responses to use
+    @param use_scaled_inputs: (Optional) Whether to scale the inputs before calculations
+    @param do_scaling_here: (Optional) Whether to scale each set of train/test data
+    @param drop_duplicates: (Optional) Do we ingnore (C{'no'}), C{'average'}, C{'Drop'} duplicate input values
+    @param errors: (Optional) C{'p95'} for 95th percentile or C{'std'} for standard deviation for error calculation
+    @param normalise: (Optional) Whether to normalise the coefficents for error calculation
+    @param do_hierarchical: (Optional) Do we maintain a hierarchical model?
+    @param remove_significant: (Optional) Model will continue removing terms until only one is left
+    @return: A tuple of the terms used in the final model and the final model.
     """
     sat_inputs = inputs
 
@@ -413,6 +489,22 @@ def map_chemical_space(
     n_points,
     hook_function,
 ):
+    """
+    Calculates a three way map of chemical space for plotting
+
+    #TODO:: Should move this to doenut.plot
+
+    @param unscaled_model: The model to plot
+    @param x_key: What key to use for the X axis
+    @param y_key: What key to use for the Y axis
+    @param c_key: What key to use for the C axis
+    @param x_limits: Tuple of min/max range of X to plot
+    @param y_limits: Tuple of min/max range of y to plot
+    @param constant: The value for C
+    @param n_points: How many marks along each axis to generate
+    @param hook_function: A custom data processing function for post processing the data
+    @return: Three meshes of the model's predictions for the keys/ranges predicted.
+    """
     min_x = x_limits[0]
     max_x = x_limits[1]
     min_y = y_limits[0]
@@ -420,7 +512,6 @@ def map_chemical_space(
 
     x = np.linspace(min_x, max_x, n_points)
     y = np.linspace(min_y, max_y, n_points)
-    # c = np.linspace(constant, constant, n_points)
 
     mesh_x, mesh_y = np.meshgrid(x, y)
 
@@ -436,58 +527,22 @@ def map_chemical_space(
     return mesh_x, mesh_y, mesh_z
 
 
-def map_chemical_space_new(
-    unscaled_model,
-    x_key,
-    y_key,
-    c_key,
-    x_limits,
-    y_limits,
-    constant,
-    n_points,
-    hook_function,
-    model,
-    inputs,
-    input_selector,
-    source_list=None,
-):
-    if source_list is None:
-        source_list = []
-    min_x = x_limits[0]
-    max_x = x_limits[1]
-    min_y = y_limits[0]
-    max_y = y_limits[1]
-
-    x = np.linspace(min_x, max_x, n_points)
-    y = np.linspace(min_y, max_y, n_points)
-    # c = np.linspace(constant, constant, n_points)
-
-    mesh_x, mesh_y = np.meshgrid(x, y)
-    z_df = pd.DataFrame()
-    z_df[x_key] = mesh_x.reshape(-1)
-    z_df[y_key] = mesh_y.reshape(-1)
-    z_df[c_key] = constant
-    z_df = hook_function(z_df)
-
-    mesh_z = unscaled_model.predict(z_df).reshape(n_points, n_points)
-
-    return mesh_x, mesh_y, mesh_z
-
-
 def add_higher_order_terms(
     inputs: pd.DataFrame,
     add_squares: bool = True,
     add_interactions: bool = True,
     column_list: list = [],
-):
-    """Adds in squares and interactions terms
-    inputs: the input/feature/variable array with data
-    add_squares=True : whether to add square terms, e.g. x_1^2, x_2^2
-    add_interactions=True: whether to add interaction terms, x_1*x_2, etc
-    column_list=[]: to select only a subset of columns, input a column list here
+) -> Tuple[pd.DataFrame, List]:
+    """
+    Generate a saturated set of inputs by adding the power and interaction terms
     Currently does not go above power of 2
 
-    returns saturated array and a list of which inputs created which column
+    @param inputs: The data to generate from
+    @param add_squares: (Optional) Whether to add square terms, e.g. x_1*2
+    @param add_interactions: (Optional) Whether to add interaction terms, e.g. x_1*x_2
+    @param column_list: (Optional) Which columns to generate from
+    @return: Tuple of the saturated inputs, and a list of which inputs created
+        which input column.
     """
 
     sat_inputs = copy.deepcopy(inputs)
@@ -525,9 +580,11 @@ def add_higher_order_terms(
 
 def predict_from_model(model, inputs, input_selector):
     """Reorgs the inputs and does a prediction
-    model = the model to use
-    inputs = the saturated inputs
-    input_selector = the subset of inputs the model is using
+
+    @param model: the model to use
+    @param inputs: the saturated inputs
+    @param input_selector: the subset of inputs the model is using
+    @return: Tuple of the predictions and the terms used to generate them
     """
     list_of_terms = [inputs.columns[x] for x in input_selector]
     model_inputs = inputs[list_of_terms]
