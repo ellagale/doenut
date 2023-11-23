@@ -3,6 +3,8 @@
 #              DoENUT Designer
 #
 ############################################################################################################
+from typing import Dict, Any, Iterable, List
+
 import doepy.build
 
 # !!! TO-DO !!!
@@ -18,17 +20,21 @@ import logging
 logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
-def _check_is_input_dict(data):
-    """Most of these functions require a dictionary of lists as their input data
+def _check_is_input_dict(data: Dict[Any, Iterable]) -> None:
+    """ Validate an input dictionary's type.
+    Most of these functions require a dictionary of lists as their input data
     This is a helper function that will throw an appropriate assert if needed.
 
     Parameters
     ----------
-    data :
+    data : Dict[Any, Iterable]
+        The data dictionary to validate
 
-
-    Returns
-    -------
+    Raises
+    ------
+    TypeError
+        If the data is of the wrong type, or if any of the values in the
+        dictionary are not iterable
 
     """
     if not isinstance(data, dict):
@@ -41,17 +47,22 @@ def _check_is_input_dict(data):
             raise e
 
 
-def get_ranges(data):
-    """Go through a dictionary of value lists, and return the same, but with
+def get_ranges(data: Dict[Any, Iterable[float]]) -> Dict[Any, List[float]]:
+    """ Find the ranges of data in an input dictionary
+
+    Go through a dictionary of value lists, and return the same, but with
     only the min / max value from each in each.
 
     Parameters
     ----------
-    data :
-
+    data: Dict[Any, Iterable[float]]
+        The input dictionary to parse
 
     Returns
     -------
+    Dict[Any, List[float]]
+        A dictionary of the same keys, but each value has now been replaced
+        with a list of min and max of that value list
 
     """
     # first check we are being passed something sane
@@ -64,18 +75,18 @@ def get_ranges(data):
     return result
 
 
-def full_fact(data):
+def full_fact(data: Dict[Any, List[float]]) -> pd.DataFrame:
     """Generate a full factorial model from the supplied parameters
 
     Parameters
     ----------
-    data :
+    data : Dict[Any, List[float]]
         dict of lists of allowed values for each parameter
 
     Returns
     -------
-    type
-        a panda dataframe of the all the experiments
+    pd.DataFrame
+        A dataframe of all the generated experiments
 
     """
     # first validate the inputs are all lists or list like
@@ -122,19 +133,20 @@ def full_fact(data):
     return result
 
 
-def frac_fact(data, resolution=None):
+def frac_fact(data: Dict[Any, List[float]], resolution: int = None) -> pd.DataFrame:
     """build a 2-level fractional factorial design
 
     Parameters
     ----------
-    data :
+    data : Dict[Any, List[float]]
         dictionary to design from
-    resolution :
+    resolution : float, optional
         what resolution model to build. Default is param_count/2
 
     Returns
     -------
-
+    pd.DataFrame
+        A dataframe of all the experiments
     """
     _check_is_input_dict(data)
     if resolution is None:
