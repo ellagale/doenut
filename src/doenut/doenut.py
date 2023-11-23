@@ -159,12 +159,14 @@ def train_model(
 
     Returns
     -------
-    type
-        A tuple of:
-        - A model fitted to the data,
-        - the inputs used
-        - the R2 of that model
-        - the predictions that model makes for the original inputs
+    sklearn.linear_model:
+        A model fitted to the data,
+    pd.DataFrame:
+        the inputs used
+    float:
+        the R2 of that model
+    List[Any]:
+        the predictions that model makes for the original inputs
 
     """
     if do_scaling_here:

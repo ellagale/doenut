@@ -19,7 +19,7 @@ logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 class ModifiableDataSet:
-    """ A Dataset that can be modified
+    """A Dataset that can be modified
 
     Typically when doing DoE you will want to apply various modifiers such as
     scaling or filtering of columns to your dataset. ModifiableDataSet is
