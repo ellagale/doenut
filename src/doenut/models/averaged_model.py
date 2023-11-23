@@ -57,7 +57,7 @@ class AveragedModel(Model):
         logger.debug("Generating unscaled model")
         unscaled_model = AveragedModel(
             data,
-                scale_data=False,
+            scale_data=False,
             scale_run_data=False,
             fit_intercept=fit_intercept,
             response_key=response_key,

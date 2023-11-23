@@ -11,17 +11,17 @@ and ModifiableDataSet.
 
 As a very quick start, assuming your data is split into a pair of pandas
 DataFrames, one for the input data and one for the responses, the following
-code will create a standard model and generate some stats on how good it is.
+code will create a standard model and generate some stats on how good it is::
 
-dataset = doenut.data.ModifiableDataSet(inputs, responses)
-model = doenut.models.AveragedModel(dataset)
-r2, q2 = model.r2, model.q2
-print(f"R2 is {r2}, Q2 is {q2}")
-doenut.plot.plot_summary_of_fit_small(r2, q2)
-doenut.plot.coeff_plot(model.coeffs,
-                       labels=list(dataset.get().inputs.columns),
-                       errors='p95',
-                       normalise=True)
+    dataset = doenut.data.ModifiableDataSet(inputs, responses)
+    model = doenut.models.AveragedModel(dataset)
+    r2, q2 = model.r2, model.q2
+    print(f"R2 is {r2}, Q2 is {q2}")
+    doenut.plot.plot_summary_of_fit_small(r2, q2)
+    doenut.plot.coeff_plot(model.coeffs,
+                           labels=list(dataset.get().inputs.columns),
+                           errors='p95',
+                           normalise=True)
 """
 
 from importlib.metadata import version
@@ -43,7 +43,6 @@ from .doenut import (
     dunk,
     find_replicates,
     map_chemical_space,
-    map_chemical_space_new,
     orthogonal_scaling,
     predict_from_model,
     scale_1D_data,

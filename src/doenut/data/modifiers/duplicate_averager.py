@@ -30,7 +30,7 @@ class DuplicateAverager(DuplicateRemover):
     def __init__(self, inputs: pd.DataFrame, responses: pd.DataFrame) -> None:
         """
         This modifier will remove all rows from the dataset which have
-        identical values for the _inputs_, and set the response value to be
+        identical values for the I{inputs}, and set the response value to be
          the average of all the duplicates. The first instance in the dataset
         of a given set of values will be the one retained.
 
