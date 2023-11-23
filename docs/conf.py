@@ -18,8 +18,7 @@ author = "Ella Gale"
 extensions = [
     "myst_nb",
     "autoapi.extension",
-    "sphinx.ext.autodoc",
-    "sphinx_epytext",
+    "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
 ]
 autoapi_dirs = ["../src"]
