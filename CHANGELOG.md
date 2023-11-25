@@ -2,6 +2,15 @@
 
 
 
+## v0.1.3 (2023-11-25)
+
+### Build
+
+* build: Update .readthedocs.yml ([`5b2311a`](https://github.com/ellagale/doenut/commit/5b2311a06c3ba101beb4e4e8c8e9351efc147183))
+
+* build: add the rtd configuration ([`cc34ffd`](https://github.com/ellagale/doenut/commit/cc34ffd97c6d73114cd978afc00cb9a26b6df1b2))
+
+
 ## v0.1.2 (2023-11-25)
 
 ### Build
