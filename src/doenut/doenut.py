@@ -29,7 +29,13 @@ def set_log_level(level: "str|int") -> None:
     level : "str|int"
         logging module value representing the desired log level
     """
-    logger.setLevel(level)
+    loggers = [logger for name, logger in logging.root.manager.loggerDict.items() if name.startswith('doenut')]
+
+    for l in loggers:
+        if isinstance(l, logging.PlaceHolder):
+            # can't set placeholders
+            continue
+        l.setLevel(level)
 
 
 def orthogonal_scaling(
