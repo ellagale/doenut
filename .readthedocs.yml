@@ -17,7 +17,7 @@ build:
       - poetry config virtualenvs.create false
     post_install:
       # https://python-poetry.org/docs/managing-dependencies/#dependency-groups
-      - poetry install --with docs
+      - poetry install --with dev
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
