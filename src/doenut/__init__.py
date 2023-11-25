@@ -47,5 +47,6 @@ from .doenut import (
     predict_from_model,
     scale_1D_data,
     scale_by,
+    set_log_level,
     train_model,
 )

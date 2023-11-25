@@ -6,6 +6,7 @@
 :hidden:
 
 example.ipynb
+solar_cells.ipynb
 changelog.md
 contributing.md
 conduct.md
