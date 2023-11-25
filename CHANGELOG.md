@@ -1,10 +1,61 @@
-# Changelog
+# CHANGELOG
 
+
+
+## v0.1.2 (2023-11-25)
+
+### Build
+
+* build: switch back to napoleon ([`fda2e78`](https://github.com/ellagale/doenut/commit/fda2e78cea3657b8ff62e2595340ceebdcf96cf9))
+
+* build: add epytext module for doc generation ([`4f7a8d5`](https://github.com/ellagale/doenut/commit/4f7a8d5183f9230703633de9591577ac845a47e3))
+
+* build: update poetry for documents ([`1e9b2db`](https://github.com/ellagale/doenut/commit/1e9b2db48a5ab26a6b5dfd074cf3eabec3525355))
+
+### Chore
+
+* chore: fix line endings on changelog ([`f4b5643`](https://github.com/ellagale/doenut/commit/f4b5643d0c588ac5bdc9e7babbf18fa0894d12fd))
+
+### Fix
+
+* fix: handle series data in datasets ([`353f50c`](https://github.com/ellagale/doenut/commit/353f50c52a8fce13d66da33e419c54658a449fad))
+
+* fix: Not all functions of doenut.py were being exported. ([`304047f`](https://github.com/ellagale/doenut/commit/304047f885c4417bec6b67c4bf73d8d3a407b457))
+
+### Unknown
+
+* complete basic docs ([`e24bc40`](https://github.com/ellagale/doenut/commit/e24bc402f612792bba06374d41eb5cba1b61b040))
+
+* doc: yet more docstrings ([`d0f1a4c`](https://github.com/ellagale/doenut/commit/d0f1a4c21c21fa9a52915c3232bc990331bc8ccc))
+
+* doc: yet more docstrings ([`8d29f05`](https://github.com/ellagale/doenut/commit/8d29f0594042a1884d9800b7f1970ba5a6823e9b))
+
+* doc: more docstrings ([`6c53e8c`](https://github.com/ellagale/doenut/commit/6c53e8cf7b5e6146ba55fde52e7e0d381c70eef3))
+
+* doc: formatting ([`9d01fbb`](https://github.com/ellagale/doenut/commit/9d01fbbb270ddc2523509ba5b858f8cc771a2ace))
+
+* doc: many more docstrings ([`f902b94`](https://github.com/ellagale/doenut/commit/f902b9439dd1a7ec3d325b58d87476f446ed7e60))
+
+* doc: wip on tidying docstrings for publishing ([`dafff2f`](https://github.com/ellagale/doenut/commit/dafff2f794a296d8007bfbbde25b239ef94de32d))
+
+* doc: add basic generated docs ([`ffdfbc4`](https://github.com/ellagale/doenut/commit/ffdfbc48ab3f2462309b1fd0a81f8230a57674ac))
+
+* add default code of conduct / contrib files (#31) ([`5242f44`](https://github.com/ellagale/doenut/commit/5242f4438d465d37d26e9fa866bd53611b9c2876))
+
+* 26 proper logging (#30)
+
+* feat: added basic logging framework
+
+* feat: more logging implemented
+
+* feat: finish adding basic logging across package. ([`2eb036d`](https://github.com/ellagale/doenut/commit/2eb036d553b7f68c807a4e536f6057919059981e))
 
 
 ## v0.1.1 (2023-11-18)
 
 ### Build
+
+* build: bump to v0.1.1 ([`610efa0`](https://github.com/ellagale/doenut/commit/610efa0b6b1ec9f8801ce979135b840a0c3d09e0))
 
 * build: prep for v0.1.1 ([`0b4b517`](https://github.com/ellagale/doenut/commit/0b4b517a68d557e813cb758a69267464ba4a6ef3))
 
