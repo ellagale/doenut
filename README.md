@@ -86,7 +86,7 @@ doenut.plot.coeff_plot(model.coeffs,
                        normalise=True)
 ```
 
-For a more comprehensive look, open up a workbook in Tutorials.
+For a more comprehensive look, see the [documentation](https://doenut.readthedocs.io) on readthedocs, or look in the docs directory)
 
 
 
