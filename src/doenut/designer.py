@@ -21,7 +21,7 @@ logger = doenut.utils.initialise_log(__name__, logging.DEBUG)
 
 
 def _check_is_input_dict(data: Dict[Any, Iterable]) -> None:
-    """ Validate an input dictionary's type.
+    """Validate an input dictionary's type.
     Most of these functions require a dictionary of lists as their input data
     This is a helper function that will throw an appropriate assert if needed.
 
@@ -48,7 +48,7 @@ def _check_is_input_dict(data: Dict[Any, Iterable]) -> None:
 
 
 def get_ranges(data: Dict[Any, Iterable[float]]) -> Dict[Any, List[float]]:
-    """ Find the ranges of data in an input dictionary
+    """Find the ranges of data in an input dictionary
 
     Go through a dictionary of value lists, and return the same, but with
     only the min / max value from each in each.
@@ -133,7 +133,9 @@ def full_fact(data: Dict[Any, List[float]]) -> pd.DataFrame:
     return result
 
 
-def frac_fact(data: Dict[Any, List[float]], resolution: int = None) -> pd.DataFrame:
+def frac_fact(
+    data: Dict[Any, List[float]], resolution: int = None
+) -> pd.DataFrame:
     """build a 2-level fractional factorial design
 
     Parameters

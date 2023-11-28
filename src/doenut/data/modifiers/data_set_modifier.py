@@ -3,7 +3,7 @@ import pandas as pd
 
 
 class DataSetModifier(ABC):
-    """Parent class for all types of modifier.
+    r"""Parent class for all types of modifier.
     They take a dataset in, perform some form of operation on it and then
     pass it along
 
