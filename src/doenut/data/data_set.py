@@ -18,9 +18,9 @@ class DataSet:
         self.responses = responses
         # pd has a nasty habit of converting single column df into series
         if isinstance(inputs, pd.Series):
-            self.inputs = inputs.to_frame(name='inputs')
+            self.inputs = inputs.to_frame(name="inputs")
         if isinstance(responses, pd.Series):
-            self.responses = responses.to_frame(name='responses')
+            self.responses = responses.to_frame(name="responses")
 
     def get_inputs(self) -> pd.DataFrame:
         return self.inputs

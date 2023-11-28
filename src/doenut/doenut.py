@@ -14,6 +14,7 @@ from doenut.utils import initialise_log
 from doenut.data import ModifiableDataSet
 from doenut.models import AveragedModel
 
+
 if TYPE_CHECKING:
     import sklearn
 
@@ -29,7 +30,11 @@ def set_log_level(level: "str|int") -> None:
     level : "str|int"
         logging module value representing the desired log level
     """
-    loggers = [logger for name, logger in logging.root.manager.loggerDict.items() if name.startswith('doenut')]
+    loggers = [
+        logger
+        for name, logger in logging.root.manager.loggerDict.items()
+        if name.startswith("doenut")
+    ]
 
     for l in loggers:
         if isinstance(l, logging.PlaceHolder):
@@ -551,11 +556,12 @@ def autotune_model(
                     if i in selected_input_indices:
                         try:
                             dependency_dict[x].add(i)
-                        except:  # TODO:: fix blank except. I _think_ KeyError
+                        except KeyError as e:
                             if do_hierarchical:
-                                print(
-                                    "Error: Heirarchical model missing lower level terms!!!!"
+                                logger.error(
+                                    "Error: Hierarchical model missing lower level terms."
                                 )
+                            raise e
         logger.info(f"Dependencies: {dependency_dict}")
         # Handy shortcut - since the empty set is considered false,
         # we can just test dependency_dict[some_term] to see if there
@@ -605,7 +611,7 @@ def autotune_model(
         have_removed = False
 
         for idx, error_value in insignificant_terms:
-            # If it has dependents, and you're doing an heirarchical model skip it
+            # If it has dependents, and you're doing a hierarchical model skip it
             if do_hierarchical:
                 if dependency_dict[idx]:
                     continue
